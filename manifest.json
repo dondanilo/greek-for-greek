@@ -1,0 +1,24 @@
+{
+  "name": "Греческий для Грека",
+  "short_name": "Греческий",
+  "description": "Персональное приложение для изучения греческого языка",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F7F7",
+  "theme_color": "#58CC02",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

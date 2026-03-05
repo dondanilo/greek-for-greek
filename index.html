@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#58CC02">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Греческий">
+  <title>Греческий для Грека</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== HOME SCREEN ==================== -->
+  <div id="screen-home" class="screen active">
+
+    <div class="home-header">
+      <div class="home-flag">🇬🇷</div>
+      <h1 class="app-title">Греческий для Грека</h1>
+      <p class="app-subtitle">Ελληνικά για τον Έλληνα</p>
+    </div>
+
+    <div class="streak-card">
+      <div class="streak-icon">🔥</div>
+      <div class="streak-info">
+        <div class="streak-number" id="streak-number">0</div>
+        <div class="streak-label">дней подряд</div>
+      </div>
+    </div>
+
+    <div class="daily-goal-card">
+      <div class="goal-header">
+        <span>Цель на сегодня</span>
+        <span id="daily-xp-display">0 / 50 XP</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="daily-progress"></div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-value" id="total-xp">0</div>
+        <div class="stat-label">Всего XP</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="verbs-count">0</div>
+        <div class="stat-label">Глаголов</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="level-display">1</div>
+        <div class="stat-label">Уровень</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startLesson()">Начать урок ▶</button>
+    <button class="btn-secondary" onclick="showVerbTable()">📚 Таблица глаголов (45)</button>
+
+  </div>
+
+  <!-- ==================== LESSON SCREEN ==================== -->
+  <div id="screen-lesson" class="screen">
+
+    <div class="lesson-header">
+      <div class="hearts" id="hearts-display">
+        <span class="heart-icon">❤️</span>
+        <span class="heart-icon">❤️</span>
+        <span class="heart-icon">❤️</span>
+      </div>
+      <div class="lesson-progress-wrap">
+        <div class="lesson-progress-bg">
+          <div class="lesson-progress-fill" id="lesson-progress"></div>
+        </div>
+      </div>
+      <div class="lesson-xp">⚡<span id="lesson-xp">0</span></div>
+    </div>
+
+    <div class="exercise-container" id="exercise-container">
+      <div class="exercise-type-label" id="exercise-label"></div>
+      <div class="exercise-question" id="exercise-question"></div>
+      <div class="exercise-subtitle" id="exercise-subtitle"></div>
+      <div class="options-grid" id="options-grid"></div>
+    </div>
+
+    <div class="lesson-footer" id="lesson-footer">
+      <div class="feedback-message" id="feedback-message"></div>
+      <button class="btn-primary" id="continue-btn" onclick="nextExercise()">Продолжить</button>
+    </div>
+
+  </div>
+
+  <!-- ==================== COMPLETE SCREEN ==================== -->
+  <div id="screen-complete" class="screen">
+    <div class="complete-content">
+
+      <div class="complete-animation">🎉</div>
+      <h2>Урок завершён!</h2>
+      <div class="complete-stars" id="complete-stars">⭐⭐⭐</div>
+
+      <div class="complete-stats">
+        <div class="complete-stat">
+          <div class="complete-stat-icon">⚡</div>
+          <div class="complete-stat-value" id="complete-xp">+0 XP</div>
+          <div class="complete-stat-label">заработано</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-icon">✅</div>
+          <div class="complete-stat-value" id="complete-correct">0/10</div>
+          <div class="complete-stat-label">правильных</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-icon">❤️</div>
+          <div class="complete-stat-value" id="complete-hearts">3</div>
+          <div class="complete-stat-label">жизней</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-icon">🔥</div>
+          <div class="complete-stat-value" id="complete-streak">0</div>
+          <div class="complete-stat-label">дней подряд</div>
+        </div>
+      </div>
+
+      <div class="complete-goal-msg" id="complete-goal-msg" style="display:none">
+        Цель дня выполнена! 🎯
+      </div>
+
+      <button class="btn-primary" onclick="showHome()">На главную</button>
+
+    </div>
+  </div>
+
+  <!-- ==================== VERB TABLE SCREEN ==================== -->
+  <div id="screen-verbs" class="screen">
+
+    <div class="verbs-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Глаголы</h2>
+      <span class="verbs-count">45 глаголов</span>
+    </div>
+
+    <div id="verb-table-container"></div>
+
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
