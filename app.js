@@ -7,7 +7,10 @@ const DEFAULT_STATE = {
   totalXp: 0,
   dailyXp: 0,
   dailyGoal: 50,
-  level: 1
+  level: 1,
+  lessonsCompleted: 0,
+  scenariosCompleted: [],
+  errorLog: {}
 };
 
 let state = { ...DEFAULT_STATE };
@@ -21,25 +24,21 @@ let lessonState = {
   answered: false
 };
 
+let scenarioState = {
+  scenarioId: null,
+  currentStep: 0,
+  score: 0,
+  answered: false
+};
+
 const XP_PER_CORRECT = 10;
+const XP_PER_SCENARIO_STEP = 15;
 const EXERCISES_PER_LESSON = 10;
 
-const PRONOUNS = [
-  "εγώ",
-  "εσύ",
-  "αυτός/ή/ό",
-  "εμείς",
-  "εσείς",
-  "αυτοί/ές/ά"
-];
-
+const PRONOUNS = ["εγώ", "εσύ", "αυτός/ή/ό", "εμείς", "εσείς", "αυτοί/ές/ά"];
 const PRONOUNS_RU = {
-  "εγώ": "я",
-  "εσύ": "ты",
-  "αυτός/ή/ό": "он/она/оно",
-  "εμείς": "мы",
-  "εσείς": "вы",
-  "αυτοί/ές/ά": "они"
+  "εγώ": "я", "εσύ": "ты", "αυτός/ή/ό": "он/она/оно",
+  "εμείς": "мы", "εσείς": "вы", "αυτοί/ές/ά": "они"
 };
 
 // ============================================================
@@ -47,36 +46,13 @@ const PRONOUNS_RU = {
 // ============================================================
 function loadState() {
   try {
-    const saved = localStorage.getItem('greek-app-state');
-    if (saved) {
-      state = { ...DEFAULT_STATE, ...JSON.parse(saved) };
-    }
-  } catch (e) {
-    state = { ...DEFAULT_STATE };
-  }
+    const saved = localStorage.getItem('greek-app-state-v2');
+    if (saved) state = { ...DEFAULT_STATE, ...JSON.parse(saved) };
+  } catch (e) { state = { ...DEFAULT_STATE }; }
 }
 
 function saveState() {
-  localStorage.setItem('greek-app-state', JSON.stringify(state));
-}
-
-// ============================================================
-// STREAK LOGIC
-// ============================================================
-function updateStreakForNewDay() {
-  const today = new Date().toDateString();
-  if (state.lastPlayed === today) return;
-
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toDateString();
-
-  if (state.lastPlayed !== yesterdayStr && state.lastPlayed !== null) {
-    state.streak = 0;
-  }
-
-  state.dailyXp = 0;
-  saveState();
+  localStorage.setItem('greek-app-state-v2', JSON.stringify(state));
 }
 
 // ============================================================
@@ -84,33 +60,38 @@ function updateStreakForNewDay() {
 // ============================================================
 function init() {
   loadState();
-  updateStreakForNewDay();
+  checkStreak();
   renderHome();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+function checkStreak() {
+  const today = new Date().toDateString();
+  if (state.lastPlayed === today) return;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (state.lastPlayed !== yesterday.toDateString() && state.lastPlayed !== null) {
+    state.streak = 0;
   }
+  state.dailyXp = 0;
+  saveState();
 }
 
 // ============================================================
-// HOME SCREEN
+// HOME
 // ============================================================
 function renderHome() {
   document.getElementById('streak-number').textContent = state.streak;
   document.getElementById('total-xp').textContent = state.totalXp;
   document.getElementById('level-display').textContent = state.level;
-  document.getElementById('verbs-count').textContent = VERBS.length;
+  document.getElementById('lessons-done').textContent = state.lessonsCompleted;
 
   const pct = Math.min(100, (state.dailyXp / state.dailyGoal) * 100);
   document.getElementById('daily-progress').style.width = pct + '%';
-  document.getElementById('daily-xp-display').textContent =
-    `${state.dailyXp} / ${state.dailyGoal} XP`;
+  document.getElementById('daily-xp-display').textContent = `${state.dailyXp} / ${state.dailyGoal} XP`;
 
-  const streakCard = document.querySelector('.streak-card');
-  if (state.streak === 0) {
-    streakCard.classList.add('streak-zero');
-  } else {
-    streakCard.classList.remove('streak-zero');
-  }
+  const card = document.getElementById('streak-card');
+  card.classList.toggle('streak-zero', state.streak === 0);
 }
 
 function showHome() {
@@ -119,112 +100,73 @@ function showHome() {
 }
 
 // ============================================================
-// LESSON GENERATION
+// LESSON — EXERCISE GENERATION
 // ============================================================
 function generateLesson() {
   const exercises = [];
-
   for (let i = 0; i < EXERCISES_PER_LESSON; i++) {
     const verb = VERBS[Math.floor(Math.random() * VERBS.length)];
     const type = Math.floor(Math.random() * 4);
+    const pronoun = PRONOUNS[Math.floor(Math.random() * PRONOUNS.length)];
 
     if (type === 0) {
-      // Conjugation: pick correct form for given pronoun
-      const pronoun = PRONOUNS[Math.floor(Math.random() * PRONOUNS.length)];
       const correct = verb.present[pronoun];
-      const wrongs = getWrongForms(verb, correct);
       exercises.push({
-        type: 'conjugation',
-        verb,
-        pronoun,
+        type: 'conjugation', verb, pronoun,
         correctAnswer: correct,
-        options: shuffle([correct, ...wrongs])
+        options: shuffle([correct, ...getWrongForms(verb, correct)])
       });
-
     } else if (type === 1) {
-      // Phrase meaning: what does "εγώ έχω" mean?
-      const pronoun = PRONOUNS[Math.floor(Math.random() * PRONOUNS.length)];
       const form = verb.present[pronoun];
-      const pronounRu = PRONOUNS_RU[pronoun];
-      const correct = `${pronounRu} ${verb.translation}`;
+      const correct = `${PRONOUNS_RU[pronoun]} ${verb.translation}`;
       exercises.push({
         type: 'phrase_meaning',
         greek: `${pronoun} ${form}`,
         correctAnswer: correct,
         options: shuffle([correct, ...getWrongMeanings(verb, pronoun)])
       });
-
     } else if (type === 2) {
-      // Word meaning: what does infinitive mean?
       const correct = verb.translation;
-      const wrongs = VERBS
-        .filter(v => v.id !== verb.id)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 3)
-        .map(v => v.translation);
+      const wrongs = VERBS.filter(v => v.id !== verb.id).sort(() => Math.random() - 0.5).slice(0, 3).map(v => v.translation);
       exercises.push({
-        type: 'word_meaning',
-        greek: verb.infinitive,
-        correctAnswer: correct,
-        options: shuffle([correct, ...wrongs])
+        type: 'word_meaning', greek: verb.infinitive,
+        correctAnswer: correct, options: shuffle([correct, ...wrongs])
       });
-
     } else {
-      // Translate to Greek: "я хочу" -> choose form
-      const pronoun = PRONOUNS[Math.floor(Math.random() * PRONOUNS.length)];
       const correct = verb.present[pronoun];
-      const wrongs = getWrongForms(verb, correct);
       exercises.push({
         type: 'translate_to_greek',
         russian: `${PRONOUNS_RU[pronoun]} ${verb.translation}`,
-        verb,
-        pronoun,
+        verb, pronoun,
         correctAnswer: correct,
-        options: shuffle([correct, ...wrongs])
+        options: shuffle([correct, ...getWrongForms(verb, correct)])
       });
     }
   }
-
   return exercises;
 }
 
 function getWrongForms(verb, correctForm) {
-  const allForms = Object.values(verb.present);
-  const others = allForms.filter(f => f !== correctForm);
-  // Supplement from other verbs if needed
-  if (others.length < 3) {
-    const extraVerb = VERBS.find(v => v.id !== verb.id);
-    const extra = Object.values(extraVerb.present).filter(f => f !== correctForm);
-    others.push(...extra);
+  const allForms = Object.values(verb.present).filter(f => f !== correctForm);
+  if (allForms.length < 3) {
+    const extra = VERBS.find(v => v.id !== verb.id);
+    allForms.push(...Object.values(extra.present).filter(f => f !== correctForm));
   }
-  return shuffle(others).slice(0, 3);
+  return shuffle(allForms).slice(0, 3);
 }
 
 function getWrongMeanings(verb, pronoun) {
-  const pronounRu = PRONOUNS_RU[pronoun];
-  return VERBS
-    .filter(v => v.id !== verb.id)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3)
-    .map(v => `${pronounRu} ${v.translation}`);
+  const pRu = PRONOUNS_RU[pronoun];
+  return VERBS.filter(v => v.id !== verb.id).sort(() => Math.random() - 0.5).slice(0, 3).map(v => `${pRu} ${v.translation}`);
 }
 
-function shuffle(arr) {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 
 // ============================================================
-// LESSON FLOW
+// LESSON — FLOW
 // ============================================================
 function startLesson() {
-  lessonState = {
-    exercises: generateLesson(),
-    currentIndex: 0,
-    hearts: 3,
-    xpEarned: 0,
-    correct: 0,
-    answered: false
-  };
+  lessonState = { exercises: generateLesson(), currentIndex: 0, hearts: 3, xpEarned: 0, correct: 0, answered: false };
   showScreen('screen-lesson');
   renderExercise();
 }
@@ -233,75 +175,59 @@ function renderExercise() {
   const ex = lessonState.exercises[lessonState.currentIndex];
   lessonState.answered = false;
 
-  // Progress bar
-  const pct = (lessonState.currentIndex / EXERCISES_PER_LESSON) * 100;
-  document.getElementById('lesson-progress').style.width = pct + '%';
-
-  // Hearts
+  document.getElementById('lesson-progress').style.width = (lessonState.currentIndex / EXERCISES_PER_LESSON * 100) + '%';
   renderHearts();
-
-  // XP
   document.getElementById('lesson-xp').textContent = lessonState.xpEarned;
+  document.getElementById('lesson-footer').style.display = 'none';
+  document.getElementById('lesson-footer').className = 'lesson-footer';
 
-  // Hide footer
-  const footer = document.getElementById('lesson-footer');
-  footer.style.display = 'none';
-  footer.className = 'lesson-footer';
-
-  const labelEl = document.getElementById('exercise-label');
-  const questionEl = document.getElementById('exercise-question');
-  const subtitleEl = document.getElementById('exercise-subtitle');
-  const optionsEl = document.getElementById('options-grid');
+  const label = document.getElementById('exercise-label');
+  const question = document.getElementById('exercise-question');
+  const subtitle = document.getElementById('exercise-subtitle');
 
   if (ex.type === 'conjugation') {
-    labelEl.textContent = 'Выбери правильную форму';
-    questionEl.textContent = ex.verb.infinitive;
-    subtitleEl.textContent =
-      `${ex.pronoun}  (${PRONOUNS_RU[ex.pronoun]})  —  ${ex.verb.translation}`;
-
+    label.textContent = 'Выбери правильную форму';
+    question.textContent = ex.verb.infinitive;
+    subtitle.textContent = `${ex.pronoun}  (${PRONOUNS_RU[ex.pronoun]})  —  ${ex.verb.translation}`;
   } else if (ex.type === 'phrase_meaning') {
-    labelEl.textContent = 'Что это значит?';
-    questionEl.textContent = ex.greek;
-    subtitleEl.textContent = '';
-
+    label.textContent = 'Что это значит?';
+    question.textContent = ex.greek;
+    subtitle.textContent = '';
   } else if (ex.type === 'word_meaning') {
-    labelEl.textContent = 'Что значит этот глагол?';
-    questionEl.textContent = ex.greek;
-    subtitleEl.textContent = '';
-
-  } else if (ex.type === 'translate_to_greek') {
-    labelEl.textContent = 'Переведи на греческий';
-    questionEl.textContent = ex.russian;
-    subtitleEl.textContent = ex.verb.infinitive + '  —  ' + ex.verb.translation;
+    label.textContent = 'Что значит этот глагол?';
+    question.textContent = ex.greek;
+    subtitle.textContent = '';
+  } else {
+    label.textContent = 'Переведи на греческий';
+    question.textContent = ex.russian;
+    subtitle.textContent = `${ex.verb.infinitive}  —  ${ex.verb.translation}`;
   }
 
-  // Render option buttons
-  optionsEl.innerHTML = '';
-  ex.options.forEach(option => {
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  ex.options.forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'option-btn';
-    btn.textContent = option;
-    btn.addEventListener('click', () => selectAnswer(option, ex.correctAnswer));
-    optionsEl.appendChild(btn);
+    btn.textContent = opt;
+    btn.addEventListener('click', () => selectAnswer(opt, ex.correctAnswer, ex.verb?.id));
+    grid.appendChild(btn);
   });
 }
 
 function renderHearts() {
   const h = lessonState.hearts;
-  const el = document.getElementById('hearts-display');
-  el.innerHTML =
+  document.getElementById('hearts-display').innerHTML =
     '<span class="heart-icon">❤️</span>'.repeat(h) +
     '<span class="heart-icon dead">🖤</span>'.repeat(3 - h);
 }
 
-function selectAnswer(selected, correct) {
+function selectAnswer(selected, correct, verbId) {
   if (lessonState.answered) return;
   lessonState.answered = true;
 
-  const buttons = document.querySelectorAll('.option-btn');
+  const buttons = document.querySelectorAll('#options-grid .option-btn');
   const footer = document.getElementById('lesson-footer');
   const feedback = document.getElementById('feedback-message');
-  const continueBtn = document.getElementById('continue-btn');
 
   buttons.forEach(btn => {
     btn.disabled = true;
@@ -309,72 +235,72 @@ function selectAnswer(selected, correct) {
   });
 
   const isCorrect = selected === correct;
-
   if (isCorrect) {
     lessonState.correct++;
     lessonState.xpEarned += XP_PER_CORRECT;
     document.getElementById('lesson-xp').textContent = lessonState.xpEarned;
-
     feedback.textContent = randomCorrectPhrase();
     feedback.className = 'feedback-message correct';
     footer.className = 'lesson-footer correct-footer';
-
-    buttons.forEach(btn => {
-      if (btn.textContent === selected) btn.classList.add('correct');
-    });
-
+    buttons.forEach(btn => { if (btn.textContent === selected) btn.classList.add('correct'); });
     playSound('correct');
-
   } else {
     lessonState.hearts--;
     renderHearts();
-
     feedback.innerHTML = `Правильно: <strong>${correct}</strong>`;
     feedback.className = 'feedback-message wrong';
     footer.className = 'lesson-footer wrong-footer';
-
-    buttons.forEach(btn => {
-      if (btn.textContent === selected) btn.classList.add('wrong');
-    });
-
+    buttons.forEach(btn => { if (btn.textContent === selected) btn.classList.add('wrong'); });
+    if (verbId) {
+      state.errorLog[verbId] = (state.errorLog[verbId] || 0) + 1;
+    }
     playSound('wrong');
   }
 
   footer.style.display = 'flex';
-
-  if (lessonState.hearts <= 0) {
-    continueBtn.textContent = 'Завершить урок';
-  } else {
-    continueBtn.textContent = 'Продолжить';
-  }
+  document.getElementById('continue-btn').textContent = lessonState.hearts <= 0 ? 'Завершить урок' : 'Продолжить';
 }
 
 function nextExercise() {
-  if (lessonState.hearts <= 0) {
-    completeLesson();
-    return;
-  }
-
+  if (lessonState.hearts <= 0) { completeLesson(); return; }
   lessonState.currentIndex++;
+  if (lessonState.currentIndex >= EXERCISES_PER_LESSON) completeLesson();
+  else renderExercise();
+}
 
-  if (lessonState.currentIndex >= EXERCISES_PER_LESSON) {
-    completeLesson();
-  } else {
-    renderExercise();
+function completeLesson() {
+  const today = new Date().toDateString();
+  if (state.lastPlayed !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    state.streak = (state.lastPlayed === yesterday.toDateString()) ? state.streak + 1 : 1;
+    state.lastPlayed = today;
   }
+  state.dailyXp += lessonState.xpEarned;
+  state.totalXp += lessonState.xpEarned;
+  state.level = Math.floor(state.totalXp / 500) + 1;
+  state.lessonsCompleted++;
+  saveState();
+
+  const acc = lessonState.correct / EXERCISES_PER_LESSON;
+  const stars = (lessonState.hearts === 3 && acc === 1) ? '⭐⭐⭐' : (lessonState.hearts >= 2 && acc >= 0.7) ? '⭐⭐' : lessonState.hearts >= 1 ? '⭐' : '😅';
+
+  document.getElementById('complete-stars').textContent = stars;
+  document.getElementById('complete-xp').textContent = `+${lessonState.xpEarned}`;
+  document.getElementById('complete-correct').textContent = `${lessonState.correct}/${EXERCISES_PER_LESSON}`;
+  document.getElementById('complete-hearts').textContent = lessonState.hearts;
+  document.getElementById('complete-streak').textContent = state.streak;
+  document.getElementById('complete-goal-msg').style.display = state.dailyXp >= state.dailyGoal ? 'block' : 'none';
+  showScreen('screen-complete');
 }
 
 function randomCorrectPhrase() {
-  const phrases = [
-    'Σωστά! Правильно!',
-    'Μπράβο! Молодец!',
-    'Τέλεια! Отлично!',
-    'Ωραία! Прекрасно!',
-    'Правильно!'
-  ];
-  return phrases[Math.floor(Math.random() * phrases.length)];
+  return ['Σωστά! Правильно!', 'Μπράβο! Молодец!', 'Τέλεια! Отлично!', 'Ωραία! Прекрасно!', 'Εξαιρετικά!'][Math.floor(Math.random() * 5)];
 }
 
+// ============================================================
+// SOUND
+// ============================================================
 function playSound(type) {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -382,93 +308,182 @@ function playSound(type) {
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-
     if (type === 'correct') {
       osc.frequency.setValueAtTime(523, ctx.currentTime);
       osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.4);
     } else {
       osc.frequency.setValueAtTime(220, ctx.currentTime);
       osc.frequency.setValueAtTime(180, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.3);
     }
-  } catch (e) {
-    // Audio not available
-  }
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch (e) {}
 }
 
 // ============================================================
-// LESSON COMPLETE
+// SCENARIOS
 // ============================================================
-function completeLesson() {
-  const today = new Date().toDateString();
+function showScenarios() {
+  const container = document.getElementById('scenarios-list');
+  container.innerHTML = SCENARIOS.map(s => {
+    const done = state.scenariosCompleted.includes(s.id);
+    return `
+    <div class="scenario-card ${done ? 'done' : ''}" onclick="startScenario('${s.id}')">
+      <div class="scenario-icon">${s.icon}</div>
+      <div class="scenario-info">
+        <div class="scenario-title">${s.title}</div>
+        <div class="scenario-desc">${s.description}</div>
+        <div class="scenario-meta">${s.steps.length} шага · ${s.steps.length * XP_PER_SCENARIO_STEP} XP</div>
+      </div>
+      <div class="scenario-arrow">${done ? '✅' : '→'}</div>
+    </div>`;
+  }).join('');
+  showScreen('screen-scenarios');
+}
 
+function startScenario(id) {
+  const scenario = SCENARIOS.find(s => s.id === id);
+  if (!scenario) return;
+  scenarioState = { scenarioId: id, currentStep: 0, score: 0, answered: false };
+  renderScenarioStep(scenario, 0);
+  showScreen('screen-scenario-detail');
+}
+
+function renderScenarioStep(scenario, stepIdx) {
+  scenarioState.answered = false;
+  const step = scenario.steps[stepIdx];
+  const total = scenario.steps.length;
+
+  document.getElementById('scenario-progress-fill').style.width = (stepIdx / total * 100) + '%';
+  document.getElementById('scenario-step-counter').textContent = `${stepIdx + 1}/${total}`;
+  document.getElementById('scenario-title-bar').textContent = scenario.title;
+
+  const container = document.getElementById('scenario-step-container');
+  container.innerHTML = `
+    <div class="scenario-situation">${step.situation}</div>
+    <div class="dialogue-card">
+      <div class="dialogue-speaker">${step.speaker} говорит:</div>
+      <div class="dialogue-greek">${step.greek}</div>
+      <div class="dialogue-transcription">🔊 ${step.transcription}</div>
+      <div class="dialogue-translation">${step.translation}</div>
+    </div>
+    <div class="scenario-question">${step.question}</div>
+    <div class="scenario-options" id="scenario-options">
+      ${step.options.map((opt, i) => `
+        <button class="scenario-option-btn" onclick="selectScenarioAnswer(${i})">
+          <div class="opt-greek">${opt.text}</div>
+          <div class="opt-transcription">🔊 ${opt.transcription}</div>
+          <div class="opt-translation">${opt.translation}</div>
+        </button>
+      `).join('')}
+    </div>
+    <div class="scenario-feedback" id="scenario-feedback" style="display:none"></div>
+    <button class="btn-primary" id="scenario-next-btn" onclick="nextScenarioStep()" style="display:none;margin-top:16px">
+      ${stepIdx < total - 1 ? 'Следующий шаг →' : 'Завершить сценарий'}
+    </button>
+  `;
+}
+
+function selectScenarioAnswer(optionIdx) {
+  if (scenarioState.answered) return;
+  scenarioState.answered = true;
+
+  const scenario = SCENARIOS.find(s => s.id === scenarioState.scenarioId);
+  const step = scenario.steps[scenarioState.currentStep];
+  const option = step.options[optionIdx];
+
+  const buttons = document.querySelectorAll('.scenario-option-btn');
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (step.options[i].correct) btn.classList.add('correct');
+  });
+
+  const feedback = document.getElementById('scenario-feedback');
+  if (option.correct) {
+    scenarioState.score++;
+    buttons[optionIdx].classList.add('correct');
+    feedback.className = 'scenario-feedback correct';
+    feedback.textContent = step.correctFeedback;
+    playSound('correct');
+  } else {
+    buttons[optionIdx].classList.add('wrong');
+    feedback.className = 'scenario-feedback wrong';
+    feedback.textContent = step.wrongFeedback;
+    playSound('wrong');
+  }
+
+  feedback.style.display = 'block';
+  document.getElementById('scenario-next-btn').style.display = 'block';
+}
+
+function nextScenarioStep() {
+  const scenario = SCENARIOS.find(s => s.id === scenarioState.scenarioId);
+  scenarioState.currentStep++;
+
+  if (scenarioState.currentStep >= scenario.steps.length) {
+    completeScenario(scenario);
+  } else {
+    renderScenarioStep(scenario, scenarioState.currentStep);
+  }
+}
+
+function completeScenario(scenario) {
+  const xp = scenarioState.score * XP_PER_SCENARIO_STEP;
+  state.totalXp += xp;
+  state.dailyXp += xp;
+  state.level = Math.floor(state.totalXp / 500) + 1;
+  if (!state.scenariosCompleted.includes(scenario.id)) {
+    state.scenariosCompleted.push(scenario.id);
+  }
+  const today = new Date().toDateString();
   if (state.lastPlayed !== today) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-
-    if (state.lastPlayed === yesterday.toDateString()) {
-      state.streak++;
-    } else if (state.lastPlayed === null) {
-      state.streak = 1;
-    } else {
-      state.streak = 1;
-    }
+    state.streak = (state.lastPlayed === yesterday.toDateString()) ? state.streak + 1 : 1;
     state.lastPlayed = today;
   }
-
-  state.dailyXp += lessonState.xpEarned;
-  state.totalXp += lessonState.xpEarned;
-  state.level = Math.floor(state.totalXp / 500) + 1;
   saveState();
 
-  const accuracy = Math.round((lessonState.correct / EXERCISES_PER_LESSON) * 100);
+  const total = scenario.steps.length;
+  const pct = scenarioState.score / total;
+  const stars = pct === 1 ? '⭐⭐⭐' : pct >= 0.67 ? '⭐⭐' : '⭐';
 
-  let stars;
-  if (lessonState.hearts === 3 && accuracy === 100) stars = '⭐⭐⭐';
-  else if (lessonState.hearts >= 2 && accuracy >= 70) stars = '⭐⭐';
-  else if (lessonState.hearts >= 1 && accuracy >= 40) stars = '⭐';
-  else stars = '😅';
+  document.getElementById('scenario-complete-icon').textContent = scenario.icon;
+  document.getElementById('scenario-complete-title').textContent = `${scenario.title} пройден!`;
+  document.getElementById('scenario-complete-stars').textContent = stars;
+  document.getElementById('scenario-score').textContent = `${scenarioState.score}/${total}`;
+  document.getElementById('scenario-xp').textContent = `+${xp} XP`;
+  document.getElementById('scenario-complete-msg').textContent =
+    pct === 1 ? 'Идеально! Ты готов к этой ситуации в реальной жизни.' :
+    pct >= 0.67 ? 'Хорошо! Ещё немного практики — и будет идеально.' :
+    'Не страшно. Повтори сценарий — с каждым разом лучше.';
 
-  document.getElementById('complete-stars').textContent = stars;
-  document.getElementById('complete-xp').textContent = `+${lessonState.xpEarned} XP`;
-  document.getElementById('complete-correct').textContent =
-    `${lessonState.correct}/${EXERCISES_PER_LESSON}`;
-  document.getElementById('complete-hearts').textContent = lessonState.hearts;
-  document.getElementById('complete-streak').textContent = state.streak;
-
-  const dailyDone = state.dailyXp >= state.dailyGoal;
-  const goalMsg = document.getElementById('complete-goal-msg');
-  if (dailyDone) {
-    goalMsg.textContent = 'Цель дня выполнена! 🎯';
-    goalMsg.style.display = 'block';
-  } else {
-    goalMsg.style.display = 'none';
-  }
-
-  showScreen('screen-complete');
+  showScreen('screen-scenario-complete');
 }
 
 // ============================================================
 // VERB TABLE
 // ============================================================
 function showVerbTable() {
-  const container = document.getElementById('verb-table-container');
   const pronounsRu = ['я', 'ты', 'он/она', 'мы', 'вы', 'они'];
+  const container = document.getElementById('verb-table-container');
 
   container.innerHTML = VERBS.map(verb => `
-    <div class="verb-card">
+    <div class="verb-card" onclick="this.classList.toggle('expanded')">
       <div class="verb-title">
-        <span class="verb-infinitive">${verb.infinitive}</span>
+        <div>
+          <span class="verb-infinitive">${verb.infinitive}</span>
+          <span class="verb-transcription"> [${verb.transcription}]</span>
+        </div>
         <span class="verb-translation-badge">${verb.translation}</span>
       </div>
       ${verb.note ? `<div class="verb-note">${verb.note}</div>` : ''}
+      <div class="verb-example">
+        <span class="example-greek">${verb.example.greek}</span>
+        <span class="example-ru">${verb.example.ru}</span>
+      </div>
       <div class="verb-conjugation">
         ${PRONOUNS.map((p, i) => `
           <div class="conj-row">
@@ -481,6 +496,133 @@ function showVerbTable() {
   `).join('');
 
   showScreen('screen-verbs');
+}
+
+// ============================================================
+// 30-DAY PLAN
+// ============================================================
+function showPlan() {
+  const lessonsNeededPerDay = 1;
+  const daysUnlocked = Math.min(30, state.lessonsCompleted + state.scenariosCompleted.length + 1);
+
+  const typeIcons = { vocab: '📖', grammar: '⚙️', scenario: '🎭', review: '🔄', audit: '📊' };
+  const typeLabels = { vocab: 'Лексика', grammar: 'Грамматика', scenario: 'Сценарий', review: 'Повторение', audit: 'Аудит' };
+
+  const container = document.getElementById('plan-container');
+  container.innerHTML = PLAN_30.map(week => `
+    <div class="week-block">
+      <div class="week-header" style="border-color:${week.color}">
+        <span class="week-number" style="color:${week.color}">Неделя ${week.week}</span>
+        <span class="week-theme">${week.theme}</span>
+      </div>
+      ${week.days.map(d => {
+        const isUnlocked = d.day <= daysUnlocked;
+        const isDone = d.day < daysUnlocked;
+        return `
+        <div class="plan-day ${isDone ? 'done' : ''} ${!isUnlocked ? 'locked' : ''}">
+          <div class="plan-day-num" style="background:${isDone ? week.color : isUnlocked ? 'white' : '#e5e5e5'};color:${isDone ? 'white' : '#3c3c3c'}">${d.day}</div>
+          <div class="plan-day-info">
+            <div class="plan-day-topic">${d.topic}</div>
+            <div class="plan-day-focus">${typeIcons[d.type]} ${typeLabels[d.type]} · ${d.focus}</div>
+          </div>
+          <div class="plan-day-status">${isDone ? '✅' : isUnlocked ? '▶' : '🔒'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+
+  showScreen('screen-plan');
+}
+
+// ============================================================
+// AUDIT / PROGRESS
+// ============================================================
+function showAudit() {
+  const container = document.getElementById('audit-container');
+
+  const totalErrors = Object.values(state.errorLog).reduce((a, b) => a + b, 0);
+  const weakVerbs = Object.entries(state.errorLog)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([id, count]) => {
+      const verb = VERBS.find(v => v.id === parseInt(id));
+      return verb ? `<div class="weak-verb-row"><span class="wv-infinitive">${verb.infinitive}</span><span class="wv-translation">${verb.translation}</span><span class="wv-errors">${count} ошиб.</span></div>` : '';
+    }).join('');
+
+  const accuracy = state.lessonsCompleted > 0
+    ? Math.round((1 - totalErrors / (state.lessonsCompleted * EXERCISES_PER_LESSON)) * 100)
+    : 100;
+
+  const daysToGoal = state.dailyGoal > 0
+    ? Math.max(0, Math.ceil((state.dailyGoal - state.dailyXp) / XP_PER_CORRECT))
+    : 0;
+
+  container.innerHTML = `
+    <div class="audit-grid">
+      <div class="audit-stat">
+        <div class="audit-stat-icon">⚡</div>
+        <div class="audit-stat-value">${state.totalXp}</div>
+        <div class="audit-stat-label">Всего XP</div>
+      </div>
+      <div class="audit-stat">
+        <div class="audit-stat-icon">🔥</div>
+        <div class="audit-stat-value">${state.streak}</div>
+        <div class="audit-stat-label">Дней подряд</div>
+      </div>
+      <div class="audit-stat">
+        <div class="audit-stat-icon">📝</div>
+        <div class="audit-stat-value">${state.lessonsCompleted}</div>
+        <div class="audit-stat-label">Уроков</div>
+      </div>
+      <div class="audit-stat">
+        <div class="audit-stat-icon">🎭</div>
+        <div class="audit-stat-value">${state.scenariosCompleted.length}/4</div>
+        <div class="audit-stat-label">Сценариев</div>
+      </div>
+      <div class="audit-stat">
+        <div class="audit-stat-icon">🎯</div>
+        <div class="audit-stat-value">${accuracy}%</div>
+        <div class="audit-stat-label">Точность</div>
+      </div>
+      <div class="audit-stat">
+        <div class="audit-stat-icon">⭐</div>
+        <div class="audit-stat-value">${state.level}</div>
+        <div class="audit-stat-label">Уровень</div>
+      </div>
+    </div>
+
+    <div class="audit-section">
+      <div class="audit-section-title">📈 До следующего уровня</div>
+      <div class="level-progress-bar">
+        <div class="level-progress-fill" style="width:${((state.totalXp % 500) / 500 * 100)}%"></div>
+      </div>
+      <div class="level-progress-label">${state.totalXp % 500} / 500 XP до уровня ${state.level + 1}</div>
+    </div>
+
+    ${Object.keys(state.errorLog).length > 0 ? `
+    <div class="audit-section">
+      <div class="audit-section-title">⚠️ Слабые места — повтори эти глаголы</div>
+      <div class="weak-verbs-list">${weakVerbs}</div>
+    </div>` : `
+    <div class="audit-section">
+      <div class="audit-section-title">✅ Слабых мест нет — продолжай в том же духе!</div>
+    </div>`}
+
+    <div class="audit-section">
+      <div class="audit-section-title">💡 Рекомендация тьютора</div>
+      <div class="tutor-tip">${getTutorTip()}</div>
+    </div>
+  `;
+
+  showScreen('screen-audit');
+}
+
+function getTutorTip() {
+  if (state.lessonsCompleted === 0) return 'Данил, начни с первого урока прямо сейчас! Каждый день — это вклад в гражданство. 🇬🇷';
+  if (state.streak === 0) return 'Стрик сброшен. Помни: регулярность важнее интенсивности. 10 минут в день > 2 часа раз в неделю.';
+  if (state.scenariosCompleted.length === 0) return 'Попробуй сценарий "Apple Store" или "Собеседование на гражданство" — это практика для реальной жизни!';
+  if (state.scenariosCompleted.length < 4) return `Пройдено ${state.scenariosCompleted.length}/4 сценариев. Сценарий "Собеседование на гражданство" — самый важный. Пройди его!`;
+  return 'Отлично! Все сценарии пройдены. Следующий шаг — говорить с носителями. Найди грека и практикуй!';
 }
 
 // ============================================================

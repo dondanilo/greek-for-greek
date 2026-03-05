@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#58CC02">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Греческий">
   <title>Греческий для Грека</title>
   <link rel="manifest" href="manifest.json">
@@ -16,16 +15,15 @@
 </head>
 <body>
 
-  <!-- ==================== HOME SCREEN ==================== -->
+  <!-- ==================== HOME ==================== -->
   <div id="screen-home" class="screen active">
-
     <div class="home-header">
       <div class="home-flag">🇬🇷</div>
       <h1 class="app-title">Греческий для Грека</h1>
-      <p class="app-subtitle">Ελληνικά για τον Έλληνα</p>
+      <p class="app-subtitle">Γεια σου, Данил! Продолжаем путь к гражданству.</p>
     </div>
 
-    <div class="streak-card">
+    <div class="streak-card" id="streak-card">
       <div class="streak-icon">🔥</div>
       <div class="streak-info">
         <div class="streak-number" id="streak-number">0</div>
@@ -49,29 +47,41 @@
         <div class="stat-label">Всего XP</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value" id="verbs-count">0</div>
-        <div class="stat-label">Глаголов</div>
-      </div>
-      <div class="stat-item">
         <div class="stat-value" id="level-display">1</div>
         <div class="stat-label">Уровень</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="lessons-done">0</div>
+        <div class="stat-label">Уроков</div>
       </div>
     </div>
 
     <button class="btn-primary" onclick="startLesson()">Начать урок ▶</button>
-    <button class="btn-secondary" onclick="showVerbTable()">📚 Таблица глаголов (45)</button>
 
+    <div class="nav-grid">
+      <button class="nav-btn" onclick="showScenarios()">
+        <span class="nav-icon">🎭</span>
+        <span class="nav-label">Сценарии</span>
+      </button>
+      <button class="nav-btn" onclick="showVerbTable()">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">Глаголы</span>
+      </button>
+      <button class="nav-btn" onclick="showPlan()">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">30 дней</span>
+      </button>
+      <button class="nav-btn" onclick="showAudit()">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Прогресс</span>
+      </button>
+    </div>
   </div>
 
-  <!-- ==================== LESSON SCREEN ==================== -->
+  <!-- ==================== LESSON ==================== -->
   <div id="screen-lesson" class="screen">
-
     <div class="lesson-header">
-      <div class="hearts" id="hearts-display">
-        <span class="heart-icon">❤️</span>
-        <span class="heart-icon">❤️</span>
-        <span class="heart-icon">❤️</span>
-      </div>
+      <div class="hearts" id="hearts-display"></div>
       <div class="lesson-progress-wrap">
         <div class="lesson-progress-bg">
           <div class="lesson-progress-fill" id="lesson-progress"></div>
@@ -79,34 +89,29 @@
       </div>
       <div class="lesson-xp">⚡<span id="lesson-xp">0</span></div>
     </div>
-
-    <div class="exercise-container" id="exercise-container">
+    <div class="exercise-container">
       <div class="exercise-type-label" id="exercise-label"></div>
       <div class="exercise-question" id="exercise-question"></div>
       <div class="exercise-subtitle" id="exercise-subtitle"></div>
       <div class="options-grid" id="options-grid"></div>
     </div>
-
     <div class="lesson-footer" id="lesson-footer">
       <div class="feedback-message" id="feedback-message"></div>
       <button class="btn-primary" id="continue-btn" onclick="nextExercise()">Продолжить</button>
     </div>
-
   </div>
 
-  <!-- ==================== COMPLETE SCREEN ==================== -->
+  <!-- ==================== COMPLETE ==================== -->
   <div id="screen-complete" class="screen">
     <div class="complete-content">
-
       <div class="complete-animation">🎉</div>
       <h2>Урок завершён!</h2>
       <div class="complete-stars" id="complete-stars">⭐⭐⭐</div>
-
       <div class="complete-stats">
         <div class="complete-stat">
           <div class="complete-stat-icon">⚡</div>
-          <div class="complete-stat-value" id="complete-xp">+0 XP</div>
-          <div class="complete-stat-label">заработано</div>
+          <div class="complete-stat-value" id="complete-xp">+0</div>
+          <div class="complete-stat-label">XP</div>
         </div>
         <div class="complete-stat">
           <div class="complete-stat-icon">✅</div>
@@ -124,27 +129,88 @@
           <div class="complete-stat-label">дней подряд</div>
         </div>
       </div>
-
-      <div class="complete-goal-msg" id="complete-goal-msg" style="display:none">
-        Цель дня выполнена! 🎯
-      </div>
-
+      <div class="complete-goal-msg" id="complete-goal-msg" style="display:none">Цель дня выполнена! 🎯</div>
       <button class="btn-primary" onclick="showHome()">На главную</button>
-
     </div>
   </div>
 
-  <!-- ==================== VERB TABLE SCREEN ==================== -->
-  <div id="screen-verbs" class="screen">
+  <!-- ==================== SCENARIOS LIST ==================== -->
+  <div id="screen-scenarios" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Сценарии</h2>
+    </div>
+    <p class="sub-desc">Реальные ситуации: переговоры, магазины, отдых, гражданство.</p>
+    <div id="scenarios-list"></div>
+  </div>
 
-    <div class="verbs-header">
+  <!-- ==================== SCENARIO DETAIL ==================== -->
+  <div id="screen-scenario-detail" class="screen">
+    <div class="lesson-header">
+      <button class="btn-back-sm" onclick="showScenarios()">✕</button>
+      <div class="lesson-progress-wrap">
+        <div class="lesson-progress-bg">
+          <div class="lesson-progress-fill" id="scenario-progress-fill"></div>
+        </div>
+      </div>
+      <div class="scenario-step-counter" id="scenario-step-counter">1/3</div>
+    </div>
+    <div class="scenario-title-bar" id="scenario-title-bar"></div>
+    <div id="scenario-step-container"></div>
+  </div>
+
+  <!-- ==================== SCENARIO COMPLETE ==================== -->
+  <div id="screen-scenario-complete" class="screen">
+    <div class="complete-content">
+      <div class="complete-animation" id="scenario-complete-icon">🏆</div>
+      <h2 id="scenario-complete-title">Сценарий пройден!</h2>
+      <div class="complete-stars" id="scenario-complete-stars">⭐⭐⭐</div>
+      <p class="scenario-complete-msg" id="scenario-complete-msg"></p>
+      <div class="complete-stats">
+        <div class="complete-stat">
+          <div class="complete-stat-icon">✅</div>
+          <div class="complete-stat-value" id="scenario-score">0/3</div>
+          <div class="complete-stat-label">правильных</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-icon">⚡</div>
+          <div class="complete-stat-value" id="scenario-xp">+0 XP</div>
+          <div class="complete-stat-label">заработано</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="showScenarios()">Ещё сценарии</button>
+      <button class="btn-secondary" onclick="showHome()" style="margin-top:10px">На главную</button>
+    </div>
+  </div>
+
+  <!-- ==================== VERB TABLE ==================== -->
+  <div id="screen-verbs" class="screen">
+    <div class="sub-header">
       <button class="btn-back" onclick="showHome()">← Назад</button>
       <h2>Глаголы</h2>
-      <span class="verbs-count">45 глаголов</span>
+      <span class="badge">45</span>
     </div>
-
+    <p class="sub-desc">Нажми на глагол — увидишь пример из твоей жизни.</p>
     <div id="verb-table-container"></div>
+  </div>
 
+  <!-- ==================== 30-DAY PLAN ==================== -->
+  <div id="screen-plan" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>30-дневный план</h2>
+    </div>
+    <p class="sub-desc">Стратегия от A2 до собеседования на гражданство.</p>
+    <div id="plan-container"></div>
+  </div>
+
+  <!-- ==================== AUDIT ==================== -->
+  <div id="screen-audit" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Мой прогресс</h2>
+    </div>
+    <div id="audit-container"></div>
   </div>
 
   <script src="data.js"></script>
