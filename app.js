@@ -821,7 +821,7 @@ async function translateWord(el, word) {
   document.getElementById('word-tooltip-original').textContent = word;
   document.getElementById('word-tooltip-translation').textContent = '...';
   const rect = el.getBoundingClientRect();
-  const top = rect.bottom + 8 + window.scrollY;
+  const top = rect.bottom + 8;
   const left = Math.min(rect.left, window.innerWidth - 220);
   tooltip.style.cssText = `top:${top}px;left:${left}px;`;
   tooltip.classList.add('visible');
