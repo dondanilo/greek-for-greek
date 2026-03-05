@@ -75,6 +75,10 @@
         <span class="nav-icon">📊</span>
         <span class="nav-label">Прогресс</span>
       </button>
+      <button class="nav-btn nav-btn-wide" onclick="showNews()">
+        <span class="nav-icon">📰</span>
+        <span class="nav-label">Новости</span>
+      </button>
     </div>
   </div>
 
@@ -211,6 +215,23 @@
       <h2>Мой прогресс</h2>
     </div>
     <div id="audit-container"></div>
+  </div>
+
+  <!-- ==================== NEWS ==================== -->
+  <div id="screen-news" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Новости</h2>
+      <span class="news-refresh-badge" id="news-refresh-badge" onclick="manualRefreshNews()" title="Обновить">🔄</span>
+    </div>
+    <div class="news-tabs-wrap">
+      <div class="news-tabs" id="news-tabs"></div>
+    </div>
+    <div id="news-feed"></div>
+    <div class="word-tooltip" id="word-tooltip">
+      <div class="word-tooltip-original" id="word-tooltip-original"></div>
+      <div class="word-tooltip-translation" id="word-tooltip-translation"></div>
+    </div>
   </div>
 
   <script src="data.js"></script>

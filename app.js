@@ -638,3 +638,241 @@ function showScreen(id) {
 // BOOT
 // ============================================================
 document.addEventListener('DOMContentLoaded', init);
+
+// ============================================================
+// NEWS FEED
+// ============================================================
+const NEWS_TOPICS = [
+  { id: 'all',       label: 'Все',         emoji: '🌐' },
+  { id: 'football',  label: 'Футбол',      emoji: '⚽', query: 'ποδόσφαιρο' },
+  { id: 'politics',  label: 'Политика',    emoji: '🏛️', query: 'πολιτική' },
+  { id: 'history',   label: 'История',     emoji: '📜', query: 'ιστορία' },
+  { id: 'tech',      label: 'Технологии',  emoji: '💻', query: 'τεχνολογία' },
+  { id: 'marketing', label: 'Маркетинг',   emoji: '📊', query: 'μάρκετινγκ' },
+  { id: 'ai',        label: 'ИИ',          emoji: '🤖', query: 'τεχνητή νοημοσύνη' },
+  { id: 'games',     label: 'Игры',        emoji: '🎮', query: 'βιντεοπαίχνια gaming' },
+  { id: 'science',   label: 'Наука',       emoji: '🔬', query: 'επιστήμη' },
+  { id: 'hollywood', label: 'Голливуд',    emoji: '🎬', query: 'χόλιγουντ κινηματογράφος' },
+];
+
+let newsCache = {};
+let activeNewsTopic = 'all';
+let newsRefreshTimer = null;
+let translationCache = {};
+let currentNewsItems = [];
+
+async function showNews() {
+  showScreen('screen-news');
+  renderNewsTabs();
+  await loadNews(activeNewsTopic);
+  startNewsRefreshTimer();
+}
+
+function renderNewsTabs() {
+  document.getElementById('news-tabs').innerHTML = NEWS_TOPICS.map(t => `
+    <button class="news-tab ${t.id === activeNewsTopic ? 'active' : ''}" data-topic="${t.id}" onclick="switchNewsTopic('${t.id}')">
+      ${t.emoji} ${t.label}
+    </button>
+  `).join('');
+}
+
+async function switchNewsTopic(topicId) {
+  activeNewsTopic = topicId;
+  document.querySelectorAll('.news-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.topic === topicId);
+  });
+  await loadNews(topicId);
+}
+
+async function loadNews(topicId, forceRefresh = false) {
+  if (!forceRefresh && newsCache[topicId]) {
+    currentNewsItems = newsCache[topicId];
+    renderNewsItems(currentNewsItems, topicId);
+    return;
+  }
+  showNewsLoading();
+  try {
+    const items = topicId === 'all'
+      ? await fetchAllNews()
+      : await fetchNewsForQuery(NEWS_TOPICS.find(t => t.id === topicId).query, topicId);
+    newsCache[topicId] = items;
+    currentNewsItems = items;
+    renderNewsItems(items, topicId);
+  } catch (e) {
+    showNewsError();
+  }
+}
+
+async function fetchNewsForQuery(query, topicId) {
+  const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=el&gl=GR&ceid=GR:el`;
+  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=20`;
+  const res = await fetch(apiUrl);
+  const data = await res.json();
+  return (data.items || []).map(item => ({ ...item, _topicId: topicId }));
+}
+
+async function fetchAllNews() {
+  const rssUrl = `https://news.google.com/rss?hl=el&gl=GR&ceid=GR:el`;
+  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=30`;
+  const res = await fetch(apiUrl);
+  const data = await res.json();
+  return data.items || [];
+}
+
+function showNewsLoading() {
+  document.getElementById('news-feed').innerHTML = `
+    <div class="news-loading">
+      <div class="news-spinner"></div>
+      <div>Загружаем новости на греческом...</div>
+    </div>`;
+}
+
+function showNewsError() {
+  document.getElementById('news-feed').innerHTML = `
+    <div class="news-error">
+      ⚠️ Не удалось загрузить новости.<br>
+      <button class="news-translate-btn" style="margin-top:12px" onclick="loadNews(activeNewsTopic, true)">
+        Попробовать снова
+      </button>
+    </div>`;
+}
+
+function renderNewsItems(items, topicId) {
+  const feed = document.getElementById('news-feed');
+  if (!items || items.length === 0) {
+    feed.innerHTML = `<div class="news-empty">Новостей не найдено 😕</div>`;
+    return;
+  }
+  feed.innerHTML = items.map((item, idx) => {
+    const imgUrl = item.thumbnail || (item.enclosure && item.enclosure.link) || '';
+    const imgHtml = imgUrl ? `<img class="news-img" src="${imgUrl}" alt="" onerror="this.style.display='none'" loading="lazy">` : '';
+    const source = extractDomain(item.link || item.guid || '');
+    const date = formatNewsDate(item.pubDate);
+    const titleHtml = wrapWordsInSpans(item.title || '');
+    const topic = NEWS_TOPICS.find(t => t.id === (item._topicId || topicId));
+    const tagHtml = (topicId === 'all' && topic && topic.id !== 'all')
+      ? `<div class="news-topic-tag">${topic.emoji} ${topic.label}</div>` : '';
+    return `
+      <div class="news-card">
+        ${imgHtml}
+        <div class="news-content">
+          ${tagHtml}
+          <div class="news-title">${titleHtml}</div>
+          <div class="news-meta">
+            <span class="news-source">${source}</span>
+            <span class="news-date">${date}</span>
+          </div>
+          <button class="news-translate-btn" onclick="translateNewsItem(this, ${idx})">Перевести</button>
+          <div class="news-translation" id="news-trans-${idx}" style="display:none"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function wrapWordsInSpans(text) {
+  const clean = text.replace(/<[^>]*>/g, '');
+  return clean.split(/(\s+)/).map(token => {
+    if (/^\s+$/.test(token)) return token;
+    const word = token.replace(/^[«»"'.,!?;:()\[\]]+|[«»"'.,!?;:()\[\]]+$/g, '');
+    if (!word || word.length < 2) return token;
+    const safe = word.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    return `<span class="news-word" onclick="translateWord(this,'${safe}')">${token}</span>`;
+  }).join('');
+}
+
+function extractDomain(url) {
+  if (!url) return '';
+  try { return new URL(url).hostname.replace('www.', ''); } catch (e) { return ''; }
+}
+
+function formatNewsDate(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 60000);
+  if (diff < 60) return `${diff} мин. назад`;
+  if (diff < 1440) return `${Math.floor(diff / 60)} ч. назад`;
+  return `${Math.floor(diff / 1440)} дн. назад`;
+}
+
+async function translateNewsItem(btn, idx) {
+  const transEl = document.getElementById(`news-trans-${idx}`);
+  if (transEl.style.display !== 'none') {
+    transEl.style.display = 'none';
+    btn.textContent = 'Перевести';
+    btn.classList.remove('translated');
+    return;
+  }
+  const text = currentNewsItems[idx] && currentNewsItems[idx].title;
+  if (!text) return;
+  btn.textContent = '...';
+  btn.disabled = true;
+  const translated = await fetchTranslation(text);
+  transEl.textContent = translated;
+  transEl.style.display = 'block';
+  btn.textContent = 'Скрыть перевод';
+  btn.classList.add('translated');
+  btn.disabled = false;
+}
+
+async function translateWord(el, word) {
+  if (!word || word.length < 2) return;
+  document.querySelectorAll('.news-word.word-active').forEach(w => w.classList.remove('word-active'));
+  el.classList.add('word-active');
+  const tooltip = document.getElementById('word-tooltip');
+  document.getElementById('word-tooltip-original').textContent = word;
+  document.getElementById('word-tooltip-translation').textContent = '...';
+  const rect = el.getBoundingClientRect();
+  const top = rect.bottom + 8 + window.scrollY;
+  const left = Math.min(rect.left, window.innerWidth - 220);
+  tooltip.style.cssText = `top:${top}px;left:${left}px;`;
+  tooltip.classList.add('visible');
+  const translation = await fetchTranslation(word);
+  document.getElementById('word-tooltip-translation').textContent = translation;
+  clearTimeout(tooltip._hideTimer);
+  tooltip._hideTimer = setTimeout(() => {
+    tooltip.classList.remove('visible');
+    el.classList.remove('word-active');
+  }, 4000);
+}
+
+async function fetchTranslation(text) {
+  if (!text) return '';
+  if (translationCache[text]) return translationCache[text];
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=el|ru`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const result = data.responseData && data.responseData.translatedText
+      ? data.responseData.translatedText
+      : text;
+    translationCache[text] = result;
+    return result;
+  } catch (e) { return '(ошибка перевода)'; }
+}
+
+function startNewsRefreshTimer() {
+  if (newsRefreshTimer) clearInterval(newsRefreshTimer);
+  newsRefreshTimer = setInterval(async () => {
+    newsCache = {};
+    const badge = document.getElementById('news-refresh-badge');
+    if (badge) badge.classList.add('spinning');
+    await loadNews(activeNewsTopic, true);
+    if (badge) badge.classList.remove('spinning');
+  }, 30 * 60 * 1000);
+}
+
+function manualRefreshNews() {
+  newsCache = {};
+  const badge = document.getElementById('news-refresh-badge');
+  if (badge) badge.classList.add('spinning');
+  loadNews(activeNewsTopic, true).then(() => {
+    if (badge) badge.classList.remove('spinning');
+  });
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.classList.contains('news-word')) {
+    const tooltip = document.getElementById('word-tooltip');
+    if (tooltip) tooltip.classList.remove('visible');
+    document.querySelectorAll('.news-word.word-active').forEach(w => w.classList.remove('word-active'));
+  }
+});
