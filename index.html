@@ -75,6 +75,14 @@
         <span class="nav-icon">📊</span>
         <span class="nav-label">Прогресс</span>
       </button>
+      <button class="nav-btn" onclick="showVocab('image')">
+        <span class="nav-icon">🖼️</span>
+        <span class="nav-label">Карточки</span>
+      </button>
+      <button class="nav-btn" onclick="showVocab('translation')">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Перевод</span>
+      </button>
       <button class="nav-btn nav-btn-wide" onclick="showNews()">
         <span class="nav-icon">📰</span>
         <span class="nav-label">Новости</span>
@@ -231,6 +239,57 @@
     <div class="word-tooltip" id="word-tooltip">
       <div class="word-tooltip-original" id="word-tooltip-original"></div>
       <div class="word-tooltip-translation" id="word-tooltip-translation"></div>
+    </div>
+  </div>
+
+  <!-- ==================== VOCAB CATEGORY LIST ==================== -->
+  <div id="screen-vocab" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2 id="vocab-screen-title">Карточки</h2>
+    </div>
+    <p class="sub-desc" id="vocab-screen-desc">Выбери категорию и запоминай слова по картинкам.</p>
+    <div id="vocab-categories-list"></div>
+  </div>
+
+  <!-- ==================== VOCAB QUIZ ==================== -->
+  <div id="screen-vocab-quiz" class="screen">
+    <div class="lesson-header">
+      <button class="btn-back-sm" onclick="exitVocabQuiz()">✕</button>
+      <div class="lesson-progress-wrap">
+        <div class="lesson-progress-bg">
+          <div class="lesson-progress-fill" id="vocab-progress"></div>
+        </div>
+      </div>
+      <div class="lesson-xp">⭐<span id="vocab-score">0</span></div>
+    </div>
+    <div class="vocab-quiz-container" id="vocab-quiz-container"></div>
+    <div class="lesson-footer" id="vocab-footer">
+      <div class="feedback-message" id="vocab-feedback"></div>
+      <button class="btn-primary" id="vocab-continue-btn" onclick="nextVocabWord()">Продолжить</button>
+    </div>
+  </div>
+
+  <!-- ==================== VOCAB COMPLETE ==================== -->
+  <div id="screen-vocab-complete" class="screen">
+    <div class="complete-content">
+      <div class="complete-animation">🎉</div>
+      <h2>Раздел пройден!</h2>
+      <div class="complete-stars" id="vocab-complete-stars">⭐⭐⭐</div>
+      <div class="complete-stats">
+        <div class="complete-stat">
+          <div class="complete-stat-icon">✅</div>
+          <div class="complete-stat-value" id="vocab-complete-score">0/10</div>
+          <div class="complete-stat-label">правильных</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-icon">⚡</div>
+          <div class="complete-stat-value" id="vocab-complete-xp">+0</div>
+          <div class="complete-stat-label">XP</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="restartVocabQuiz()" style="max-width:320px">Играть снова</button>
+      <button class="btn-secondary" onclick="exitVocabQuiz()" style="margin-top:10px;max-width:320px">Другая категория</button>
     </div>
   </div>
 

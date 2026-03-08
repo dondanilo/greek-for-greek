@@ -548,3 +548,228 @@ const PLAN_30 = [
     ]
   }
 ];
+
+// ============================================================
+// VOCABULARY CATEGORIES
+// ============================================================
+const VOCAB_CATEGORIES = [
+  {
+    id: 'food', title: 'Еда', icon: '🍽️',
+    words: [
+      { greek: 'το ψωμί', transcription: 'то псоми', translation: 'хлеб', emoji: '🍞' },
+      { greek: 'το κρέας', transcription: 'то крэас', translation: 'мясо', emoji: '🥩' },
+      { greek: 'το τυρί', transcription: 'то тири', translation: 'сыр', emoji: '🧀' },
+      { greek: 'το αυγό', transcription: 'то авго', translation: 'яйцо', emoji: '🥚' },
+      { greek: 'η σαλάτα', transcription: 'и салата', translation: 'салат', emoji: '🥗' },
+      { greek: 'η πίτσα', transcription: 'и питса', translation: 'пицца', emoji: '🍕' },
+      { greek: 'το σουβλάκι', transcription: 'то сувлаки', translation: 'сувлаки', emoji: '🍢' },
+      { greek: 'το ψάρι', transcription: 'то псари', translation: 'рыба', emoji: '🐟' },
+      { greek: 'η σούπα', transcription: 'и супа', translation: 'суп', emoji: '🍲' },
+      { greek: 'το κοτόπουλο', transcription: 'то котопуло', translation: 'курица', emoji: '🍗' },
+      { greek: 'οι πατάτες', transcription: 'и пататэс', translation: 'картофель', emoji: '🥔' },
+      { greek: 'η ντομάτα', transcription: 'и домата', translation: 'помидор', emoji: '🍅' },
+      { greek: 'το αγγούρι', transcription: 'то ангури', translation: 'огурец', emoji: '🥒' },
+      { greek: 'το μήλο', transcription: 'то мило', translation: 'яблоко', emoji: '🍎' },
+      { greek: 'η μπανάνα', transcription: 'и банана', translation: 'банан', emoji: '🍌' },
+      { greek: 'το πορτοκάλι', transcription: 'то портокали', translation: 'апельсин', emoji: '🍊' },
+      { greek: 'τα μακαρόνια', transcription: 'та макарониа', translation: 'макароны', emoji: '🍝' },
+      { greek: 'το ρύζι', transcription: 'то ризи', translation: 'рис', emoji: '🍚' },
+    ]
+  },
+  {
+    id: 'drinks', title: 'Напитки', icon: '🥤',
+    words: [
+      { greek: 'ο καφές', transcription: 'о кафэс', translation: 'кофе', emoji: '☕' },
+      { greek: 'το νερό', transcription: 'то нэро', translation: 'вода', emoji: '💧' },
+      { greek: 'ο χυμός', transcription: 'о химос', translation: 'сок', emoji: '🧃' },
+      { greek: 'το κρασί', transcription: 'то краси', translation: 'вино', emoji: '🍷' },
+      { greek: 'η μπύρα', transcription: 'и бира', translation: 'пиво', emoji: '🍺' },
+      { greek: 'το τσάι', transcription: 'то цай', translation: 'чай', emoji: '🍵' },
+      { greek: 'το γάλα', transcription: 'то гала', translation: 'молоко', emoji: '🥛' },
+      { greek: 'η λεμονάδα', transcription: 'и лемонада', translation: 'лимонад', emoji: '🍋' },
+      { greek: 'το ούζο', transcription: 'то узо', translation: 'узо', emoji: '🥃' },
+      { greek: 'η σόδα', transcription: 'и сода', translation: 'газировка', emoji: '🥤' },
+      { greek: 'το κακάο', transcription: 'то какао', translation: 'какао', emoji: '🍫' },
+      { greek: 'ο φρέντο', transcription: 'о фрэндо', translation: 'холодный кофе', emoji: '🧊' },
+    ]
+  },
+  {
+    id: 'transport', title: 'Транспорт', icon: '🚌',
+    words: [
+      { greek: 'το αυτοκίνητο', transcription: 'то автокинито', translation: 'машина', emoji: '🚗' },
+      { greek: 'το λεωφορείο', transcription: 'то лэофорио', translation: 'автобус', emoji: '🚌' },
+      { greek: 'το μετρό', transcription: 'то мэтро', translation: 'метро', emoji: '🚇' },
+      { greek: 'το ταξί', transcription: 'то такси', translation: 'такси', emoji: '🚕' },
+      { greek: 'το αεροπλάνο', transcription: 'то аэроплано', translation: 'самолёт', emoji: '✈️' },
+      { greek: 'το πλοίο', transcription: 'то плио', translation: 'корабль', emoji: '🚢' },
+      { greek: 'το ποδήλατο', transcription: 'то подилато', translation: 'велосипед', emoji: '🚲' },
+      { greek: 'η μηχανή', transcription: 'и михани', translation: 'мотоцикл', emoji: '🏍️' },
+      { greek: 'το τραμ', transcription: 'то трам', translation: 'трамвай', emoji: '🚋' },
+      { greek: 'το τρένο', transcription: 'то трэно', translation: 'поезд', emoji: '🚂' },
+      { greek: 'το αεροδρόμιο', transcription: 'то аэродромио', translation: 'аэропорт', emoji: '🛫' },
+      { greek: 'το λιμάνι', transcription: 'то лимани', translation: 'порт', emoji: '⚓' },
+    ]
+  },
+  {
+    id: 'family', title: 'Семья', icon: '👨‍👩‍👧‍👦',
+    words: [
+      { greek: 'ο πατέρας', transcription: 'о патэрас', translation: 'отец', emoji: '👨' },
+      { greek: 'η μητέρα', transcription: 'и митэра', translation: 'мать', emoji: '👩' },
+      { greek: 'ο γιος', transcription: 'о йос', translation: 'сын', emoji: '👦' },
+      { greek: 'η κόρη', transcription: 'и кори', translation: 'дочь', emoji: '👧' },
+      { greek: 'ο αδερφός', transcription: 'о адэрфос', translation: 'брат', emoji: '🧑' },
+      { greek: 'η αδερφή', transcription: 'и адэрфи', translation: 'сестра', emoji: '👩‍🦰' },
+      { greek: 'ο παππούς', transcription: 'о папус', translation: 'дедушка', emoji: '👴' },
+      { greek: 'η γιαγιά', transcription: 'и яйа', translation: 'бабушка', emoji: '👵' },
+      { greek: 'ο σύζυγος', transcription: 'о сизигос', translation: 'муж', emoji: '🤵' },
+      { greek: 'η σύζυγος', transcription: 'и сизигос', translation: 'жена', emoji: '👰' },
+      { greek: 'το παιδί', transcription: 'то пэди', translation: 'ребёнок', emoji: '👶' },
+      { greek: 'ο θείος', transcription: 'о сиос', translation: 'дядя', emoji: '🧔' },
+      { greek: 'η θεία', transcription: 'и сиа', translation: 'тётя', emoji: '👩‍🦳' },
+      { greek: 'η οικογένεια', transcription: 'и икойэниа', translation: 'семья', emoji: '👪' },
+    ]
+  },
+  {
+    id: 'business', title: 'Бизнес', icon: '💼',
+    words: [
+      { greek: 'η δουλειά', transcription: 'и дулья', translation: 'работа', emoji: '💼' },
+      { greek: 'η εταιρεία', transcription: 'и этэриа', translation: 'компания', emoji: '🏢' },
+      { greek: 'η συνάντηση', transcription: 'и синандиси', translation: 'встреча', emoji: '🤝' },
+      { greek: 'το συμβόλαιο', transcription: 'то символэо', translation: 'контракт', emoji: '📋' },
+      { greek: 'ο πελάτης', transcription: 'о пэлатис', translation: 'клиент', emoji: '👥' },
+      { greek: 'η τιμή', transcription: 'и тими', translation: 'цена', emoji: '💰' },
+      { greek: 'η έκπτωση', transcription: 'и экптоси', translation: 'скидка', emoji: '🏷️' },
+      { greek: 'η παραγγελία', transcription: 'и парангэлиа', translation: 'заказ', emoji: '📦' },
+      { greek: 'το κέρδος', transcription: 'то кэрдос', translation: 'прибыль', emoji: '📈' },
+      { greek: 'το γραφείο', transcription: 'то графио', translation: 'офис', emoji: '🏢' },
+      { greek: 'ο διευθυντής', transcription: 'о диэфтинтис', translation: 'директор', emoji: '👔' },
+      { greek: 'η τράπεζα', transcription: 'и трапэза', translation: 'банк', emoji: '🏦' },
+      { greek: 'η πρόταση', transcription: 'и протаси', translation: 'предложение', emoji: '📄' },
+    ]
+  },
+  {
+    id: 'home', title: 'Дом', icon: '🏠',
+    words: [
+      { greek: 'το σπίτι', transcription: 'то спити', translation: 'дом', emoji: '🏠' },
+      { greek: 'το δωμάτιο', transcription: 'то доматьо', translation: 'комната', emoji: '🛏️' },
+      { greek: 'η κουζίνα', transcription: 'и кузина', translation: 'кухня', emoji: '🍳' },
+      { greek: 'το μπάνιο', transcription: 'то банио', translation: 'ванная', emoji: '🚿' },
+      { greek: 'το σαλόνι', transcription: 'то салони', translation: 'гостиная', emoji: '🛋️' },
+      { greek: 'η πόρτα', transcription: 'и порта', translation: 'дверь', emoji: '🚪' },
+      { greek: 'το παράθυρο', transcription: 'то парасиро', translation: 'окно', emoji: '🪟' },
+      { greek: 'το τραπέζι', transcription: 'то трапэзи', translation: 'стол', emoji: '🪑' },
+      { greek: 'το κρεβάτι', transcription: 'то крэвати', translation: 'кровать', emoji: '🛏️' },
+      { greek: 'ο καναπές', transcription: 'о канапэс', translation: 'диван', emoji: '🛋️' },
+      { greek: 'η τηλεόραση', transcription: 'и тилэораси', translation: 'телевизор', emoji: '📺' },
+      { greek: 'το ψυγείο', transcription: 'то псийио', translation: 'холодильник', emoji: '🧊' },
+      { greek: 'το πλυντήριο', transcription: 'то плиндирио', translation: 'стиральная машина', emoji: '🫧' },
+    ]
+  },
+  {
+    id: 'city', title: 'Город', icon: '🏙️',
+    words: [
+      { greek: 'η πόλη', transcription: 'и поли', translation: 'город', emoji: '🏙️' },
+      { greek: 'η πλατεία', transcription: 'и платиа', translation: 'площадь', emoji: '⛲' },
+      { greek: 'το μουσείο', transcription: 'то музио', translation: 'музей', emoji: '🏛️' },
+      { greek: 'η εκκλησία', transcription: 'и эклисиа', translation: 'церковь', emoji: '⛪' },
+      { greek: 'το εστιατόριο', transcription: 'то эстиаторио', translation: 'ресторан', emoji: '🍽️' },
+      { greek: 'το σούπερ μάρκετ', transcription: 'то супэр маркэт', translation: 'супермаркет', emoji: '🏪' },
+      { greek: 'το ξενοδοχείο', transcription: 'то ксэнодохио', translation: 'отель', emoji: '🏨' },
+      { greek: 'το πάρκο', transcription: 'то парко', translation: 'парк', emoji: '🌳' },
+      { greek: 'η παραλία', transcription: 'и паралиа', translation: 'пляж', emoji: '🏖️' },
+      { greek: 'το νοσοκομείο', transcription: 'то носокомио', translation: 'больница', emoji: '🏥' },
+      { greek: 'το φαρμακείο', transcription: 'то фармакио', translation: 'аптека', emoji: '💊' },
+      { greek: 'ο δρόμος', transcription: 'о дромос', translation: 'улица', emoji: '🛣️' },
+      { greek: 'η γέφυρα', transcription: 'и йэфира', translation: 'мост', emoji: '🌉' },
+      { greek: 'η αγορά', transcription: 'и агора', translation: 'рынок', emoji: '🛒' },
+    ]
+  },
+  {
+    id: 'market', title: 'На рынке', icon: '🛒',
+    words: [
+      { greek: 'πόσο κάνει;', transcription: 'посо кани?', translation: 'сколько стоит?', emoji: '💰' },
+      { greek: 'φθηνό', transcription: 'фтино', translation: 'дёшево', emoji: '💚' },
+      { greek: 'ακριβό', transcription: 'акрivo', translation: 'дорого', emoji: '💸' },
+      { greek: 'φρέσκο', transcription: 'фрэско', translation: 'свежий', emoji: '🌿' },
+      { greek: 'το κιλό', transcription: 'то кило', translation: 'килограмм', emoji: '⚖️' },
+      { greek: 'η ρέστα', transcription: 'и рэста', translation: 'сдача', emoji: '🪙' },
+      { greek: 'παρακαλώ', transcription: 'паракало', translation: 'пожалуйста', emoji: '🙏' },
+      { greek: 'ευχαριστώ', transcription: 'эфхаристо', translation: 'спасибо', emoji: '😊' },
+      { greek: 'δώστε μου', transcription: 'достэ му', translation: 'дайте мне', emoji: '🤲' },
+      { greek: 'τίποτε άλλο', transcription: 'типотэ ало', translation: 'ничего больше', emoji: '🙅' },
+      { greek: 'η απόδειξη', transcription: 'и аподикси', translation: 'чек', emoji: '🧾' },
+      { greek: 'εντάξει', transcription: 'эндакси', translation: 'договорились', emoji: '👍' },
+      { greek: 'πολύ καλό', transcription: 'поли кало', translation: 'очень хорошо', emoji: '👌' },
+    ]
+  },
+  {
+    id: 'transport_phrases', title: 'В транспорте', icon: '🚇',
+    words: [
+      { greek: 'η στάση', transcription: 'и стаси', translation: 'остановка', emoji: '🚏' },
+      { greek: 'το εισιτήριο', transcription: 'то эситирио', translation: 'билет', emoji: '🎫' },
+      { greek: 'η γραμμή', transcription: 'и грами', translation: 'маршрут/линия', emoji: '🗺️' },
+      { greek: 'η έξοδος', transcription: 'и эксодос', translation: 'выход', emoji: '🚪' },
+      { greek: 'η είσοδος', transcription: 'и эйсодос', translation: 'вход', emoji: '🔑' },
+      { greek: 'η αλλαγή', transcription: 'и алайи', translation: 'пересадка', emoji: '🔄' },
+      { greek: 'το δρομολόγιο', transcription: 'то дромолойо', translation: 'расписание', emoji: '📅' },
+      { greek: 'αριστερά', transcription: 'аристэра', translation: 'налево', emoji: '⬅️' },
+      { greek: 'δεξιά', transcription: 'дэксья', translation: 'направо', emoji: '➡️' },
+      { greek: 'ευθεία', transcription: 'эфтья', translation: 'прямо', emoji: '⬆️' },
+      { greek: 'κοντά', transcription: 'конда', translation: 'близко', emoji: '📍' },
+      { greek: 'μακριά', transcription: 'макрья', translation: 'далеко', emoji: '🗺️' },
+      { greek: 'πού πηγαίνει;', transcription: 'пу пийэни?', translation: 'куда идёт?', emoji: '❓' },
+      { greek: 'πότε φτάνει;', transcription: 'потэ фтани?', translation: 'когда прибывает?', emoji: '⏰' },
+    ]
+  },
+  {
+    id: 'clothes', title: 'Одежда', icon: '👕',
+    words: [
+      { greek: 'το πουκάμισο', transcription: 'то пукамизо', translation: 'рубашка', emoji: '👔' },
+      { greek: 'το παντελόνι', transcription: 'то пандэлони', translation: 'брюки', emoji: '👖' },
+      { greek: 'το φόρεμα', transcription: 'то форэма', translation: 'платье', emoji: '👗' },
+      { greek: 'η φούστα', transcription: 'и фуста', translation: 'юбка', emoji: '🩱' },
+      { greek: 'το μπουφάν', transcription: 'то буфан', translation: 'куртка', emoji: '🧥' },
+      { greek: 'τα παπούτσια', transcription: 'та папуциа', translation: 'обувь', emoji: '👟' },
+      { greek: 'η τσάντα', transcription: 'и цанда', translation: 'сумка', emoji: '👜' },
+      { greek: 'το καπέλο', transcription: 'то капэло', translation: 'кепка', emoji: '🧢' },
+      { greek: 'το κασκόλ', transcription: 'то касколь', translation: 'шарф', emoji: '🧣' },
+      { greek: 'τα γάντια', transcription: 'та гандья', translation: 'перчатки', emoji: '🧤' },
+      { greek: 'το μπλουζάκι', transcription: 'то блузаки', translation: 'футболка', emoji: '👕' },
+      { greek: 'οι κάλτσες', transcription: 'и калцэс', translation: 'носки', emoji: '🧦' },
+    ]
+  },
+  {
+    id: 'money', title: 'Деньги', icon: '💶',
+    words: [
+      { greek: 'το ευρώ', transcription: 'то эвро', translation: 'евро', emoji: '💶' },
+      { greek: 'η κάρτα', transcription: 'и карта', translation: 'карта', emoji: '💳' },
+      { greek: 'τα μετρητά', transcription: 'та мэтрита', translation: 'наличные', emoji: '💵' },
+      { greek: 'η απόδειξη', transcription: 'и аподикси', translation: 'чек', emoji: '🧾' },
+      { greek: 'η έκπτωση', transcription: 'и экптоси', translation: 'скидка', emoji: '🏷️' },
+      { greek: 'το μαγαζί', transcription: 'то магази', translation: 'магазин', emoji: '🏪' },
+      { greek: 'το ΑΤΜ', transcription: 'то ATM', translation: 'банкомат', emoji: '🏧' },
+      { greek: 'φθηνός', transcription: 'фтинос', translation: 'дешёвый', emoji: '💚' },
+      { greek: 'ακριβός', transcription: 'акривос', translation: 'дорогой', emoji: '💸' },
+      { greek: 'η προσφορά', transcription: 'и просфора', translation: 'акция', emoji: '🎁' },
+      { greek: 'ο λογαριασμός', transcription: 'о логарьязмос', translation: 'счёт', emoji: '🧾' },
+      { greek: 'τα ρέστα', transcription: 'та рэста', translation: 'сдача', emoji: '🪙' },
+    ]
+  },
+  {
+    id: 'weather', title: 'Погода', icon: '🌤️',
+    words: [
+      { greek: 'ο ήλιος', transcription: 'о илиос', translation: 'солнце', emoji: '☀️' },
+      { greek: 'η βροχή', transcription: 'и врохи', translation: 'дождь', emoji: '🌧️' },
+      { greek: 'ο αέρας', transcription: 'о аэрас', translation: 'ветер', emoji: '💨' },
+      { greek: 'το χιόνι', transcription: 'то хьони', translation: 'снег', emoji: '❄️' },
+      { greek: 'ζεστός', transcription: 'зэстос', translation: 'жарко', emoji: '🔥' },
+      { greek: 'κρύος', transcription: 'крьос', translation: 'холодно', emoji: '🥶' },
+      { greek: 'συννεφιά', transcription: 'синэфья', translation: 'облачно', emoji: '☁️' },
+      { greek: 'ο καιρός', transcription: 'о кэрос', translation: 'погода', emoji: '🌤️' },
+      { greek: 'η καταιγίδα', transcription: 'и катэйида', translation: 'гроза', emoji: '⛈️' },
+      { greek: 'η θερμοκρασία', transcription: 'и тэрмокразья', translation: 'температура', emoji: '🌡️' },
+      { greek: 'ο ουρανός', transcription: 'о уранос', translation: 'небо', emoji: '🌌' },
+      { greek: 'το ουράνιο τόξο', transcription: 'то ураньо токсо', translation: 'радуга', emoji: '🌈' },
+    ]
+  },
+];

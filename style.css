@@ -433,3 +433,86 @@ body {
 }
 .news-refresh-badge:hover { opacity: 1; }
 .news-refresh-badge.spinning { animation: spin 1s linear infinite; opacity: 0.8; }
+
+/* ============================================================ VOCAB */
+.vocab-categories-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.vocab-category-card {
+  background: var(--white); border-radius: var(--radius); padding: 18px 10px;
+  border: 2px solid var(--gray-light); box-shadow: 0 2px 0 var(--gray-light);
+  cursor: pointer; text-align: center;
+  transition: border-color 0.15s, transform 0.08s;
+  font-family: 'Nunito', sans-serif;
+}
+.vocab-category-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+.vocab-category-card:active { transform: translateY(0); }
+.vocab-cat-icon { font-size: 34px; line-height: 1; margin-bottom: 8px; }
+.vocab-cat-title { font-size: 14px; font-weight: 800; color: var(--text); }
+.vocab-cat-count { font-size: 11px; color: var(--text-light); font-weight: 700; margin-top: 3px; }
+
+/* Quiz container */
+.vocab-quiz-container {
+  flex: 1; display: flex; flex-direction: column; gap: 10px;
+}
+
+/* Word display */
+.vocab-word-display { text-align: center; padding: 8px 0 4px; }
+.vocab-word-mode-label {
+  font-size: 12px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--text-light); margin-bottom: 6px;
+}
+.vocab-word-instruction {
+  font-size: 13px; color: var(--text-light); font-weight: 600; margin-bottom: 10px; line-height: 1.4;
+}
+.vocab-word-greek {
+  font-size: 26px; font-weight: 900; color: var(--text);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 4px; line-height: 1.3;
+}
+.vocab-tts-btn {
+  background: none; border: none; font-size: 22px; cursor: pointer;
+  opacity: 0.7; transition: opacity 0.15s, transform 0.1s; padding: 2px; flex-shrink: 0;
+}
+.vocab-tts-btn:hover { opacity: 1; transform: scale(1.15); }
+.vocab-word-transcription { font-size: 14px; color: var(--blue); font-weight: 700; }
+
+/* Image quiz 2x2 grid */
+.vocab-image-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;
+}
+.vocab-image-card {
+  background: var(--white); border-radius: var(--radius); padding: 16px 8px;
+  border: 2.5px solid var(--gray-light); box-shadow: 0 3px 0 var(--gray-light);
+  cursor: pointer; text-align: center;
+  transition: border-color 0.12s, background 0.12s, transform 0.08s;
+  user-select: none; font-family: 'Nunito', sans-serif;
+}
+.vocab-image-card:hover:not(:disabled) {
+  border-color: var(--blue); transform: translateY(-2px);
+  background: rgba(28,176,246,0.04);
+}
+.vocab-image-card:disabled { cursor: default; }
+.vocab-image-card.correct { border-color: var(--green); background: var(--green-light); box-shadow: 0 3px 0 var(--green-dark); }
+.vocab-image-card.wrong { border-color: var(--red); background: var(--red-light); box-shadow: 0 3px 0 #cc2222; }
+.vocab-card-emoji { font-size: 50px; line-height: 1.2; display: block; }
+.vocab-card-label { font-size: 14px; font-weight: 800; color: var(--text); margin-top: 6px; }
+
+/* Translation quiz buttons */
+.vocab-translation-options {
+  display: flex; flex-direction: column; gap: 12px; margin-top: 8px;
+}
+.vocab-translation-btn {
+  padding: 20px 18px; background: var(--white);
+  border: 2.5px solid var(--gray-light); border-radius: 50px;
+  font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800;
+  color: var(--text); cursor: pointer; text-align: center;
+  transition: border-color 0.12s, background 0.12s, transform 0.08s;
+  box-shadow: 0 3px 0 var(--gray-light); user-select: none;
+}
+.vocab-translation-btn:hover:not(:disabled) {
+  border-color: var(--blue); background: rgba(28,176,246,0.06); transform: translateY(-2px);
+}
+.vocab-translation-btn:disabled { cursor: default; }
+.vocab-translation-btn.correct { border-color: var(--green); background: var(--green-light); color: var(--green-dark); box-shadow: 0 3px 0 var(--green-dark); }
+.vocab-translation-btn.wrong { border-color: var(--red); background: var(--red-light); color: var(--red); box-shadow: 0 3px 0 #cc2222; }

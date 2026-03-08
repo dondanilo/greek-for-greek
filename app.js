@@ -876,3 +876,192 @@ document.addEventListener('click', e => {
     document.querySelectorAll('.news-word.word-active').forEach(w => w.classList.remove('word-active'));
   }
 });
+
+// ============================================================
+// VOCAB QUIZ
+// ============================================================
+let currentVocabMode = 'image';
+let vocabQuizState = {
+  categoryId: null, mode: null, words: [],
+  currentIndex: 0, score: 0, answered: false, totalWords: 10, options: []
+};
+
+function showVocab(mode) {
+  currentVocabMode = mode;
+  document.getElementById('vocab-screen-title').textContent = mode === 'image' ? 'Карточки' : 'Перевод';
+  document.getElementById('vocab-screen-desc').textContent = mode === 'image'
+    ? 'Выбери картинку, которая соответствует греческому слову.'
+    : 'Выбери правильный перевод греческого слова.';
+
+  document.getElementById('vocab-categories-list').innerHTML =
+    `<div class="vocab-categories-grid">${VOCAB_CATEGORIES.map(cat => `
+      <div class="vocab-category-card" onclick="startVocabQuiz('${cat.id}')">
+        <div class="vocab-cat-icon">${cat.icon}</div>
+        <div class="vocab-cat-title">${cat.title}</div>
+        <div class="vocab-cat-count">${cat.words.length} слов</div>
+      </div>`).join('')}</div>`;
+
+  showScreen('screen-vocab');
+}
+
+function startVocabQuiz(categoryId) {
+  const category = VOCAB_CATEGORIES.find(c => c.id === categoryId);
+  if (!category) return;
+  const words = shuffle([...category.words]).slice(0, 10);
+  vocabQuizState = {
+    categoryId, mode: currentVocabMode, words,
+    currentIndex: 0, score: 0, answered: false, totalWords: words.length, options: []
+  };
+  showScreen('screen-vocab-quiz');
+  renderVocabWord();
+}
+
+function renderVocabWord() {
+  const { words, currentIndex, mode, totalWords } = vocabQuizState;
+  const word = words[currentIndex];
+  vocabQuizState.answered = false;
+  document.getElementById('vocab-progress').style.width = (currentIndex / totalWords * 100) + '%';
+  document.getElementById('vocab-score').textContent = vocabQuizState.score;
+  document.getElementById('vocab-footer').style.display = 'none';
+  document.getElementById('vocab-footer').className = 'lesson-footer';
+  const category = VOCAB_CATEGORIES.find(c => c.id === vocabQuizState.categoryId);
+  if (mode === 'image') renderImageQuiz(word, category);
+  else renderTranslationQuiz(word, category);
+}
+
+function renderImageQuiz(word, category) {
+  const pool = category.words.filter(w => w.greek !== word.greek);
+  const wrongWords = shuffle(pool).slice(0, 3);
+  // if pool has < 3 words pad from other categories
+  if (wrongWords.length < 3) {
+    const extra = VOCAB_CATEGORIES
+      .filter(c => c.id !== category.id)
+      .flatMap(c => c.words)
+      .filter(w => !wrongWords.some(x => x.greek === w.greek));
+    wrongWords.push(...shuffle(extra).slice(0, 3 - wrongWords.length));
+  }
+  const options = shuffle([word, ...wrongWords]);
+  vocabQuizState.options = options;
+
+  document.getElementById('vocab-quiz-container').innerHTML = `
+    <div class="vocab-word-display">
+      <div class="vocab-word-mode-label">✦ Новый</div>
+      <div class="vocab-word-instruction">Выберите картинку с переводом на русский</div>
+      <div class="vocab-word-greek">
+        ${word.greek}
+        <button class="vocab-tts-btn" data-greek="${word.greek.replace(/"/g, '&quot;')}" onclick="speakGreek(this.dataset.greek)">🔊</button>
+      </div>
+      <div class="vocab-word-transcription">${word.transcription}</div>
+    </div>
+    <div class="vocab-image-grid">
+      ${options.map((opt, i) => `
+        <button class="vocab-image-card" onclick="selectVocabAnswer(${i})">
+          <span class="vocab-card-emoji">${opt.emoji}</span>
+          <div class="vocab-card-label">${opt.translation}</div>
+        </button>`).join('')}
+    </div>`;
+}
+
+function renderTranslationQuiz(word, category) {
+  const pool = category.words.filter(w => w.greek !== word.greek);
+  const wrongWords = shuffle(pool).slice(0, 2);
+  if (wrongWords.length < 2) {
+    const extra = VOCAB_CATEGORIES
+      .filter(c => c.id !== category.id)
+      .flatMap(c => c.words)
+      .filter(w => !wrongWords.some(x => x.greek === w.greek));
+    wrongWords.push(...shuffle(extra).slice(0, 2 - wrongWords.length));
+  }
+  const options = shuffle([word, ...wrongWords]);
+  vocabQuizState.options = options;
+
+  document.getElementById('vocab-quiz-container').innerHTML = `
+    <div class="vocab-word-display">
+      <div class="vocab-word-mode-label">✦ Новый</div>
+      <div class="vocab-word-instruction">Выберите перевод на русский</div>
+      <div class="vocab-word-greek">
+        ${word.greek}
+        <button class="vocab-tts-btn" data-greek="${word.greek.replace(/"/g, '&quot;')}" onclick="speakGreek(this.dataset.greek)">🔊</button>
+      </div>
+      <div class="vocab-word-transcription">${word.transcription}</div>
+    </div>
+    <div class="vocab-translation-options">
+      ${options.map((opt, i) => `
+        <button class="vocab-translation-btn" onclick="selectVocabAnswer(${i})">
+          ${opt.translation}
+        </button>`).join('')}
+    </div>`;
+}
+
+function selectVocabAnswer(optionIdx) {
+  if (vocabQuizState.answered) return;
+  vocabQuizState.answered = true;
+
+  const { words, currentIndex, options, mode } = vocabQuizState;
+  const correctWord = words[currentIndex];
+  const selectedWord = options[optionIdx];
+  const isCorrect = selectedWord.greek === correctWord.greek;
+  const correctIdx = options.findIndex(o => o.greek === correctWord.greek);
+
+  const btnSelector = mode === 'image' ? '.vocab-image-card' : '.vocab-translation-btn';
+  const buttons = document.querySelectorAll(btnSelector);
+  buttons.forEach(btn => btn.disabled = true);
+
+  if (isCorrect) {
+    vocabQuizState.score++;
+    buttons[optionIdx].classList.add('correct');
+    document.getElementById('vocab-score').textContent = vocabQuizState.score;
+    document.getElementById('vocab-feedback').textContent = randomCorrectPhrase();
+    document.getElementById('vocab-feedback').className = 'feedback-message correct';
+    document.getElementById('vocab-footer').className = 'lesson-footer correct-footer';
+    playSound('correct');
+  } else {
+    buttons[optionIdx].classList.add('wrong');
+    buttons[correctIdx].classList.add('correct');
+    document.getElementById('vocab-feedback').innerHTML = `Правильно: <strong>${correctWord.translation}</strong> ${correctWord.emoji}`;
+    document.getElementById('vocab-feedback').className = 'feedback-message wrong';
+    document.getElementById('vocab-footer').className = 'lesson-footer wrong-footer';
+    playSound('wrong');
+  }
+  document.getElementById('vocab-footer').style.display = 'flex';
+}
+
+function nextVocabWord() {
+  vocabQuizState.currentIndex++;
+  if (vocabQuizState.currentIndex >= vocabQuizState.totalWords) completeVocabQuiz();
+  else renderVocabWord();
+}
+
+function completeVocabQuiz() {
+  const { score, totalWords } = vocabQuizState;
+  const xp = score * XP_PER_CORRECT;
+  state.totalXp += xp;
+  state.dailyXp += xp;
+  state.level = Math.floor(state.totalXp / 500) + 1;
+  const today = new Date().toDateString();
+  if (state.lastPlayed !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    state.streak = (state.lastPlayed === yesterday.toDateString()) ? state.streak + 1 : 1;
+    state.lastPlayed = today;
+  }
+  saveState();
+  const pct = score / totalWords;
+  document.getElementById('vocab-complete-stars').textContent = pct === 1 ? '⭐⭐⭐' : pct >= 0.7 ? '⭐⭐' : '⭐';
+  document.getElementById('vocab-complete-score').textContent = `${score}/${totalWords}`;
+  document.getElementById('vocab-complete-xp').textContent = `+${xp}`;
+  showScreen('screen-vocab-complete');
+}
+
+function restartVocabQuiz() { startVocabQuiz(vocabQuizState.categoryId); }
+function exitVocabQuiz() { showVocab(currentVocabMode); }
+
+function speakGreek(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'el-GR';
+    utt.rate = 0.85;
+    window.speechSynthesis.speak(utt);
+  }
+}
