@@ -807,27 +807,69 @@ async function loadNews(topicId, forceRefresh = false) {
   }
 }
 
-async function fetchRSS(rssUrl) {
-  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
-  const res = await fetch(proxy, { cache: 'no-store' });
-  const data = await res.json();
-  if (!data.contents) return [];
+function fetchWithTimeout(url, ms) {
+  return Promise.race([
+    fetch(url, { cache: 'no-store' }),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+  ]);
+}
+
+function parseRSSXML(text) {
   const parser = new DOMParser();
-  const xml = parser.parseFromString(data.contents, 'text/xml');
-  return [...xml.querySelectorAll('item')].map(item => {
-    // Google News title содержит "- Source" в конце — оставляем как есть
+  const xml = parser.parseFromString(text, 'text/xml');
+  const items = [...xml.querySelectorAll('item')];
+  if (!items.length) return null;
+  return items.map(item => {
     const rawTitle = item.querySelector('title')?.textContent || '';
-    // Достаём ссылку — у Google News она в <link> после <title>
     const linkNode = item.querySelector('link');
     const link = linkNode ? (linkNode.nextSibling?.nodeValue?.trim() || linkNode.textContent) : '';
     const pubDate = item.querySelector('pubDate')?.textContent || '';
     const source = item.querySelector('source')?.textContent || '';
-    // Превью: ищем в description тег <img>
     const desc = item.querySelector('description')?.textContent || '';
     const imgMatch = desc.match(/<img[^>]+src="([^"]+)"/);
     const thumbnail = imgMatch ? imgMatch[1] : '';
     return { title: rawTitle, link, pubDate, thumbnail, source };
   });
+}
+
+async function fetchRSS(rssUrl) {
+  const encoded = encodeURIComponent(rssUrl);
+  const proxies = [
+    async () => {
+      const res = await fetchWithTimeout(`https://corsproxy.io/?${encoded}`, 8000);
+      return await res.text();
+    },
+    async () => {
+      const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encoded}`, 8000);
+      const d = await res.json();
+      return d.contents;
+    },
+    async () => {
+      const res = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encoded}&count=20`, 8000);
+      const d = await res.json();
+      if (d.items?.length) {
+        return d.items.map(i => ({
+          title: i.title, link: i.link, pubDate: i.pubDate,
+          thumbnail: i.thumbnail || '', source: ''
+        }));
+      }
+      return null;
+    },
+  ];
+
+  for (const attempt of proxies) {
+    try {
+      const result = await attempt();
+      if (!result) continue;
+      // rss2json already returns parsed array
+      if (Array.isArray(result)) return result;
+      const parsed = parseRSSXML(result);
+      if (parsed && parsed.length > 0) return parsed;
+    } catch (e) {
+      console.warn('RSS proxy failed, trying next:', e.message);
+    }
+  }
+  return [];
 }
 
 async function fetchNewsForQuery(query, topicId) {
