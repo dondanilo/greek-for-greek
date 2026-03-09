@@ -1,4 +1,66 @@
 // ============================================================
+// FIREBASE
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDFXEEYCj6DBEW6wpgPCaTUmtwi-LW4JLA",
+  authDomain: "greek-for-greek.firebaseapp.com",
+  projectId: "greek-for-greek",
+  storageBucket: "greek-for-greek.firebasestorage.app",
+  messagingSenderId: "779214300636",
+  appId: "1:779214300636:web:8ee18943eaa003ffc55b19"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+
+function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => {
+    console.error('Sign-in error:', err);
+    alert('Ошибка входа: ' + err.message);
+  });
+}
+
+function signOut() {
+  hideUserMenu();
+  auth.signOut();
+}
+
+function showUserMenu() {
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+}
+
+function hideUserMenu() {
+  document.getElementById('user-menu').style.display = 'none';
+}
+
+function renderUserInfo() {
+  if (!currentUser) return;
+  const name = currentUser.displayName || 'Пользователь';
+  const email = currentUser.email || '';
+  const photo = currentUser.photoURL;
+
+  const avatarImg = document.getElementById('user-avatar');
+  const avatarInitials = document.getElementById('user-initials');
+  if (photo) {
+    avatarImg.src = photo;
+    avatarImg.style.display = 'block';
+    avatarInitials.style.display = 'none';
+  } else {
+    avatarImg.style.display = 'none';
+    avatarInitials.textContent = name.charAt(0).toUpperCase();
+    avatarInitials.style.display = 'block';
+  }
+
+  document.getElementById('user-menu-name').textContent = name;
+  document.getElementById('user-menu-email').textContent = email;
+  document.getElementById('app-subtitle').textContent = `Γεια σου, ${name.split(' ')[0]}! Продолжаем путь к гражданству.`;
+}
+
+// ============================================================
 // STATE
 // ============================================================
 const DEFAULT_STATE = {
@@ -44,25 +106,53 @@ const PRONOUNS_RU = {
 // ============================================================
 // PERSISTENCE
 // ============================================================
-function loadState() {
+async function loadState() {
+  // Сначала загружаем из localStorage как fallback
   try {
     const saved = localStorage.getItem('greek-app-state-v2');
     if (saved) state = { ...DEFAULT_STATE, ...JSON.parse(saved) };
   } catch (e) { state = { ...DEFAULT_STATE }; }
+
+  // Потом синхронизируем с Firestore (приоритет)
+  if (currentUser) {
+    try {
+      const doc = await db.collection('users').doc(currentUser.uid).get();
+      if (doc.exists) {
+        state = { ...DEFAULT_STATE, ...doc.data() };
+        localStorage.setItem('greek-app-state-v2', JSON.stringify(state));
+      }
+    } catch (e) { console.error('Firestore load error:', e); }
+  }
 }
 
 function saveState() {
   localStorage.setItem('greek-app-state-v2', JSON.stringify(state));
+  if (currentUser) {
+    db.collection('users').doc(currentUser.uid)
+      .set(state)
+      .catch(e => console.error('Firestore save error:', e));
+  }
 }
 
 // ============================================================
 // INIT
 // ============================================================
 function init() {
-  loadState();
-  checkStreak();
-  renderHome();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      currentUser = user;
+      await loadState();
+      checkStreak();
+      renderUserInfo();
+      renderHome();
+      showScreen('screen-home');
+    } else {
+      currentUser = null;
+      showScreen('screen-login');
+    }
+  });
 }
 
 function checkStreak() {
@@ -874,6 +964,12 @@ document.addEventListener('click', e => {
     const tooltip = document.getElementById('word-tooltip');
     if (tooltip) tooltip.classList.remove('visible');
     document.querySelectorAll('.news-word.word-active').forEach(w => w.classList.remove('word-active'));
+  }
+  // Закрываем меню пользователя при клике вне
+  const menu = document.getElementById('user-menu');
+  const btn = document.getElementById('user-avatar-btn');
+  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.style.display = 'none';
   }
 });
 

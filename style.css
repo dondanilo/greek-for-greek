@@ -516,3 +516,56 @@ body {
 .vocab-translation-btn:disabled { cursor: default; }
 .vocab-translation-btn.correct { border-color: var(--green); background: var(--green-light); color: var(--green-dark); box-shadow: 0 3px 0 var(--green-dark); }
 .vocab-translation-btn.wrong { border-color: var(--red); background: var(--red-light); color: var(--red); box-shadow: 0 3px 0 #cc2222; }
+
+/* ============================================================ LOGIN SCREEN */
+.login-container {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 100vh; gap: 20px;
+  padding: 40px 24px; text-align: center;
+}
+.login-flag { font-size: 72px; }
+.login-subtitle {
+  color: var(--text-light); font-size: 16px; font-weight: 600;
+  max-width: 280px; line-height: 1.5;
+}
+.btn-google-login {
+  display: flex; align-items: center; gap: 12px;
+  padding: 15px 28px; background: white; color: var(--text);
+  border: 2px solid var(--gray-light); border-radius: 14px;
+  font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 700;
+  cursor: pointer; box-shadow: 0 3px 0 var(--gray-light);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.btn-google-login:active { transform: translateY(3px); box-shadow: none; }
+.google-svg { flex-shrink: 0; }
+
+/* ============================================================ USER AVATAR */
+.home-top-row {
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
+}
+.btn-user-info {
+  width: 40px; height: 40px; border-radius: 50%; border: 2.5px solid var(--green);
+  background: var(--green-light); cursor: pointer; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: var(--green-dark);
+  flex-shrink: 0;
+}
+.btn-user-info img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ============================================================ USER MENU */
+.user-menu {
+  flex-direction: column; gap: 6px;
+  background: white; border-radius: var(--radius);
+  padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  border: 1.5px solid var(--gray-light);
+  position: relative; z-index: 10;
+  margin-top: -8px;
+}
+.user-menu-name { font-size: 16px; font-weight: 800; color: var(--text); }
+.user-menu-email { font-size: 13px; color: var(--text-light); margin-bottom: 6px; }
+.btn-signout {
+  padding: 10px; background: var(--red-light); color: var(--red);
+  border: 2px solid var(--red); border-radius: 10px;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; width: 100%;
+}
