@@ -15,12 +15,25 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 let currentUser = null;
 
+let _signingIn = false;
 function signInWithGoogle() {
+  if (_signingIn) return;
+  _signingIn = true;
+  const btn = document.querySelector('.btn-google-login');
+  if (btn) { btn.disabled = true; btn.textContent = 'Подождите...'; }
+
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider).catch(err => {
-    console.error('Sign-in error:', err);
-    alert('Ошибка входа: ' + err.message);
-  });
+  auth.signInWithPopup(provider)
+    .catch(err => {
+      // Тихо игнорируем: пользователь закрыл окно или нажал дважды
+      if (err.code === 'auth/cancelled-popup-request' ||
+          err.code === 'auth/popup-closed-by-user') return;
+      alert('Ошибка входа: ' + err.message);
+    })
+    .finally(() => {
+      _signingIn = false;
+      if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="google-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="22" height="22"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 32.9 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.6 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.9 18.9 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.6 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.3 26.7 36 24 36c-5.2 0-9.5-3.1-11.3-7.6l-6.5 5C9.7 39.6 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.9 2.4-2.5 4.5-4.5 5.9l.1-.1 6.2 5.2C36.9 40.7 44 35 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg> Войти через Google'; }
+    });
 }
 
 function signOut() {
@@ -139,13 +152,6 @@ function saveState() {
 // ============================================================
 async function init() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-
-  // Обрабатываем результат редиректа от Google
-  try {
-    await auth.getRedirectResult();
-  } catch (err) {
-    console.error('Redirect result error:', err);
-  }
 
   // Подписываемся на состояние авторизации
   auth.onAuthStateChanged(async user => {
