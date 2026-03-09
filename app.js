@@ -137,9 +137,17 @@ function saveState() {
 // ============================================================
 // INIT
 // ============================================================
-function init() {
+async function init() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
+  // Обрабатываем результат редиректа от Google
+  try {
+    await auth.getRedirectResult();
+  } catch (err) {
+    console.error('Redirect result error:', err);
+  }
+
+  // Подписываемся на состояние авторизации
   auth.onAuthStateChanged(async user => {
     if (user) {
       currentUser = user;
