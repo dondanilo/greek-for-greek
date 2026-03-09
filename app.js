@@ -807,20 +807,38 @@ async function loadNews(topicId, forceRefresh = false) {
   }
 }
 
+async function fetchRSS(rssUrl) {
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+  const res = await fetch(proxy, { cache: 'no-store' });
+  const data = await res.json();
+  if (!data.contents) return [];
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(data.contents, 'text/xml');
+  return [...xml.querySelectorAll('item')].map(item => {
+    // Google News title содержит "- Source" в конце — оставляем как есть
+    const rawTitle = item.querySelector('title')?.textContent || '';
+    // Достаём ссылку — у Google News она в <link> после <title>
+    const linkNode = item.querySelector('link');
+    const link = linkNode ? (linkNode.nextSibling?.nodeValue?.trim() || linkNode.textContent) : '';
+    const pubDate = item.querySelector('pubDate')?.textContent || '';
+    const source = item.querySelector('source')?.textContent || '';
+    // Превью: ищем в description тег <img>
+    const desc = item.querySelector('description')?.textContent || '';
+    const imgMatch = desc.match(/<img[^>]+src="([^"]+)"/);
+    const thumbnail = imgMatch ? imgMatch[1] : '';
+    return { title: rawTitle, link, pubDate, thumbnail, source };
+  });
+}
+
 async function fetchNewsForQuery(query, topicId) {
   const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=el&gl=GR&ceid=GR:el`;
-  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=20`;
-  const res = await fetch(apiUrl);
-  const data = await res.json();
-  return (data.items || []).map(item => ({ ...item, _topicId: topicId }));
+  const items = await fetchRSS(rssUrl);
+  return items.map(item => ({ ...item, _topicId: topicId }));
 }
 
 async function fetchAllNews() {
   const rssUrl = `https://news.google.com/rss?hl=el&gl=GR&ceid=GR:el`;
-  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=30`;
-  const res = await fetch(apiUrl);
-  const data = await res.json();
-  return data.items || [];
+  return await fetchRSS(rssUrl);
 }
 
 function showNewsLoading() {
