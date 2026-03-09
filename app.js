@@ -1175,3 +1175,259 @@ function speakGreek(text) {
     window.speechSynthesis.speak(utt);
   }
 }
+
+// ============================================================
+// QUIZ — SENTENCE ORDERING
+// ============================================================
+let quizState = {
+  categoryId: null, sentences: [], currentIndex: 0,
+  hearts: 3, score: 0, xpEarned: 0, answered: false,
+  placedWords: [], availableWords: [], dragSrc: null
+};
+
+function showQuiz() {
+  const list = document.getElementById('quiz-categories-list');
+  list.innerHTML = `<div class="vocab-categories-grid">${
+    QUIZ_CATEGORIES.map(cat => `
+      <div class="vocab-category-card" onclick="startQuiz('${cat.id}')">
+        <div class="vocab-cat-icon">${cat.emoji}</div>
+        <div class="vocab-cat-title">${cat.title}</div>
+        <div class="vocab-cat-count">${cat.sentences.length} предложений</div>
+      </div>`).join('')
+  }</div>`;
+  showScreen('screen-quiz');
+}
+
+function startQuiz(categoryId) {
+  const cat = QUIZ_CATEGORIES.find(c => c.id === categoryId);
+  if (!cat) return;
+  // Берём 10 предложений: сортируем по сложности, выбираем равномерно
+  const sorted = [...cat.sentences].sort((a, b) => a.diff - b.diff);
+  const sentences = shuffle(sorted).slice(0, 10).sort((a, b) => a.diff - b.diff);
+  quizState = {
+    categoryId, sentences, currentIndex: 0,
+    hearts: 3, score: 0, xpEarned: 0, answered: false,
+    placedWords: [], availableWords: [], dragSrc: null
+  };
+  showScreen('screen-quiz-session');
+  renderQuizSentence();
+}
+
+function renderQuizSentence() {
+  const { sentences, currentIndex } = quizState;
+  const s = sentences[currentIndex];
+  quizState.answered = false;
+  quizState.placedWords = [];
+  quizState.availableWords = shuffle([...s.words]);
+
+  document.getElementById('quiz-progress').style.width =
+    (currentIndex / quizState.sentences.length * 100) + '%';
+  document.getElementById('quiz-xp').textContent = quizState.xpEarned;
+  document.getElementById('quiz-footer').style.display = 'none';
+  document.getElementById('quiz-footer').className = 'lesson-footer';
+
+  renderQuizUI(s);
+}
+
+function renderQuizUI(s) {
+  const container = document.getElementById('quiz-session-container');
+  const hearts = '<span class="heart-icon">❤️</span>'.repeat(quizState.hearts) +
+    '<span class="heart-icon dead">🖤</span>'.repeat(3 - quizState.hearts);
+
+  container.innerHTML = `
+    <div class="quiz-hearts">${hearts}</div>
+    <div class="quiz-translation">${s.ru}</div>
+    <div class="quiz-answer-area" id="quiz-answer-area">
+      ${quizState.placedWords.length === 0
+        ? '<span class="quiz-answer-placeholder">Нажми на слова ниже</span>'
+        : quizState.placedWords.map((w, i) =>
+            `<button class="quiz-word-tile placed" onclick="removeQuizWord(${i})"
+              draggable="true" data-idx="${i}" data-source="placed">${w}</button>`
+          ).join('')}
+    </div>
+    <div class="quiz-word-pool" id="quiz-word-pool">
+      ${quizState.availableWords.map((w, i) =>
+        `<button class="quiz-word-tile" onclick="addQuizWord(${i})"
+          draggable="true" data-idx="${i}" data-source="pool">${w}</button>`
+      ).join('')}
+    </div>
+    <button class="btn-primary quiz-check-btn" id="quiz-check-btn"
+      onclick="checkQuizAnswer()"
+      ${quizState.placedWords.length === 0 ? 'disabled' : ''}>
+      Проверить ✓
+    </button>`;
+
+  setupQuizDragDrop();
+}
+
+function addQuizWord(poolIdx) {
+  if (quizState.answered) return;
+  const word = quizState.availableWords[poolIdx];
+  quizState.availableWords.splice(poolIdx, 1);
+  quizState.placedWords.push(word);
+  renderQuizUI(quizState.sentences[quizState.currentIndex]);
+}
+
+function removeQuizWord(placedIdx) {
+  if (quizState.answered) return;
+  const word = quizState.placedWords[placedIdx];
+  quizState.placedWords.splice(placedIdx, 1);
+  quizState.availableWords.push(word);
+  renderQuizUI(quizState.sentences[quizState.currentIndex]);
+}
+
+function checkQuizAnswer() {
+  if (quizState.answered || quizState.placedWords.length === 0) return;
+  const s = quizState.sentences[quizState.currentIndex];
+
+  // Проверяем если все слова размещены
+  if (quizState.placedWords.length < s.words.length) return;
+
+  quizState.answered = true;
+  const correct = s.words.join(' ');
+  const answer = quizState.placedWords.join(' ');
+  const isCorrect = answer === correct;
+
+  const footer = document.getElementById('quiz-footer');
+  const feedback = document.getElementById('quiz-feedback');
+  const checkBtn = document.getElementById('quiz-check-btn');
+  if (checkBtn) checkBtn.disabled = true;
+
+  // Подсветка ответа
+  const answerArea = document.getElementById('quiz-answer-area');
+  if (answerArea) {
+    answerArea.classList.add(isCorrect ? 'answer-correct' : 'answer-wrong');
+  }
+
+  if (isCorrect) {
+    quizState.score++;
+    quizState.xpEarned += XP_PER_CORRECT;
+    document.getElementById('quiz-xp').textContent = quizState.xpEarned;
+    feedback.textContent = randomCorrectPhrase();
+    feedback.className = 'feedback-message correct';
+    footer.className = 'lesson-footer correct-footer';
+    playSound('correct');
+  } else {
+    quizState.hearts--;
+    feedback.innerHTML = `Правильно: <strong>${correct}</strong>`;
+    feedback.className = 'feedback-message wrong';
+    footer.className = 'lesson-footer wrong-footer';
+    playSound('wrong');
+  }
+
+  footer.style.display = 'flex';
+  const continueBtn = document.getElementById('quiz-continue-btn');
+  continueBtn.textContent = quizState.hearts <= 0 ? 'Завершить' : 'Продолжить';
+}
+
+function nextQuizSentence() {
+  if (quizState.hearts <= 0) { completeQuiz(); return; }
+  quizState.currentIndex++;
+  if (quizState.currentIndex >= quizState.sentences.length) completeQuiz();
+  else renderQuizSentence();
+}
+
+function completeQuiz() {
+  const { score, xpEarned } = quizState;
+  const total = quizState.sentences.length;
+  state.totalXp += xpEarned;
+  state.dailyXp += xpEarned;
+  state.level = Math.floor(state.totalXp / 500) + 1;
+  const today = new Date().toDateString();
+  if (state.lastPlayed !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    state.streak = (state.lastPlayed === yesterday.toDateString()) ? state.streak + 1 : 1;
+    state.lastPlayed = today;
+  }
+  saveState();
+
+  const pct = score / total;
+  document.getElementById('quiz-complete-stars').textContent =
+    pct === 1 ? '⭐⭐⭐' : pct >= 0.7 ? '⭐⭐' : '⭐';
+  document.getElementById('quiz-complete-score').textContent = `${score}/${total}`;
+  document.getElementById('quiz-complete-xp').textContent = `+${xpEarned}`;
+  showScreen('screen-quiz-complete');
+}
+
+function restartQuiz() { startQuiz(quizState.categoryId); }
+function exitQuiz() { showQuiz(); }
+
+// ============================================================
+// DRAG AND DROP
+// ============================================================
+function setupQuizDragDrop() {
+  const tiles = document.querySelectorAll('.quiz-word-tile');
+  const answerArea = document.getElementById('quiz-answer-area');
+  const pool = document.getElementById('quiz-word-pool');
+
+  tiles.forEach(tile => {
+    // Desktop drag
+    tile.addEventListener('dragstart', e => {
+      quizState.dragSrc = tile;
+      e.dataTransfer.effectAllowed = 'move';
+      tile.classList.add('dragging');
+    });
+    tile.addEventListener('dragend', () => tile.classList.remove('dragging'));
+
+    // Mobile touch drag
+    tile.addEventListener('touchstart', handleTouchStart, { passive: true });
+    tile.addEventListener('touchmove', handleTouchMove, { passive: false });
+    tile.addEventListener('touchend', handleTouchEnd);
+  });
+
+  [answerArea, pool].forEach(zone => {
+    zone.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!quizState.dragSrc) return;
+      const src = quizState.dragSrc.dataset.source;
+      const idx = parseInt(quizState.dragSrc.dataset.idx);
+      const dest = zone.id === 'quiz-answer-area' ? 'placed' : 'pool';
+      if (src === 'pool' && dest === 'placed') addQuizWord(idx);
+      else if (src === 'placed' && dest === 'pool') removeQuizWord(idx);
+    });
+  });
+}
+
+let _touchTile = null, _touchClone = null, _touchOffX = 0, _touchOffY = 0;
+
+function handleTouchStart(e) {
+  _touchTile = e.currentTarget;
+  const t = e.touches[0];
+  const r = _touchTile.getBoundingClientRect();
+  _touchOffX = t.clientX - r.left;
+  _touchOffY = t.clientY - r.top;
+  _touchClone = _touchTile.cloneNode(true);
+  _touchClone.className = 'quiz-word-tile dragging touch-clone';
+  _touchClone.style.cssText = `position:fixed;z-index:9999;pointer-events:none;
+    left:${r.left}px;top:${r.top}px;width:${r.width}px;opacity:0.85;`;
+  document.body.appendChild(_touchClone);
+}
+
+function handleTouchMove(e) {
+  e.preventDefault();
+  if (!_touchClone) return;
+  const t = e.touches[0];
+  _touchClone.style.left = (t.clientX - _touchOffX) + 'px';
+  _touchClone.style.top = (t.clientY - _touchOffY) + 'px';
+}
+
+function handleTouchEnd(e) {
+  if (!_touchClone || !_touchTile) return;
+  const t = e.changedTouches[0];
+  _touchClone.remove();
+
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const inAnswer = el && (el.id === 'quiz-answer-area' || el.closest('#quiz-answer-area'));
+  const inPool = el && (el.id === 'quiz-word-pool' || el.closest('#quiz-word-pool'));
+
+  const src = _touchTile.dataset.source;
+  const idx = parseInt(_touchTile.dataset.idx);
+
+  if (src === 'pool' && inAnswer) addQuizWord(idx);
+  else if (src === 'placed' && inPool) removeQuizWord(idx);
+
+  _touchTile = null;
+  _touchClone = null;
+}
