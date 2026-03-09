@@ -17,7 +17,7 @@ let currentUser = null;
 
 function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(err => {
+  auth.signInWithRedirect(provider).catch(err => {
     console.error('Sign-in error:', err);
     alert('Ошибка входа: ' + err.message);
   });
