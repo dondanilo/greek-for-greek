@@ -68,7 +68,10 @@
     <div class="daily-goal-card">
       <div class="goal-header">
         <span>Цель на сегодня</span>
-        <span id="daily-xp-display">0 / 50 XP</span>
+        <div class="goal-right">
+          <span id="daily-xp-display">0 / 50 XP</span>
+          <button class="goal-edit-btn" onclick="showGoalModal()" title="Изменить цель">✏️</button>
+        </div>
       </div>
       <div class="progress-bar-bg">
         <div class="progress-bar-fill" id="daily-progress"></div>
@@ -105,6 +108,10 @@
         <span class="nav-icon">📅</span>
         <span class="nav-label">30 дней</span>
       </button>
+      <button class="nav-btn" onclick="showPhrases()">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">Фразы</span>
+      </button>
       <button class="nav-btn" onclick="showAudit()">
         <span class="nav-icon">📊</span>
         <span class="nav-label">Прогресс</span>
@@ -125,7 +132,30 @@
         <span class="nav-icon">📰</span>
         <span class="nav-label">Новости</span>
       </button>
+      <button class="nav-btn" onclick="showAchievements()">
+        <span class="nav-icon">🏅</span>
+        <span class="nav-label">Достижения</span>
+        <span class="ach-nav-count" id="ach-nav-count">0/15</span>
+      </button>
     </div>
+
+    <button class="weak-lesson-btn" id="weak-lesson-btn" onclick="startWeakLesson()" style="display:none">
+      <span class="weak-lesson-icon">⚠️</span>
+      <div class="weak-lesson-text">
+        <div class="weak-lesson-title">Повторить слабые места</div>
+        <div class="weak-lesson-sub">Ошибок: <span id="weak-verbs-count">0 глаголов</span></div>
+      </div>
+      <span class="weak-lesson-arrow">→</span>
+    </button>
+
+    <button class="srs-review-btn" id="srs-review-btn" onclick="startSrsLesson()" style="display:none">
+      <span class="weak-lesson-icon">🧠</span>
+      <div class="weak-lesson-text">
+        <div class="weak-lesson-title">Интервальное повторение</div>
+        <div class="weak-lesson-sub">Пора повторить: <span id="srs-due-count">0 глаголов</span></div>
+      </div>
+      <span class="weak-lesson-arrow">→</span>
+    </button>
   </div>
 
   <!-- ==================== LESSON ==================== -->
@@ -191,7 +221,7 @@
       <button class="btn-back" onclick="showHome()">← Назад</button>
       <h2>Сценарии</h2>
     </div>
-    <p class="sub-desc">Реальные ситуации: переговоры, магазины, отдых, гражданство.</p>
+    <p class="sub-desc">8 реальных ситуаций: магазины, ресторан, аптека, банк, ΚΕΠ, такси, переговоры, гражданство.</p>
     <div id="scenarios-list"></div>
   </div>
 
@@ -239,9 +269,9 @@
     <div class="sub-header">
       <button class="btn-back" onclick="showHome()">← Назад</button>
       <h2>Глаголы</h2>
-      <span class="badge">45</span>
+      <span class="badge" id="verb-count-badge">45</span>
     </div>
-    <p class="sub-desc">Нажми на глагол — увидишь пример из твоей жизни.</p>
+    <input type="search" id="verb-search" class="verb-search-input" placeholder="Поиск по-гречески или по-русски..." oninput="filterVerbs(this.value)">
     <div id="verb-table-container"></div>
   </div>
 
@@ -380,6 +410,51 @@
       </div>
       <button class="btn-primary" onclick="restartQuiz()" style="max-width:320px">Ещё раз</button>
       <button class="btn-secondary" onclick="showQuiz()" style="margin-top:10px;max-width:320px">Другая тема</button>
+    </div>
+  </div>
+
+  <!-- ==================== PHRASES ==================== -->
+  <div id="screen-phrases" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Фразы и выражения</h2>
+    </div>
+    <p class="sub-desc">Живой язык — то, как греки говорят на самом деле.</p>
+    <div class="phrase-cats" id="phrase-cats"></div>
+    <div id="phrases-container"></div>
+  </div>
+
+  <!-- ==================== ACHIEVEMENTS ==================== -->
+  <div id="screen-achievements" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Достижения</h2>
+      <span class="badge" id="ach-badge">0/15</span>
+    </div>
+    <p class="sub-desc">Каждый шаг на пути к гражданству Греции.</p>
+    <div id="achievements-container"></div>
+  </div>
+
+  <!-- ==================== ACHIEVEMENT TOAST ==================== -->
+  <div id="achievement-toast" class="achievement-toast">
+    <div class="toast-icon" id="toast-icon">🏆</div>
+    <div class="toast-content">
+      <div class="toast-label">Достижение разблокировано!</div>
+      <div class="toast-title" id="toast-title"></div>
+      <div class="toast-desc" id="toast-desc"></div>
+    </div>
+  </div>
+
+  <!-- ==================== GOAL MODAL ==================== -->
+  <div id="goal-modal" class="modal-overlay" onclick="hideGoalModal()" style="display:none">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-title">Цель на день</div>
+      <div class="goal-options">
+        <button class="goal-option-btn" data-xp="30" onclick="setDailyGoal(30)">30 XP <span class="goal-hint">расслабленно</span></button>
+        <button class="goal-option-btn" data-xp="50" onclick="setDailyGoal(50)">50 XP <span class="goal-hint">стандарт</span></button>
+        <button class="goal-option-btn" data-xp="100" onclick="setDailyGoal(100)">100 XP <span class="goal-hint">интенсивно</span></button>
+        <button class="goal-option-btn" data-xp="150" onclick="setDailyGoal(150)">150 XP <span class="goal-hint">марафон</span></button>
+      </div>
     </div>
   </div>
 

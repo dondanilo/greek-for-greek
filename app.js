@@ -85,7 +85,9 @@ const DEFAULT_STATE = {
   level: 1,
   lessonsCompleted: 0,
   scenariosCompleted: [],
-  errorLog: {}
+  errorLog: {},
+  achievements: [],
+  srs: {}  // { verbId: { interval, ef, due } }
 };
 
 let state = { ...DEFAULT_STATE };
@@ -109,6 +111,12 @@ let scenarioState = {
 const XP_PER_CORRECT = 10;
 const XP_PER_SCENARIO_STEP = 15;
 const EXERCISES_PER_LESSON = 10;
+
+const GREEK_KEYS = [
+  ['α','β','γ','δ','ε','ζ','η','θ'],
+  ['ι','κ','λ','μ','ν','ξ','ο','π'],
+  ['ρ','σ','ς','τ','υ','φ','χ','ψ','ω'],
+];
 
 const PRONOUNS = ["εγώ", "εσύ", "αυτός/ή/ό", "εμείς", "εσείς", "αυτοί/ές/ά"];
 const PRONOUNS_RU = {
@@ -196,6 +204,26 @@ function renderHome() {
 
   const card = document.getElementById('streak-card');
   card.classList.toggle('streak-zero', state.streak === 0);
+
+  // Achievements counter
+  if (!state.achievements) state.achievements = [];
+  document.getElementById('ach-nav-count').textContent = `${state.achievements.length}/${ACHIEVEMENTS.length}`;
+
+  // Weak lesson button
+  const weakCount = Object.keys(state.errorLog).length;
+  const weakBtn = document.getElementById('weak-lesson-btn');
+  if (weakBtn) {
+    weakBtn.style.display = weakCount > 0 ? 'flex' : 'none';
+    document.getElementById('weak-verbs-count').textContent = `${weakCount} ${weakCount === 1 ? 'глагол' : weakCount < 5 ? 'глагола' : 'глаголов'}`;
+  }
+
+  // SRS review button
+  const dueCount = getSrsDueCount();
+  const srsBtn = document.getElementById('srs-review-btn');
+  if (srsBtn) {
+    srsBtn.style.display = dueCount > 0 ? 'flex' : 'none';
+    document.getElementById('srs-due-count').textContent = `${dueCount} ${dueCount === 1 ? 'глагол' : dueCount < 5 ? 'глагола' : 'глаголов'}`;
+  }
 }
 
 function showHome() {
@@ -206,11 +234,12 @@ function showHome() {
 // ============================================================
 // LESSON — EXERCISE GENERATION
 // ============================================================
-function generateLesson() {
+function generateLesson(verbPool = null) {
+  const pool = verbPool || buildSrsPool();
   const exercises = [];
   for (let i = 0; i < EXERCISES_PER_LESSON; i++) {
-    const verb = VERBS[Math.floor(Math.random() * VERBS.length)];
-    const type = Math.floor(Math.random() * 4);
+    const verb = pool[Math.floor(Math.random() * pool.length)];
+    const type = Math.floor(Math.random() * 5); // 0-3: multiple choice, 4: typing
     const pronoun = PRONOUNS[Math.floor(Math.random() * PRONOUNS.length)];
 
     if (type === 0) {
@@ -224,7 +253,7 @@ function generateLesson() {
       const form = verb.present[pronoun];
       const correct = `${PRONOUNS_RU[pronoun]} ${verb.translation}`;
       exercises.push({
-        type: 'phrase_meaning',
+        type: 'phrase_meaning', verb,
         greek: `${pronoun} ${form}`,
         correctAnswer: correct,
         options: shuffle([correct, ...getWrongMeanings(verb, pronoun)])
@@ -233,10 +262,10 @@ function generateLesson() {
       const correct = verb.translation;
       const wrongs = VERBS.filter(v => v.id !== verb.id).sort(() => Math.random() - 0.5).slice(0, 3).map(v => v.translation);
       exercises.push({
-        type: 'word_meaning', greek: verb.infinitive,
+        type: 'word_meaning', verb, greek: verb.infinitive,
         correctAnswer: correct, options: shuffle([correct, ...wrongs])
       });
-    } else {
+    } else if (type === 3) {
       const correct = verb.present[pronoun];
       exercises.push({
         type: 'translate_to_greek',
@@ -244,6 +273,14 @@ function generateLesson() {
         verb, pronoun,
         correctAnswer: correct,
         options: shuffle([correct, ...getWrongForms(verb, correct)])
+      });
+    } else {
+      // type === 4: typing
+      const correct = verb.present[pronoun];
+      exercises.push({
+        type: 'typing',
+        verb, pronoun,
+        correctAnswer: correct
       });
     }
   }
@@ -270,7 +307,22 @@ function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 // LESSON — FLOW
 // ============================================================
 function startLesson() {
-  lessonState = { exercises: generateLesson(), currentIndex: 0, hearts: 3, xpEarned: 0, correct: 0, answered: false };
+  lessonState = { exercises: generateLesson(), currentIndex: 0, hearts: 3, xpEarned: 0, correct: 0, answered: false, isWeakMode: false };
+  showScreen('screen-lesson');
+  renderExercise();
+}
+
+function startWeakLesson() {
+  const weakIds = Object.keys(state.errorLog)
+    .sort((a, b) => state.errorLog[b] - state.errorLog[a])
+    .map(id => parseInt(id));
+  const weakVerbs = VERBS.filter(v => weakIds.includes(v.id));
+  if (weakVerbs.length < 2) return;
+  lessonState = {
+    exercises: generateLesson(weakVerbs),
+    currentIndex: 0, hearts: 3, xpEarned: 0, correct: 0, answered: false,
+    isWeakMode: true
+  };
   showScreen('screen-lesson');
   renderExercise();
 }
@@ -301,6 +353,10 @@ function renderExercise() {
     label.textContent = 'Что значит этот глагол?';
     question.textContent = ex.greek;
     subtitle.textContent = '';
+  } else if (ex.type === 'typing') {
+    label.innerHTML = 'Напечатай форму <span class="label-badge">⌨️ сложно</span>';
+    question.textContent = ex.verb.infinitive;
+    subtitle.textContent = `${ex.pronoun}  (${PRONOUNS_RU[ex.pronoun]})  —  ${ex.verb.translation}`;
   } else {
     label.textContent = 'Переведи на греческий';
     question.textContent = ex.russian;
@@ -309,13 +365,99 @@ function renderExercise() {
 
   const grid = document.getElementById('options-grid');
   grid.innerHTML = '';
-  ex.options.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.textContent = opt;
-    btn.addEventListener('click', () => selectAnswer(opt, ex.correctAnswer, ex.verb?.id));
-    grid.appendChild(btn);
-  });
+
+  if (ex.type === 'typing') {
+    renderTypingInput();
+  } else {
+    ex.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => selectAnswer(opt, ex.correctAnswer, ex.verb?.id));
+      grid.appendChild(btn);
+    });
+  }
+}
+
+function renderTypingInput() {
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = `
+    <div class="typing-wrap">
+      <input type="text" id="typing-input" class="typing-input"
+             placeholder="Введи форму глагола..."
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="greek-keyboard">
+      ${GREEK_KEYS.map(row => `
+        <div class="gk-row">
+          ${row.map(ch => `<button class="gk-btn" onclick="insertGreekChar('${ch}')">${ch}</button>`).join('')}
+        </div>
+      `).join('')}
+      <div class="gk-row gk-bottom-row">
+        <button class="gk-btn gk-space" onclick="insertGreekChar(' ')">·</button>
+        <button class="gk-btn gk-backspace" onclick="insertGreekChar('⌫')">⌫</button>
+        <button class="gk-btn gk-submit" onclick="checkTypingAnswer()">✓</button>
+      </div>
+    </div>
+  `;
+  const input = document.getElementById('typing-input');
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') checkTypingAnswer(); });
+  setTimeout(() => input.focus(), 50);
+}
+
+function insertGreekChar(char) {
+  const input = document.getElementById('typing-input');
+  if (!input || lessonState.answered) return;
+  if (char === '⌫') {
+    input.value = input.value.slice(0, -1);
+  } else {
+    input.value += char;
+  }
+  input.focus();
+}
+
+function normalizeGreek(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function checkTypingAnswer() {
+  if (lessonState.answered) return;
+  const ex = lessonState.exercises[lessonState.currentIndex];
+  const input = document.getElementById('typing-input');
+  if (!input) return;
+  const userAnswer = input.value.trim();
+  if (!userAnswer) { input.classList.add('typing-empty'); setTimeout(() => input.classList.remove('typing-empty'), 400); return; }
+
+  lessonState.answered = true;
+  input.disabled = true;
+
+  const footer = document.getElementById('lesson-footer');
+  const feedback = document.getElementById('feedback-message');
+  const isCorrect = normalizeGreek(userAnswer) === normalizeGreek(ex.correctAnswer);
+  if (ex.verb?.id) srsRate(ex.verb.id, isCorrect);
+
+  if (isCorrect) {
+    lessonState.correct++;
+    lessonState.xpEarned += XP_PER_CORRECT;
+    document.getElementById('lesson-xp').textContent = lessonState.xpEarned;
+    feedback.textContent = randomCorrectPhrase();
+    feedback.className = 'feedback-message correct';
+    footer.className = 'lesson-footer correct-footer';
+    input.classList.add('typing-correct');
+    playSound('correct');
+  } else {
+    lessonState.hearts--;
+    renderHearts();
+    feedback.innerHTML = `Правильно: <strong>${ex.correctAnswer}</strong>`;
+    feedback.className = 'feedback-message wrong';
+    footer.className = 'lesson-footer wrong-footer';
+    input.classList.add('typing-wrong');
+    if (ex.verb?.id) state.errorLog[ex.verb.id] = (state.errorLog[ex.verb.id] || 0) + 1;
+    playSound('wrong');
+  }
+
+  footer.style.display = 'flex';
+  document.getElementById('continue-btn').textContent = lessonState.hearts <= 0 ? 'Завершить урок' : 'Продолжить';
 }
 
 function renderHearts() {
@@ -339,6 +481,7 @@ function selectAnswer(selected, correct, verbId) {
   });
 
   const isCorrect = selected === correct;
+  if (verbId) srsRate(verbId, isCorrect);
   if (isCorrect) {
     lessonState.correct++;
     lessonState.xpEarned += XP_PER_CORRECT;
@@ -384,7 +527,14 @@ function completeLesson() {
   state.totalXp += lessonState.xpEarned;
   state.level = Math.floor(state.totalXp / 500) + 1;
   state.lessonsCompleted++;
+  const isPerfect = lessonState.hearts === 3 && lessonState.correct === EXERCISES_PER_LESSON;
+  if (lessonState.isWeakMode) {
+    // Clear errors for verbs that were practiced
+    const practicedIds = [...new Set(lessonState.exercises.filter(e => e.verb).map(e => e.verb.id))];
+    practicedIds.forEach(id => { delete state.errorLog[id]; });
+  }
   saveState();
+  checkAchievements({ perfectLesson: isPerfect, weakMode: lessonState.isWeakMode });
 
   const acc = lessonState.correct / EXERCISES_PER_LESSON;
   const stars = (lessonState.hearts === 3 && acc === 1) ? '⭐⭐⭐' : (lessonState.hearts >= 2 && acc >= 0.7) ? '⭐⭐' : lessonState.hearts >= 1 ? '⭐' : '😅';
@@ -400,6 +550,203 @@ function completeLesson() {
 
 function randomCorrectPhrase() {
   return ['Σωστά! Правильно!', 'Μπράβο! Молодец!', 'Τέλεια! Отлично!', 'Ωραία! Прекрасно!', 'Εξαιρετικά!'][Math.floor(Math.random() * 5)];
+}
+
+// ============================================================
+// TTS (TEXT-TO-SPEECH)
+// ============================================================
+function speakGreek(text, event) {
+  if (event) event.stopPropagation();
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'el-GR';
+  utterance.rate = 0.85;
+  utterance.pitch = 1;
+  speechSynthesis.speak(utterance);
+}
+
+// ============================================================
+// SPACED REPETITION (SRS)
+// ============================================================
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function srsRate(verbId, isCorrect) {
+  if (!state.srs) state.srs = {};
+  const card = state.srs[verbId] || { interval: 0, ef: 2.5 };
+  if (isCorrect) {
+    if (card.interval === 0)      card.interval = 1;
+    else if (card.interval === 1) card.interval = 4;
+    else if (card.interval < 10)  card.interval = Math.round(card.interval * card.ef);
+    else                          card.interval = Math.round(card.interval * card.ef);
+    card.ef = Math.min(3.0, (card.ef || 2.5) + 0.1);
+  } else {
+    card.interval = 1;
+    card.ef = Math.max(1.3, (card.ef || 2.5) - 0.2);
+  }
+  const due = new Date();
+  due.setDate(due.getDate() + card.interval);
+  card.due = due.toISOString().split('T')[0];
+  state.srs[verbId] = card;
+}
+
+function getSrsDueVerbs() {
+  if (!state.srs) return [];
+  const today = todayStr();
+  return VERBS.filter(v => state.srs[v.id]?.due <= today);
+}
+
+function getSrsDueCount() {
+  return getSrsDueVerbs().length;
+}
+
+function renderSrsStats() {
+  if (!state.srs) state.srs = {};
+  const total = VERBS.length;
+  const studied = Object.keys(state.srs).length;
+  const dueCount = getSrsDueCount();
+  const newCount = total - studied;
+  const knownCount = studied - dueCount;
+  return `
+    <div class="srs-stats-grid">
+      <div class="srs-stat srs-new"><span class="srs-stat-val">${newCount}</span><span class="srs-stat-lbl">Новых</span></div>
+      <div class="srs-stat srs-due"><span class="srs-stat-val">${dueCount}</span><span class="srs-stat-lbl">К повторению</span></div>
+      <div class="srs-stat srs-known"><span class="srs-stat-val">${knownCount}</span><span class="srs-stat-lbl">Изучено</span></div>
+    </div>
+    <div class="srs-bar-wrap">
+      <div class="srs-bar" style="background:#e5e5e5; border-radius:8px; overflow:hidden; height:10px; margin-top:10px;">
+        <div style="height:100%; width:${Math.round(knownCount/total*100)}%; background:#58CC02; display:inline-block; float:left;"></div>
+        <div style="height:100%; width:${Math.round(dueCount/total*100)}%; background:#FF9600; display:inline-block; float:left;"></div>
+      </div>
+    </div>
+    <div style="font-size:12px; color:#999; margin-top:6px;">${studied} из ${total} глаголов изучалось</div>
+  `;
+}
+
+function buildSrsPool() {
+  if (!state.srs) state.srs = {};
+  const today = todayStr();
+  const pool = [];
+  VERBS.forEach(v => {
+    const card = state.srs[v.id];
+    if (!card) {
+      // Новый — среднее: 2x
+      pool.push(v, v);
+    } else if (card.due <= today) {
+      // К повторению — высокий приоритет: 4x
+      pool.push(v, v, v, v);
+    } else {
+      // Известный, не пора — низкий: 1x
+      pool.push(v);
+    }
+  });
+  return pool;
+}
+
+function startSrsLesson() {
+  const dueVerbs = getSrsDueVerbs();
+  if (dueVerbs.length === 0) return;
+  const pool = dueVerbs.length >= 2 ? dueVerbs : null;
+  lessonState = {
+    exercises: generateLesson(pool),
+    currentIndex: 0, hearts: 3, xpEarned: 0, correct: 0,
+    answered: false, isWeakMode: false, isSrsMode: true
+  };
+  showScreen('screen-lesson');
+  renderExercise();
+}
+
+// ============================================================
+// ACHIEVEMENTS
+// ============================================================
+let achToastQueue = [];
+
+function checkAchievements(ctx = {}) {
+  if (!state.achievements) state.achievements = [];
+  const conditions = {
+    'first_lesson':   state.lessonsCompleted >= 1,
+    'perfect_lesson': ctx.perfectLesson === true,
+    'lessons_5':      state.lessonsCompleted >= 5,
+    'lessons_10':     state.lessonsCompleted >= 10,
+    'lessons_30':     state.lessonsCompleted >= 30,
+    'streak_3':       state.streak >= 3,
+    'streak_7':       state.streak >= 7,
+    'streak_30':      state.streak >= 30,
+    'scenario_first': state.scenariosCompleted.length >= 1,
+    'scenarios_all':  state.scenariosCompleted.length >= SCENARIOS.length,
+    'citizenship':    state.scenariosCompleted.includes('citizenship'),
+    'weak_conquered': ctx.weakMode === true,
+    'xp_500':         state.totalXp >= 500,
+    'xp_2000':        state.totalXp >= 2000,
+    'level_5':        state.level >= 5,
+  };
+  const newlyUnlocked = [];
+  for (const [id, met] of Object.entries(conditions)) {
+    if (met && !state.achievements.includes(id)) {
+      state.achievements.push(id);
+      const ach = ACHIEVEMENTS.find(a => a.id === id);
+      if (ach) newlyUnlocked.push(ach);
+    }
+  }
+  if (newlyUnlocked.length > 0) {
+    saveState();
+    newlyUnlocked.forEach(a => achToastQueue.push(a));
+    if (achToastQueue.length === newlyUnlocked.length) processAchToast();
+  }
+}
+
+function processAchToast() {
+  if (!achToastQueue.length) return;
+  const ach = achToastQueue[0];
+  const toast = document.getElementById('achievement-toast');
+  document.getElementById('toast-icon').textContent = ach.icon;
+  document.getElementById('toast-title').textContent = ach.title;
+  document.getElementById('toast-desc').textContent = ach.desc;
+  toast.classList.add('show');
+  playSound('correct');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      achToastQueue.shift();
+      processAchToast();
+    }, 500);
+  }, 3200);
+}
+
+function showAchievements() {
+  if (!state.achievements) state.achievements = [];
+  const unlocked = state.achievements.length;
+  const total = ACHIEVEMENTS.length;
+  document.getElementById('ach-badge').textContent = `${unlocked}/${total}`;
+
+  const container = document.getElementById('achievements-container');
+  const byCategory = {};
+  ACHIEVEMENTS.forEach(a => {
+    if (!byCategory[a.category]) byCategory[a.category] = [];
+    byCategory[a.category].push(a);
+  });
+
+  container.innerHTML = Object.entries(byCategory).map(([cat, achs]) => `
+    <div class="ach-category">
+      <div class="ach-category-title">${cat}</div>
+      ${achs.map(a => {
+        const isUnlocked = state.achievements.includes(a.id);
+        return `
+        <div class="ach-card ${isUnlocked ? 'unlocked' : 'locked'}">
+          <div class="ach-icon">${isUnlocked ? a.icon : '🔒'}</div>
+          <div class="ach-info">
+            <div class="ach-title">${a.title}</div>
+            <div class="ach-desc">${a.desc}</div>
+          </div>
+          ${isUnlocked ? '<div class="ach-check">✓</div>' : ''}
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+
+  showScreen('screen-achievements');
 }
 
 // ============================================================
@@ -469,8 +816,11 @@ function renderScenarioStep(scenario, stepIdx) {
     <div class="scenario-situation">${step.situation}</div>
     <div class="dialogue-card">
       <div class="dialogue-speaker">${step.speaker} говорит:</div>
-      <div class="dialogue-greek">${step.greek}</div>
-      <div class="dialogue-transcription">🔊 ${step.transcription}</div>
+      <div class="dialogue-greek-wrap">
+        <div class="dialogue-greek">${step.greek}</div>
+        <button class="speak-btn-lg" data-speak="${step.greek.replace(/"/g, '&quot;')}" onclick="speakGreek(this.dataset.speak)">🔊</button>
+      </div>
+      <div class="dialogue-transcription">${step.transcription}</div>
       <div class="dialogue-translation">${step.translation}</div>
     </div>
     <div class="scenario-question">${step.question}</div>
@@ -549,6 +899,7 @@ function completeScenario(scenario) {
     state.lastPlayed = today;
   }
   saveState();
+  checkAchievements({});
 
   const total = scenario.steps.length;
   const pct = scenarioState.score / total;
@@ -570,11 +921,17 @@ function completeScenario(scenario) {
 // ============================================================
 // VERB TABLE
 // ============================================================
-function showVerbTable() {
+function renderVerbCards(verbs) {
   const pronounsRu = ['я', 'ты', 'он/она', 'мы', 'вы', 'они'];
   const container = document.getElementById('verb-table-container');
+  document.getElementById('verb-count-badge').textContent = verbs.length;
 
-  container.innerHTML = VERBS.map(verb => `
+  if (verbs.length === 0) {
+    container.innerHTML = '<div class="no-results">Ничего не найдено 🤷</div>';
+    return;
+  }
+
+  container.innerHTML = verbs.map(verb => `
     <div class="verb-card" onclick="this.classList.toggle('expanded')">
       <div class="verb-title">
         <div>
@@ -585,6 +942,7 @@ function showVerbTable() {
       </div>
       ${verb.note ? `<div class="verb-note">${verb.note}</div>` : ''}
       <div class="verb-example">
+        <button class="speak-btn" data-speak="${verb.example.greek}" onclick="speakGreek(this.dataset.speak, event)" title="Произнести">🔊</button>
         <span class="example-greek">${verb.example.greek}</span>
         <span class="example-ru">${verb.example.ru}</span>
       </div>
@@ -592,14 +950,102 @@ function showVerbTable() {
         ${PRONOUNS.map((p, i) => `
           <div class="conj-row">
             <span class="conj-pronoun">${pronounsRu[i]}</span>
-            <span class="conj-form">${verb.present[p]}</span>
+            <span class="conj-form conj-speakable" onclick="speakGreek('${verb.present[p]}', event)" title="Нажми — услышишь">${verb.present[p]}</span>
           </div>
         `).join('')}
       </div>
     </div>
   `).join('');
+}
 
+function filterVerbs(query) {
+  const q = query.toLowerCase().trim();
+  const filtered = q
+    ? VERBS.filter(v =>
+        v.infinitive.toLowerCase().includes(q) ||
+        v.translation.toLowerCase().includes(q) ||
+        Object.values(v.present).some(f => f.toLowerCase().includes(q))
+      )
+    : VERBS;
+  renderVerbCards(filtered);
+}
+
+function showVerbTable() {
+  document.getElementById('verb-search').value = '';
+  renderVerbCards(VERBS);
   showScreen('screen-verbs');
+}
+
+// ============================================================
+// PHRASES & EXPRESSIONS
+// ============================================================
+function showPhrases() {
+  // Category pills
+  const catsEl = document.getElementById('phrase-cats');
+  catsEl.innerHTML = PHRASES.map(cat => `
+    <button class="phrase-cat-pill" onclick="scrollToPhraseCat('${cat.id}')" style="border-color:${cat.color};color:${cat.color}">
+      ${cat.icon} ${cat.category}
+    </button>
+  `).join('');
+
+  // All phrases
+  const container = document.getElementById('phrases-container');
+  container.innerHTML = PHRASES.map(cat => `
+    <div class="phrase-category-block" id="phrase-cat-${cat.id}">
+      <div class="phrase-cat-header" style="border-color:${cat.color}">
+        <span class="phrase-cat-icon">${cat.icon}</span>
+        <span class="phrase-cat-title" style="color:${cat.color}">${cat.category}</span>
+        <span class="phrase-cat-count">${cat.phrases.length}</span>
+      </div>
+      ${cat.phrases.map(p => `
+        <div class="phrase-card">
+          <div class="phrase-top">
+            <div class="phrase-greek" data-speak="${p.greek.replace(/"/g,'&quot;')}"
+                 onclick="speakGreek(this.dataset.speak)">${p.greek}</div>
+            <button class="speak-btn" data-speak="${p.greek.replace(/"/g,'&quot;')}"
+                    onclick="speakGreek(this.dataset.speak, event)">🔊</button>
+          </div>
+          <div class="phrase-transcription">${p.transcription}</div>
+          <div class="phrase-translation">${p.translation}</div>
+          ${p.note ? `<div class="phrase-note">${p.note}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  showScreen('screen-phrases');
+}
+
+function scrollToPhraseCat(id) {
+  const el = document.getElementById('phrase-cat-' + id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Highlight active pill
+  document.querySelectorAll('.phrase-cat-pill').forEach(p => p.classList.remove('active'));
+  const pills = document.querySelectorAll('.phrase-cat-pill');
+  const idx = PHRASES.findIndex(c => c.id === id);
+  if (pills[idx]) pills[idx].classList.add('active');
+}
+
+// ============================================================
+// DAILY GOAL SETTINGS
+// ============================================================
+function showGoalModal() {
+  document.querySelectorAll('.goal-option-btn').forEach(btn => {
+    const isActive = parseInt(btn.dataset.xp) === state.dailyGoal;
+    btn.classList.toggle('active', isActive);
+  });
+  document.getElementById('goal-modal').style.display = 'flex';
+}
+
+function hideGoalModal() {
+  document.getElementById('goal-modal').style.display = 'none';
+}
+
+function setDailyGoal(xp) {
+  state.dailyGoal = xp;
+  saveState();
+  renderHome();
+  hideGoalModal();
 }
 
 // ============================================================
@@ -680,7 +1126,7 @@ function showAudit() {
       </div>
       <div class="audit-stat">
         <div class="audit-stat-icon">🎭</div>
-        <div class="audit-stat-value">${state.scenariosCompleted.length}/4</div>
+        <div class="audit-stat-value">${state.scenariosCompleted.length}/${SCENARIOS.length}</div>
         <div class="audit-stat-label">Сценариев</div>
       </div>
       <div class="audit-stat">
@@ -713,6 +1159,11 @@ function showAudit() {
     </div>`}
 
     <div class="audit-section">
+      <div class="audit-section-title">🧠 Интервальное повторение (SRS)</div>
+      ${renderSrsStats()}
+    </div>
+
+    <div class="audit-section">
       <div class="audit-section-title">💡 Рекомендация тьютора</div>
       <div class="tutor-tip">${getTutorTip()}</div>
     </div>
@@ -725,8 +1176,9 @@ function getTutorTip() {
   if (state.lessonsCompleted === 0) return 'Данил, начни с первого урока прямо сейчас! Каждый день — это вклад в гражданство. 🇬🇷';
   if (state.streak === 0) return 'Стрик сброшен. Помни: регулярность важнее интенсивности. 10 минут в день > 2 часа раз в неделю.';
   if (state.scenariosCompleted.length === 0) return 'Попробуй сценарий "Apple Store" или "Собеседование на гражданство" — это практика для реальной жизни!';
-  if (state.scenariosCompleted.length < 4) return `Пройдено ${state.scenariosCompleted.length}/4 сценариев. Сценарий "Собеседование на гражданство" — самый важный. Пройди его!`;
-  return 'Отлично! Все сценарии пройдены. Следующий шаг — говорить с носителями. Найди грека и практикуй!';
+  if (!state.scenariosCompleted.includes('citizenship')) return `Пройдено ${state.scenariosCompleted.length}/${SCENARIOS.length} сценариев. Сценарий "Собеседование на гражданство" — самый важный. Пройди его!`;
+  if (state.scenariosCompleted.length < SCENARIOS.length) return `Пройдено ${state.scenariosCompleted.length}/${SCENARIOS.length} сценариев. Попробуй аптеку, банк и ΚΕΠ — реальные ситуации в Греции!`;
+  return 'Отлично! Все 8 сценариев пройдены. Следующий шаг — говорить с носителями. Найди грека и практикуй!';
 }
 
 // ============================================================
