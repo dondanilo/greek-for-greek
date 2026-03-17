@@ -1032,3 +1032,49 @@ body {
 .quiz-session-container {
   display: flex; flex-direction: column; gap: 14px;
 }
+
+/* ============================================================
+   PAYWALL
+   ============================================================ */
+.paywall-container {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 32px 20px 48px; max-width: 420px; margin: 0 auto; text-align: center;
+}
+.paywall-icon { font-size: 56px; margin-bottom: 16px; }
+.paywall-title { font-size: 24px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.paywall-subtitle { font-size: 15px; color: var(--gray); margin-bottom: 32px; line-height: 1.5; }
+
+.paywall-plans { display: flex; flex-direction: column; gap: 16px; width: 100%; margin-bottom: 20px; }
+
+.paywall-plan {
+  border: 2px solid var(--gray-light); border-radius: 16px;
+  padding: 20px; position: relative;
+}
+.paywall-plan-popular {
+  border-color: var(--primary); background: #f0fff4;
+}
+.paywall-plan-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--primary); color: white; font-size: 12px; font-weight: 700;
+  padding: 4px 12px; border-radius: 100px; white-space: nowrap;
+}
+.paywall-plan-name { font-size: 14px; color: var(--gray); font-weight: 600; margin-bottom: 6px; }
+.paywall-plan-price { font-size: 28px; font-weight: 800; color: var(--text); }
+.paywall-plan-price span { font-size: 14px; font-weight: 500; color: var(--gray); }
+.paywall-plan-billed { font-size: 13px; color: var(--gray); margin-bottom: 16px; }
+
+.paywall-btn-primary {
+  display: block; width: 100%; padding: 14px; border-radius: 12px; margin-top: 16px;
+  background: var(--primary); color: white; font-size: 15px; font-weight: 700;
+  text-decoration: none; text-align: center;
+}
+.paywall-btn-secondary {
+  display: block; width: 100%; padding: 14px; border-radius: 12px; margin-top: 16px;
+  background: white; color: var(--text); font-size: 15px; font-weight: 700;
+  text-decoration: none; text-align: center; border: 2px solid var(--gray-light);
+}
+.paywall-note { font-size: 13px; color: var(--gray); margin-bottom: 24px; }
+.paywall-signout {
+  background: none; border: none; color: var(--gray); font-size: 14px;
+  cursor: pointer; text-decoration: underline; padding: 8px;
+}

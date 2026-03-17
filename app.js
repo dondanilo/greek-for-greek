@@ -156,6 +156,60 @@ function saveState() {
 }
 
 // ============================================================
+// SUBSCRIPTION
+// ============================================================
+
+// Save email to Firestore so webhook can find user by email
+async function saveUserEmail() {
+  if (!currentUser?.email) return;
+  try {
+    await db.collection('users').doc(currentUser.uid).set(
+      { email: currentUser.email.toLowerCase() },
+      { merge: true }
+    );
+  } catch (e) { console.error('saveUserEmail error:', e); }
+}
+
+// Check subscription status: active / trialing = OK, else paywall
+async function checkSubscription() {
+  if (!currentUser) return false;
+
+  // 1. Check users/{uid}.subscription (set by webhook)
+  const sub = state.subscription;
+  if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
+    return true;
+  }
+
+  // 2. Also check subscriptions/{email} as fallback
+  try {
+    const email = currentUser.email?.toLowerCase();
+    if (email) {
+      const doc = await db.collection('subscriptions').doc(email).get();
+      if (doc.exists) {
+        const s = doc.data();
+        if (s.status === 'active' || s.status === 'trialing') {
+          // Sync to state
+          state.subscription = { status: s.status, expiresAt: s.expiresAt };
+          saveState();
+          return true;
+        }
+      }
+    }
+  } catch (e) { console.error('checkSubscription error:', e); }
+
+  return false;
+}
+
+function showPaywall() {
+  const monthlyUrl = `https://izigreek.lemonsqueezy.com/checkout/buy/ba321ab1-7852-4b45-8d8b-a39393003582?checkout[custom][user_id]=${currentUser?.uid || ''}`;
+  const annualUrl = `https://izigreek.lemonsqueezy.com/checkout/buy/81d18e92-cb61-46fb-b84c-63b5c903b15d?checkout[custom][user_id]=${currentUser?.uid || ''}`;
+
+  document.getElementById('paywall-monthly-btn').href = monthlyUrl;
+  document.getElementById('paywall-annual-btn').href = annualUrl;
+  showScreen('screen-paywall');
+}
+
+// ============================================================
 // INIT
 // ============================================================
 async function init() {
@@ -166,10 +220,17 @@ async function init() {
     if (user) {
       currentUser = user;
       await loadState();
+      await saveUserEmail();
       checkStreak();
       renderUserInfo();
-      renderHome();
-      showScreen('screen-home');
+
+      const hasAccess = await checkSubscription();
+      if (hasAccess) {
+        renderHome();
+        showScreen('screen-home');
+      } else {
+        showPaywall();
+      }
     } else {
       currentUser = null;
       showScreen('screen-login');
