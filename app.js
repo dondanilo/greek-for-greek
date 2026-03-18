@@ -70,7 +70,7 @@ function renderUserInfo() {
 
   document.getElementById('user-menu-name').textContent = name;
   document.getElementById('user-menu-email').textContent = email;
-  document.getElementById('app-subtitle').textContent = `Γεια σου, ${name.split(' ')[0]}! Продолжаем путь к гражданству.`;
+  document.getElementById('app-subtitle').textContent = `Γεια σου, ${name.split(' ')[0]}!`;
 }
 
 // ============================================================
