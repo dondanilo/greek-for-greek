@@ -1711,3 +1711,50 @@ body {
 .progress-motivation-emoji { font-size: 36px; margin-bottom: 8px; }
 .progress-motivation-text  { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .progress-motivation-sub   { font-size: 13px; color: var(--text-light); }
+
+/* ==================== SUPPORT ==================== */
+.support-btn {
+  display: block; width: calc(100% - 32px); margin: 8px 16px 20px;
+  padding: 13px; border-radius: var(--radius);
+  background: none; border: 2px solid var(--gray-light);
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+  color: var(--text-light); cursor: pointer; text-align: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+.support-btn:hover { border-color: var(--green); color: var(--green-dark); }
+
+.support-modal-box {
+  max-height: 90vh; overflow-y: auto; width: 100%; max-width: 480px;
+}
+.support-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.support-modal-title { font-size: 18px; font-weight: 800; color: var(--text); }
+.modal-close-btn {
+  background: none; border: none; font-size: 18px; cursor: pointer;
+  color: var(--gray); width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.modal-close-btn:hover { background: var(--gray-bg); }
+.support-form-desc { font-size: 13px; color: var(--gray); margin-bottom: 16px; }
+
+.support-field { margin-bottom: 12px; }
+.support-label { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+.support-input {
+  width: 100%; padding: 11px 13px; border: 1.5px solid var(--gray-light);
+  border-radius: 10px; font-family: 'Nunito', sans-serif;
+  font-size: 14px; color: var(--text); background: var(--gray-bg);
+  outline: none; transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.support-input:focus { border-color: var(--green); background: var(--white); }
+.support-select { appearance: none; cursor: pointer; }
+.support-textarea { min-height: 100px; resize: vertical; }
+.support-submit-btn { margin-top: 8px; }
+
+.support-success { text-align: center; padding: 24px 0 8px; }
+.support-success-icon  { font-size: 48px; margin-bottom: 12px; }
+.support-success-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.support-success-sub   { font-size: 14px; color: var(--gray); }

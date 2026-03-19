@@ -1645,6 +1645,69 @@ function scrollToTop() {
 }
 
 // ============================================================
+// SUPPORT FORM
+// ============================================================
+function showSupportForm() {
+  const modal = document.getElementById('support-modal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // Pre-fill name/email from current user
+  if (currentUser) {
+    const nameEl = document.getElementById('sf-name');
+    const emailEl = document.getElementById('sf-email');
+    if (nameEl && !nameEl.value) nameEl.value = currentUser.displayName || '';
+    if (emailEl && !emailEl.value) emailEl.value = currentUser.email || '';
+  }
+}
+
+function hideSupportForm() {
+  document.getElementById('support-modal').style.display = 'none';
+  document.body.style.overflow = '';
+  // Reset form
+  document.getElementById('support-form-wrap').style.display = 'block';
+  document.getElementById('support-success').style.display = 'none';
+}
+
+async function submitSupportForm() {
+  const name    = document.getElementById('sf-name').value.trim();
+  const email   = document.getElementById('sf-email').value.trim();
+  const phone   = document.getElementById('sf-phone').value.trim();
+  const subject = document.getElementById('sf-subject').value;
+  const message = document.getElementById('sf-message').value.trim();
+
+  if (!name || !email || !subject || !message) {
+    alert('Пожалуйста, заполните все обязательные поля.');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    alert('Введите корректный email.');
+    return;
+  }
+
+  const btn = document.querySelector('.support-submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Отправляем...';
+
+  try {
+    const res = await fetch('https://izigreek-webhook.vercel.app/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, subject, message,
+        userId: currentUser?.uid || '' })
+    });
+    if (!res.ok) throw new Error('Server error ' + res.status);
+    document.getElementById('support-form-wrap').style.display = 'none';
+    document.getElementById('support-success').style.display = 'block';
+  } catch (e) {
+    console.error('Support form error:', e);
+    alert('Не удалось отправить. Попробуйте позже или напишите напрямую: support@izigreek.com');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Отправить';
+  }
+}
+
+// ============================================================
 // SOCIAL FEED
 // ============================================================
 let feedUnsubscribe = null;

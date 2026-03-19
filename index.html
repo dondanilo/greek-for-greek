@@ -237,6 +237,55 @@
       </div>
       <span class="weak-lesson-arrow">→</span>
     </button>
+    <button class="support-btn" onclick="showSupportForm()">💬 Написать в поддержку</button>
+  </div>
+
+  <!-- ==================== SUPPORT MODAL ==================== -->
+  <div id="support-modal" class="modal-overlay" onclick="hideSupportForm()" style="display:none">
+    <div class="modal-box support-modal-box" onclick="event.stopPropagation()">
+      <div class="support-modal-header">
+        <div class="support-modal-title">Написать в поддержку</div>
+        <button class="modal-close-btn" onclick="hideSupportForm()">✕</button>
+      </div>
+      <div id="support-form-wrap">
+        <div class="support-form-desc">Ответим в течение 24 часов 🇬🇷</div>
+        <div class="support-field">
+          <label class="support-label">Ваше имя *</label>
+          <input id="sf-name" class="support-input" type="text" placeholder="Как к вам обращаться?" maxlength="100">
+        </div>
+        <div class="support-field">
+          <label class="support-label">Email *</label>
+          <input id="sf-email" class="support-input" type="email" placeholder="your@email.com" maxlength="100">
+        </div>
+        <div class="support-field">
+          <label class="support-label">Телефон (WhatsApp / Telegram)</label>
+          <input id="sf-phone" class="support-input" type="tel" placeholder="+7 999 123-45-67" maxlength="30">
+        </div>
+        <div class="support-field">
+          <label class="support-label">Тема обращения *</label>
+          <select id="sf-subject" class="support-input support-select">
+            <option value="">— выберите тему —</option>
+            <option value="Технический вопрос">Технический вопрос</option>
+            <option value="Подписка и оплата">Подписка и оплата</option>
+            <option value="Ошибка в материалах">Ошибка в материалах</option>
+            <option value="Предложение по улучшению">Предложение по улучшению</option>
+            <option value="Другое">Другое</option>
+          </select>
+        </div>
+        <div class="support-field">
+          <label class="support-label">Сообщение *</label>
+          <textarea id="sf-message" class="support-input support-textarea"
+            placeholder="Опишите ваш вопрос подробно..." maxlength="2000"></textarea>
+        </div>
+        <button class="btn-primary support-submit-btn" onclick="submitSupportForm()">Отправить</button>
+      </div>
+      <div id="support-success" style="display:none" class="support-success">
+        <div class="support-success-icon">✅</div>
+        <div class="support-success-title">Заявка отправлена!</div>
+        <div class="support-success-sub">Ответим в течение 24 часов на ваш email.</div>
+        <button class="btn-secondary" onclick="hideSupportForm()" style="margin-top:16px">Закрыть</button>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== LESSON ==================== -->
