@@ -1489,23 +1489,32 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   overflow: hidden;
 }
-.feed-composer-top {
-  display: flex; gap: 10px; padding: 14px 14px 0;
+.feed-composer-row {
+  display: flex; gap: 10px;
+  padding: 14px 14px 12px;
   align-items: flex-start;
 }
 .feed-composer-textarea {
   flex: 1;
-  border: none; outline: none; resize: none;
+  border: 1.5px solid var(--gray-light);
+  border-radius: 12px;
+  outline: none; resize: none;
   font-family: 'Nunito', sans-serif;
   font-size: 15px; color: var(--text);
-  background: transparent;
-  min-height: 72px; max-height: 200px;
+  background: var(--gray-bg);
+  min-height: 80px; max-height: 200px;
   line-height: 1.5;
+  padding: 10px 12px;
+  transition: border-color 0.15s;
+}
+.feed-composer-textarea:focus {
+  border-color: var(--green);
+  background: var(--white);
 }
 .feed-composer-textarea::placeholder { color: var(--gray); }
 
 .composer-image-preview {
-  position: relative; margin: 8px 14px 0;
+  position: relative; margin: 0 14px 10px;
   border-radius: 12px; overflow: hidden;
   max-height: 240px;
 }
@@ -1524,44 +1533,41 @@ body {
 }
 
 .feed-composer-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px 12px;
-  border-top: 1px solid var(--gray-light);
-  margin-top: 10px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 14px 14px;
 }
-.composer-left { display: flex; align-items: center; gap: 10px; }
 .composer-attach-btn {
-  font-size: 20px; cursor: pointer;
-  width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 8px; transition: background 0.15s;
+  display: flex; align-items: center; gap: 5px;
+  background: var(--gray-bg); border: 1.5px solid var(--gray-light);
+  border-radius: 20px; padding: 7px 14px;
+  font-size: 13px; font-weight: 700; color: var(--text-light);
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.15s;
 }
-.composer-attach-btn:hover { background: var(--gray-bg); }
-.composer-char-count { font-size: 12px; color: var(--gray); font-weight: 600; }
-.composer-char-count.warn { color: #FF9600; }
+.composer-attach-btn:hover { background: var(--gray-light); }
+.composer-attach-btn.has-image {
+  border-color: var(--green); color: var(--green-dark); background: var(--green-light);
+}
+.composer-char-count {
+  flex: 1; text-align: right;
+  font-size: 12px; color: var(--gray); font-weight: 600;
+}
+.composer-char-count.warn  { color: #FF9600; }
 .composer-char-count.limit { color: var(--red); }
 
 .composer-submit-btn {
-  background: var(--green); color: white;
-  border: none; border-radius: 20px;
-  padding: 8px 18px; font-size: 14px; font-weight: 700;
-  font-family: 'Nunito', sans-serif;
-  cursor: pointer; transition: opacity 0.15s;
+  padding: 9px 20px !important;
+  font-size: 14px !important;
+  border-radius: 20px !important;
+  white-space: nowrap;
 }
 .composer-submit-btn:disabled {
-  background: var(--gray-light); color: var(--gray); cursor: default;
-}
-.composer-submit-btn.loading { opacity: 0.6; pointer-events: none; }
-
-/* Upload progress bar */
-.composer-upload-bar {
-  height: 3px; background: var(--green-light);
-  margin: 0 14px 8px; border-radius: 99px; display: none;
-}
-.composer-upload-bar-fill {
-  height: 100%; background: var(--green);
-  border-radius: 99px; width: 0%;
-  transition: width 0.2s;
+  background: var(--gray-light) !important;
+  box-shadow: none !important;
+  color: var(--gray) !important;
+  cursor: default;
+  transform: none !important;
 }
 
 /* User post text & image */

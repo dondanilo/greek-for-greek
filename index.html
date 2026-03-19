@@ -623,26 +623,23 @@
 
     <!-- Composer -->
     <div class="feed-composer">
-      <div class="feed-composer-top">
+      <div class="feed-composer-row">
         <div id="composer-avatar-wrap"></div>
         <textarea id="composer-text" class="feed-composer-textarea"
           placeholder="Поделись успехом, мыслью или вопросом... 🇬🇷"
-          maxlength="1000"
-          oninput="onComposerInput()"></textarea>
+          maxlength="1000"></textarea>
       </div>
       <div id="composer-image-preview" class="composer-image-preview" style="display:none">
         <img id="composer-preview-img" src="" alt="">
         <button class="composer-remove-img" onclick="removeComposerImage()">✕</button>
       </div>
       <div class="feed-composer-footer">
-        <div class="composer-left">
-          <label class="composer-attach-btn" for="composer-file-input" title="Прикрепить фото">
-            📎
-            <input type="file" id="composer-file-input" accept="image/*" style="display:none" onchange="onComposerFile(this)">
-          </label>
-          <span class="composer-char-count" id="composer-char-count">0 / 1000</span>
-        </div>
-        <button class="composer-submit-btn" id="composer-submit" onclick="submitPost()" disabled>Опубликовать</button>
+        <label class="composer-attach-btn" for="composer-file-input" title="Прикрепить фото">
+          🖼️ Фото
+          <input type="file" id="composer-file-input" accept="image/*" style="display:none" onchange="onComposerFile(this)">
+        </label>
+        <span class="composer-char-count" id="composer-char-count"></span>
+        <button class="btn-primary composer-submit-btn" id="composer-submit" onclick="submitPost()" disabled>Опубликовать</button>
       </div>
     </div>
 

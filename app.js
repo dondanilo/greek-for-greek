@@ -1502,7 +1502,15 @@ function showFeed() {
   showScreen('screen-feed');
   hideFeedBadge();
   renderComposerAvatar();
+  initComposer();
   loadFeed();
+}
+
+function initComposer() {
+  const ta = document.getElementById('composer-text');
+  if (!ta || ta._composerInited) return;
+  ta._composerInited = true;
+  ta.addEventListener('input', onComposerInput);
 }
 
 function renderComposerAvatar() {
@@ -1520,7 +1528,7 @@ function onComposerInput() {
   const counter = document.getElementById('composer-char-count');
   const btn = document.getElementById('composer-submit');
   const len = ta.value.length;
-  counter.textContent = `${len} / 1000`;
+  counter.textContent = len > 0 ? `${len} / 1000` : '';
   counter.className = 'composer-char-count' + (len >= 1000 ? ' limit' : len >= 800 ? ' warn' : '');
   btn.disabled = len === 0 && !composerFile;
 }
@@ -1540,6 +1548,7 @@ function onComposerFile(input) {
     document.getElementById('composer-image-preview').style.display = 'block';
   };
   reader.readAsDataURL(file);
+  document.querySelector('.composer-attach-btn').classList.add('has-image');
   document.getElementById('composer-submit').disabled = false;
 }
 
@@ -1548,6 +1557,7 @@ function removeComposerImage() {
   document.getElementById('composer-file-input').value = '';
   document.getElementById('composer-image-preview').style.display = 'none';
   document.getElementById('composer-preview-img').src = '';
+  document.querySelector('.composer-attach-btn')?.classList.remove('has-image');
   onComposerInput();
 }
 
