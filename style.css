@@ -1034,6 +1034,107 @@ body {
 }
 
 /* ============================================================
+   ONBOARDING
+   ============================================================ */
+.onboarding-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 32px;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  justify-content: center;
+  gap: 0;
+}
+
+.onboarding-logo {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.onboarding-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1a1a2e;
+  text-align: center;
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.onboarding-subtitle {
+  font-size: 15px;
+  color: #666;
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+.onboarding-features {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.onboarding-feature {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #f8f9fa;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.onboarding-feature-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.onboarding-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.onboarding-feature-text strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.onboarding-feature-text span {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.onboarding-tip {
+  background: #fff8e6;
+  border: 1.5px solid #ffd166;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #5a4000;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.onboarding-btn {
+  width: 100%;
+  font-size: 17px;
+  padding: 16px;
+}
+
+/* ============================================================
    PAYWALL
    ============================================================ */
 .paywall-container {

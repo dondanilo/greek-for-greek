@@ -87,7 +87,8 @@ const DEFAULT_STATE = {
   scenariosCompleted: [],
   errorLog: {},
   achievements: [],
-  srs: {}  // { verbId: { interval, ef, due } }
+  srs: {},  // { verbId: { interval, ef, due } }
+  onboardingDone: false
 };
 
 let state = { ...DEFAULT_STATE };
@@ -203,6 +204,12 @@ async function checkSubscription() {
   return false;
 }
 
+function finishOnboarding() {
+  state.onboardingDone = true;
+  saveState();
+  showScreen('screen-home');
+}
+
 function showPaywall() {
   const monthlyUrl = `https://izigreek.lemonsqueezy.com/checkout/buy/ba321ab1-7852-4b45-8d8b-a39393003582?checkout[custom][user_id]=${currentUser?.uid || ''}`;
   const annualUrl = `https://izigreek.lemonsqueezy.com/checkout/buy/81d18e92-cb61-46fb-b84c-63b5c903b15d?checkout[custom][user_id]=${currentUser?.uid || ''}`;
@@ -236,7 +243,11 @@ async function init() {
       const hasAccess = await checkSubscription();
       if (hasAccess) {
         renderHome();
-        showScreen('screen-home');
+        if (!state.onboardingDone) {
+          showScreen('screen-onboarding');
+        } else {
+          showScreen('screen-home');
+        }
       } else {
         showPaywall();
       }
