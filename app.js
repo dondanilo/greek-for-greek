@@ -1726,8 +1726,17 @@ function renderFeedCard(docId, post) {
         <span class="like-heart">${isLiked ? '❤️' : '🤍'}</span>
         <span>${likes.length > 0 ? likes.length : ''}</span>
       </button>
+      ${post.uid === myUid ? `<button class="feed-delete-btn" onclick="deletePost('${docId}')" title="Удалить пост">✕</button>` : ''}
     </div>`;
   return card;
+}
+
+function deletePost(docId) {
+  if (!currentUser) return;
+  db.collection('posts').doc(docId).get().then(doc => {
+    if (!doc.exists || doc.data().uid !== currentUser.uid) return;
+    db.collection('posts').doc(docId).delete();
+  });
 }
 
 function toggleLike(docId) {
