@@ -4607,7 +4607,7 @@ const VOCAB_CATEGORIES = [
       { greek: 'τα δεδομένα', transcription: 'та дедомена', translation: 'данные', emoji: '📊' },
       { greek: 'η ψηφιακή', transcription: 'и псифьяки', translation: 'цифровая', emoji: '🔢' },
     ]
-  },,
+  },
   {
     id: 'travel',
     title: 'Путешествия',
