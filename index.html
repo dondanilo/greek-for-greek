@@ -213,6 +213,11 @@
         <span class="nav-label">Достижения</span>
         <span class="ach-nav-count" id="ach-nav-count">0/15</span>
       </button>
+      <button class="nav-btn nav-btn-feed" onclick="showFeed()">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Лента</span>
+        <span class="feed-nav-badge" id="feed-nav-badge" style="display:none"></span>
+      </button>
     </div>
 
     <button class="weak-lesson-btn" id="weak-lesson-btn" onclick="startWeakLesson()" style="display:none">
@@ -608,6 +613,19 @@
     <div id="achievements-container"></div>
   </div>
 
+  <!-- ==================== FEED ==================== -->
+  <div id="screen-feed" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Лента</h2>
+      <span class="feed-live-dot" title="Обновляется в реальном времени"></span>
+    </div>
+    <p class="sub-desc">Успехи учеников — вдохновляйся и вдохновляй других 🇬🇷</p>
+    <div id="feed-container">
+      <div class="feed-loading">Загружаем ленту...</div>
+    </div>
+  </div>
+
   <!-- ==================== ACHIEVEMENT TOAST ==================== -->
   <div id="achievement-toast" class="achievement-toast">
     <div class="toast-icon" id="toast-icon">🏆</div>
@@ -630,6 +648,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Scroll to top button -->
+  <button id="scroll-top-btn" onclick="scrollToTop()" aria-label="Наверх">↑</button>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>

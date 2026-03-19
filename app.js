@@ -326,11 +326,28 @@ function showPaywall() {
 // ============================================================
 async function init() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-    // Auto-reload when new SW activates with fresh assets
-    navigator.serviceWorker.addEventListener('message', event => {
-      if (event.data?.type === 'SW_UPDATED') window.location.reload();
+    const reg = await navigator.serviceWorker.register('sw.js').catch(() => null);
+
+    // Reload when a new SW takes control (guarantees fresh files)
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
     });
+
+    if (reg) {
+      // When a new SW finishes installing, tell it to skip waiting immediately
+      const onInstalled = (sw) => {
+        sw.addEventListener('statechange', () => {
+          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+            sw.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      };
+      if (reg.installing) onInstalled(reg.installing);
+      reg.addEventListener('updatefound', () => onInstalled(reg.installing));
+    }
   }
 
   // Подписываемся на состояние авторизации
@@ -722,6 +739,14 @@ function completeLesson() {
   }
   saveState();
   checkAchievements({ perfectLesson: isPerfect, weakMode: lessonState.isWeakMode });
+  createPost('lesson_complete', {
+    isPerfect,
+    hearts: lessonState.hearts,
+    correct: lessonState.correct,
+    total: EXERCISES_PER_LESSON,
+    xp: lessonState.xpEarned,
+    streak: state.streak
+  });
 
   const acc = lessonState.correct / EXERCISES_PER_LESSON;
   const stars = (lessonState.hearts === 3 && acc === 1) ? '⭐⭐⭐' : (lessonState.hearts >= 2 && acc >= 0.7) ? '⭐⭐' : lessonState.hearts >= 1 ? '⭐' : '😅';
@@ -879,8 +904,22 @@ function checkAchievements(ctx = {}) {
   }
   if (newlyUnlocked.length > 0) {
     saveState();
-    newlyUnlocked.forEach(a => achToastQueue.push(a));
+    newlyUnlocked.forEach(a => {
+      achToastQueue.push(a);
+      createPost('achievement', { icon: a.icon, title: a.title, desc: a.desc });
+    });
     if (achToastQueue.length === newlyUnlocked.length) processAchToast();
+  }
+
+  // Streak milestones
+  const streakMilestones = [3, 7, 14, 30, 60, 100];
+  if (streakMilestones.includes(state.streak)) {
+    const key = `streak_posted_${state.streak}`;
+    if (!state[key]) {
+      state[key] = true;
+      saveState();
+      createPost('streak', { streak: state.streak });
+    }
   }
 }
 
@@ -1438,6 +1477,248 @@ function showScreen(id) {
 }
 
 // ============================================================
+// SCROLL TO TOP
+// ============================================================
+(function() {
+  const btn = document.getElementById('scroll-top-btn');
+  if (!btn) return;
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive: true });
+})();
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// SOCIAL FEED
+// ============================================================
+let feedUnsubscribe = null;
+
+function showFeed() {
+  showScreen('screen-feed');
+  hideFeedBadge();
+  loadFeed();
+}
+
+function hideFeedBadge() {
+  document.getElementById('feed-nav-badge').style.display = 'none';
+}
+
+function showFeedBadge() {
+  const badge = document.getElementById('feed-nav-badge');
+  const currentScreen = document.querySelector('.screen.active');
+  if (currentScreen && currentScreen.id === 'screen-feed') return;
+  badge.style.display = 'block';
+}
+
+function loadFeed() {
+  const container = document.getElementById('feed-container');
+  if (!container) return;
+
+  if (feedUnsubscribe) {
+    feedUnsubscribe();
+    feedUnsubscribe = null;
+  }
+
+  container.innerHTML = '<div class="feed-loading">Загружаем ленту...</div>';
+
+  feedUnsubscribe = db.collection('posts')
+    .orderBy('createdAt', 'desc')
+    .limit(50)
+    .onSnapshot(snapshot => {
+      // Note: requires Firestore index on createdAt desc — auto-created on first query
+      if (snapshot.empty) {
+        container.innerHTML = `
+          <div class="feed-empty">
+            <div class="feed-empty-icon">🌱</div>
+            <div class="feed-empty-text">Лента пока пустая</div>
+            <div class="feed-empty-sub">Пройди урок или квиз — и твой результат появится здесь!</div>
+          </div>`;
+        return;
+      }
+
+      const isFirstLoad = container.querySelector('.feed-loading');
+      const newPostIds = new Set();
+      snapshot.docChanges().forEach(change => {
+        if (change.type === 'added' && !isFirstLoad) newPostIds.add(change.doc.id);
+      });
+
+      if (newPostIds.size > 0 && !isFirstLoad) showFeedBadge();
+
+      container.innerHTML = '';
+      snapshot.forEach(doc => {
+        container.appendChild(renderFeedCard(doc.id, doc.data()));
+      });
+    }, err => {
+      console.error('Feed error:', err);
+      // Fallback: load without ordering (index may not exist yet)
+      db.collection('posts').limit(50).get().then(snap => {
+        if (snap.empty) {
+          container.innerHTML = `<div class="feed-empty"><div class="feed-empty-icon">🌱</div><div class="feed-empty-text">Лента пока пустая</div><div class="feed-empty-sub">Пройди урок или квиз!</div></div>`;
+          return;
+        }
+        const docs = [];
+        snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
+        docs.sort((a, b) => (b.data.createdAt?.seconds || 0) - (a.data.createdAt?.seconds || 0));
+        container.innerHTML = '';
+        docs.forEach(d => container.appendChild(renderFeedCard(d.id, d.data)));
+      }).catch(() => {
+        container.innerHTML = '<div class="feed-loading">Не удалось загрузить ленту</div>';
+      });
+    });
+}
+
+function renderFeedCard(docId, post) {
+  const card = document.createElement('div');
+  card.className = 'feed-card';
+  card.dataset.postId = docId;
+
+  const myUid = currentUser?.uid;
+  const likes = post.likes || [];
+  const isLiked = likes.includes(myUid);
+  const timeAgo = formatTimeAgo(post.createdAt?.toDate ? post.createdAt.toDate() : new Date());
+
+  let avatarHtml;
+  if (post.photoURL) {
+    avatarHtml = `<img class="feed-avatar" src="${post.photoURL}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                  <div class="feed-avatar-initials" style="display:none">${getInitials(post.displayName)}</div>`;
+  } else {
+    avatarHtml = `<div class="feed-avatar-initials">${getInitials(post.displayName)}</div>`;
+  }
+
+  const chipsHtml = (post.chips || []).map(c =>
+    `<span class="feed-chip ${c.color || ''}">${c.text}</span>`
+  ).join('');
+
+  card.innerHTML = `
+    <div class="feed-card-header">
+      ${avatarHtml}
+      <div class="feed-card-meta">
+        <div class="feed-card-name">${escHtml(post.displayName || 'Ученик')}</div>
+        <div class="feed-card-time">${timeAgo}</div>
+      </div>
+    </div>
+    <div class="feed-card-body">
+      <div class="feed-card-icon">${post.emoji || '📌'}</div>
+      <div class="feed-card-text">
+        <div class="feed-card-title">${escHtml(post.title || '')}</div>
+        <div class="feed-card-sub">${escHtml(post.subtitle || '')}</div>
+        ${chipsHtml ? `<div class="feed-card-chips">${chipsHtml}</div>` : ''}
+      </div>
+    </div>
+    <div class="feed-card-footer">
+      <button class="feed-like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${docId}')">
+        <span class="like-heart">${isLiked ? '❤️' : '🤍'}</span>
+        <span>${likes.length > 0 ? likes.length : ''}</span>
+      </button>
+    </div>`;
+  return card;
+}
+
+function toggleLike(docId) {
+  if (!currentUser) return;
+  const uid = currentUser.uid;
+  const ref = db.collection('posts').doc(docId);
+  ref.get().then(doc => {
+    if (!doc.exists) return;
+    const likes = doc.data().likes || [];
+    const updated = likes.includes(uid)
+      ? likes.filter(id => id !== uid)
+      : [...likes, uid];
+    ref.update({ likes: updated });
+  });
+}
+
+async function createPost(type, data) {
+  if (!currentUser) return;
+  try {
+    await db.collection('posts').add({
+      uid: currentUser.uid,
+      displayName: currentUser.displayName || 'Ученик',
+      photoURL: currentUser.photoURL || null,
+      type,
+      ...buildPostContent(type, data),
+      likes: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (e) {
+    console.warn('createPost error:', e);
+  }
+}
+
+function buildPostContent(type, data) {
+  switch (type) {
+    case 'lesson_complete': {
+      const stars = data.isPerfect ? '⭐⭐⭐' : data.hearts >= 2 ? '⭐⭐' : '⭐';
+      return {
+        emoji: '📖',
+        title: 'Прошёл урок греческого',
+        subtitle: `${stars} · ${data.correct}/${data.total} правильно`,
+        chips: [
+          { text: `+${data.xp} XP`, color: 'green' },
+          { text: `🔥 ${data.streak} дн.`, color: 'yellow' }
+        ]
+      };
+    }
+    case 'quiz_complete': {
+      const stars = data.pct === 1 ? '⭐⭐⭐' : data.pct >= 0.7 ? '⭐⭐' : '⭐';
+      return {
+        emoji: '🧩',
+        title: `Квиз: ${data.categoryTitle || 'Греческий'}`,
+        subtitle: `${stars} · ${data.score}/${data.total} правильно`,
+        chips: [
+          { text: `+${data.xp} XP`, color: 'green' },
+          { text: `${Math.round(data.pct * 100)}%`, color: data.pct === 1 ? 'green' : 'blue' }
+        ]
+      };
+    }
+    case 'achievement': {
+      return {
+        emoji: data.icon || '🏆',
+        title: `Достижение: ${data.title}`,
+        subtitle: data.desc || '',
+        chips: [{ text: 'Новое достижение', color: 'yellow' }]
+      };
+    }
+    case 'streak': {
+      return {
+        emoji: '🔥',
+        title: `${data.streak} дней подряд!`,
+        subtitle: 'Отличная серия — так держать!',
+        chips: [{ text: `🔥 ${data.streak} дней`, color: 'yellow' }]
+      };
+    }
+    default:
+      return { emoji: '📌', title: data.title || '', subtitle: '' };
+  }
+}
+
+function formatTimeAgo(date) {
+  if (!date) return '';
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 60) return 'только что';
+  if (diff < 3600) return `${Math.floor(diff / 60)} мин. назад`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} ч. назад`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)} дн. назад`;
+  return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+}
+
+function getInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ============================================================
 // BOOT
 // ============================================================
 document.addEventListener('DOMContentLoaded', init);
@@ -1534,25 +1815,30 @@ function parseRSSXML(text) {
 async function fetchRSS(rssUrl) {
   const encoded = encodeURIComponent(rssUrl);
   const proxies = [
+    // rss2json — returns parsed JSON directly (no count param = free tier)
     async () => {
-      const res = await fetchWithTimeout(`https://corsproxy.io/?${encoded}`, 8000);
-      return await res.text();
-    },
-    async () => {
-      const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encoded}`, 8000);
+      const res = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encoded}`, 8000);
       const d = await res.json();
-      return d.contents;
-    },
-    async () => {
-      const res = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encoded}&count=20`, 8000);
-      const d = await res.json();
-      if (d.items?.length) {
+      if (d.status === 'ok' && d.items?.length) {
         return d.items.map(i => ({
           title: i.title, link: i.link, pubDate: i.pubDate,
-          thumbnail: i.thumbnail || '', source: ''
+          thumbnail: i.thumbnail || i.enclosure?.link || '', source: i.author || ''
         }));
       }
       return null;
+    },
+    // corsproxy.io — updated URL format
+    async () => {
+      const res = await fetchWithTimeout(`https://corsproxy.io/?url=${encoded}`, 8000);
+      const text = await res.text();
+      if (text.trim().startsWith('<')) return text;
+      return null;
+    },
+    // allorigins raw endpoint
+    async () => {
+      const res = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encoded}`, 8000);
+      if (!res.ok) return null;
+      return await res.text();
     },
   ];
 
@@ -2173,6 +2459,12 @@ function completeQuiz() {
   saveState();
 
   const pct = score / total;
+  const cat = QUIZ_CATEGORIES.find(c => c.id === quizState.categoryId);
+  createPost('quiz_complete', {
+    score, total, pct, xp: xpEarned,
+    categoryTitle: cat?.title || 'Греческий'
+  });
+
   document.getElementById('quiz-complete-stars').textContent =
     pct === 1 ? '⭐⭐⭐' : pct >= 0.7 ? '⭐⭐' : '⭐';
   document.getElementById('quiz-complete-score').textContent = `${score}/${total}`;

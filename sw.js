@@ -1,4 +1,4 @@
-const CACHE_NAME = 'greek-app-v4';
+const CACHE_NAME = 'greek-app-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -13,22 +13,21 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-  self.skipWaiting();
+  // Don't skipWaiting here — page will send SKIP_WAITING when ready
 });
 
-// Activate: delete old caches, notify clients to reload
+// Page tells us to take over (triggers controllerchange → page reloads)
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
+// Activate: delete old caches and claim clients
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => {
-      // Tell all open tabs to reload so they pick up the new version
-      return self.clients.matchAll({ type: 'window' }).then(clients => {
-        clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
-      });
-    })
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // Push notifications
