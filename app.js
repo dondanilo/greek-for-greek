@@ -1590,7 +1590,6 @@ function showVocab(mode) {
       <div class="vocab-category-card" onclick="startVocabQuiz('${cat.id}')">
         <div class="vocab-cat-icon">${cat.emoji}</div>
         <div class="vocab-cat-title">${cat.title}</div>
-        <div class="vocab-cat-count">${cat.words.length} слов</div>
       </div>`).join('')}</div>`;
 
   showScreen('screen-vocab');
