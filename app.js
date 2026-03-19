@@ -88,7 +88,8 @@ const DEFAULT_STATE = {
   errorLog: {},
   achievements: [],
   srs: {},  // { verbId: { interval, ef, due } }
-  onboardingDone: false
+  onboardingDone: false,
+  vocabProgress: {}  // { categoryId: [greek, greek, ...] }
 };
 
 let state = { ...DEFAULT_STATE };
@@ -1696,11 +1697,24 @@ function showVocab(mode) {
     : 'Выбери правильный перевод греческого слова.';
 
   document.getElementById('vocab-categories-list').innerHTML =
-    `<div class="vocab-categories-grid">${VOCAB_CATEGORIES.map(cat => `
-      <div class="vocab-category-card" onclick="startVocabQuiz('${cat.id}')">
-        <div class="vocab-cat-icon">${cat.emoji}</div>
+    `<div class="vocab-categories-grid">${VOCAB_CATEGORIES.map(cat => {
+      const learned = (state.vocabProgress[cat.id] || []).length;
+      const total = cat.words.length;
+      const pct = Math.round(learned / total * 100);
+      const done = learned >= total;
+      return `
+      <div class="vocab-category-card${done ? ' vocab-cat-done' : ''}" onclick="startVocabQuiz('${cat.id}')">
+        <div class="vocab-cat-icon">${done ? '✅' : cat.emoji}</div>
         <div class="vocab-cat-title">${cat.title}</div>
-      </div>`).join('')}</div>`;
+        ${learned > 0 ? `
+        <div class="vocab-cat-progress">
+          <div class="vocab-cat-progress-bar">
+            <div class="vocab-cat-progress-fill" style="width:${pct}%"></div>
+          </div>
+          <span class="vocab-cat-progress-label">${learned}/${total}</span>
+        </div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
 
   // Reset search
   const si = document.getElementById('vocab-search');
@@ -1869,6 +1883,12 @@ function selectVocabAnswer(optionIdx) {
     document.getElementById('vocab-feedback').className = 'feedback-message correct';
     document.getElementById('vocab-footer').className = 'lesson-footer correct-footer';
     playSound('correct');
+    // Mark word as learned
+    const catId = vocabQuizState.categoryId;
+    if (!state.vocabProgress[catId]) state.vocabProgress[catId] = [];
+    if (!state.vocabProgress[catId].includes(correctWord.greek)) {
+      state.vocabProgress[catId].push(correctWord.greek);
+    }
   } else {
     buttons[optionIdx].classList.add('wrong');
     buttons[correctIdx].classList.add('correct');
