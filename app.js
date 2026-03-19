@@ -174,6 +174,9 @@ async function saveUserEmail() {
 async function checkSubscription() {
   if (!currentUser) return false;
 
+  // Developer account — always has access
+  if (currentUser.email?.toLowerCase() === 'dondanilo1994@gmail.com') return true;
+
   // 1. Check users/{uid}.subscription (set by webhook)
   const sub = state.subscription;
   if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
