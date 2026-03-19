@@ -1133,7 +1133,67 @@ function showPhrases() {
     </div>
   `).join('');
 
+  // Reset search
+  const si = document.getElementById('phrases-search');
+  if (si) si.value = '';
+  searchPhrases('');
+
   showScreen('screen-phrases');
+}
+
+function searchPhrases(query) {
+  const q = query.trim().toLowerCase();
+  const resultsEl = document.getElementById('phrases-search-results');
+  const normalEl = document.getElementById('phrases-container');
+  const catsEl = document.getElementById('phrase-cats');
+  const descEl = document.getElementById('phrases-sub-desc');
+
+  if (!q) {
+    resultsEl.style.display = 'none';
+    normalEl.style.display = '';
+    catsEl.style.display = '';
+    descEl.style.display = '';
+    return;
+  }
+
+  normalEl.style.display = 'none';
+  catsEl.style.display = 'none';
+  descEl.style.display = 'none';
+  resultsEl.style.display = '';
+
+  const matches = [];
+  PHRASES.forEach(cat => {
+    cat.phrases.forEach(p => {
+      if (
+        p.greek.toLowerCase().includes(q) ||
+        p.transcription.toLowerCase().includes(q) ||
+        p.translation.toLowerCase().includes(q) ||
+        (p.note && p.note.toLowerCase().includes(q))
+      ) {
+        matches.push({ ...p, catIcon: cat.icon, catTitle: cat.category, catColor: cat.color });
+      }
+    });
+  });
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = `<div class="search-empty">Ничего не найдено</div>`;
+    return;
+  }
+
+  resultsEl.innerHTML = matches.map(p => `
+    <div class="phrase-card">
+      <div class="phrase-search-cat" style="color:${p.catColor}">${p.catIcon} ${p.catTitle}</div>
+      <div class="phrase-top">
+        <div class="phrase-greek" data-speak="${p.greek.replace(/"/g,'&quot;')}"
+             onclick="speakGreek(this.dataset.speak)">${p.greek}</div>
+        <button class="speak-btn" data-speak="${p.greek.replace(/"/g,'&quot;')}"
+                onclick="speakGreek(this.dataset.speak, event)">🔊</button>
+      </div>
+      <div class="phrase-transcription">${p.transcription}</div>
+      <div class="phrase-translation">${p.translation}</div>
+      ${p.note ? `<div class="phrase-note">${p.note}</div>` : ''}
+    </div>
+  `).join('');
 }
 
 function scrollToPhraseCat(id) {
@@ -1642,7 +1702,60 @@ function showVocab(mode) {
         <div class="vocab-cat-title">${cat.title}</div>
       </div>`).join('')}</div>`;
 
+  // Reset search
+  const si = document.getElementById('vocab-search');
+  if (si) si.value = '';
+  searchVocab('');
+
   showScreen('screen-vocab');
+}
+
+function searchVocab(query) {
+  const q = query.trim().toLowerCase();
+  const resultsEl = document.getElementById('vocab-search-results');
+  const catsEl = document.getElementById('vocab-categories-list');
+
+  if (!q) {
+    resultsEl.style.display = 'none';
+    catsEl.style.display = '';
+    return;
+  }
+
+  catsEl.style.display = 'none';
+  resultsEl.style.display = '';
+
+  const matches = [];
+  VOCAB_CATEGORIES.forEach(cat => {
+    cat.words.forEach(w => {
+      if (
+        w.greek.toLowerCase().includes(q) ||
+        w.transcription.toLowerCase().includes(q) ||
+        w.translation.toLowerCase().includes(q)
+      ) {
+        matches.push({ ...w, catTitle: cat.title, catEmoji: cat.emoji });
+      }
+    });
+  });
+
+  if (matches.length === 0) {
+    resultsEl.innerHTML = `<div class="search-empty">Ничего не найдено</div>`;
+    return;
+  }
+
+  resultsEl.innerHTML = `<div class="vocab-search-list">${matches.map(w => `
+    <div class="vocab-search-card">
+      <div class="vocab-search-emoji">${w.emoji || '📝'}</div>
+      <div class="vocab-search-body">
+        <div class="vocab-search-greek">${w.greek}
+          <button class="vocab-tts-btn" data-greek="${w.greek.replace(/"/g,'&quot;')}"
+                  onclick="speakGreek(this.dataset.greek)">🔊</button>
+        </div>
+        <div class="vocab-search-transcription">${w.transcription}</div>
+        <div class="vocab-search-translation">${w.translation}</div>
+      </div>
+      <div class="vocab-search-cat">${w.catEmoji} ${w.catTitle}</div>
+    </div>
+  `).join('')}</div>`;
 }
 
 function startVocabQuiz(categoryId) {

@@ -392,7 +392,10 @@
       <button class="btn-back" onclick="showHome()">← Назад</button>
       <h2 id="vocab-screen-title">Карточки</h2>
     </div>
-    <p class="sub-desc" id="vocab-screen-desc">Выбери категорию и запоминай слова по картинкам.</p>
+    <div class="search-wrap">
+      <input id="vocab-search" class="search-input" type="search" placeholder="🔍 Найти слово..." oninput="searchVocab(this.value)" autocomplete="off">
+    </div>
+    <div id="vocab-search-results" style="display:none"></div>
     <div id="vocab-categories-list"></div>
   </div>
 
@@ -494,7 +497,11 @@
       <button class="btn-back" onclick="showHome()">← Назад</button>
       <h2>Фразы и выражения</h2>
     </div>
-    <p class="sub-desc">Живой язык — то, как греки говорят на самом деле.</p>
+    <div class="search-wrap">
+      <input id="phrases-search" class="search-input" type="search" placeholder="🔍 Найти фразу..." oninput="searchPhrases(this.value)" autocomplete="off">
+    </div>
+    <div id="phrases-search-results" style="display:none"></div>
+    <p class="sub-desc" id="phrases-sub-desc">Живой язык — то, как греки говорят на самом деле.</p>
     <div class="phrase-cats" id="phrase-cats"></div>
     <div id="phrases-container"></div>
   </div>
