@@ -216,7 +216,13 @@ function showPaywall() {
 // INIT
 // ============================================================
 async function init() {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+    // Auto-reload when new SW activates with fresh assets
+    navigator.serviceWorker.addEventListener('message', event => {
+      if (event.data?.type === 'SW_UPDATED') window.location.reload();
+    });
+  }
 
   // Подписываемся на состояние авторизации
   auth.onAuthStateChanged(async user => {
