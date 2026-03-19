@@ -31,6 +31,26 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+// Push notifications
+self.addEventListener('push', event => {
+  const data = event.data?.json() || {};
+  const title = data.title || 'IziGreek';
+  const options = {
+    body: data.body || 'Время для греческого! 🇬🇷',
+    icon: '/icon-192.png',
+    badge: '/icon-72.png',
+    vibrate: [200, 100, 200],
+    data: { url: data.url || 'https://cabinet.izigreek.com' }
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = event.notification.data?.url || 'https://cabinet.izigreek.com';
+  event.waitUntil(clients.openWindow(url));
+});
+
 // Fetch: network-first for app files, cache fallback
 self.addEventListener('fetch', event => {
   // Only handle same-origin GET requests
