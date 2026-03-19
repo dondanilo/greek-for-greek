@@ -1535,6 +1535,7 @@ body {
 .feed-composer-footer {
   display: flex; align-items: center; gap: 8px;
   padding: 0 14px 14px;
+  flex-wrap: nowrap;
 }
 .composer-attach-btn {
   display: flex; align-items: center; gap: 5px;
@@ -1557,10 +1558,13 @@ body {
 .composer-char-count.limit { color: var(--red); }
 
 .composer-submit-btn {
+  width: auto !important;
   padding: 9px 20px !important;
   font-size: 14px !important;
   border-radius: 20px !important;
+  box-shadow: 0 3px 0 var(--green-dark) !important;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .composer-submit-btn:disabled {
   background: var(--gray-light) !important;
