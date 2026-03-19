@@ -246,6 +246,72 @@ async function setupPushNotifications() {
   } catch (e) { console.error('Push setup error:', e); }
 }
 
+function showSettings() {
+  // User info
+  if (currentUser) {
+    const name = currentUser.displayName || 'Пользователь';
+    const email = currentUser.email || '';
+    document.getElementById('settings-user-name').textContent = name;
+    document.getElementById('settings-user-email').textContent = email;
+    document.getElementById('settings-initials').textContent = name.charAt(0).toUpperCase();
+    const avatarEl = document.getElementById('settings-avatar');
+    const initialsEl = document.getElementById('settings-initials');
+    if (currentUser.photoURL) {
+      avatarEl.src = currentUser.photoURL;
+      avatarEl.style.display = 'block';
+      initialsEl.style.display = 'none';
+    } else {
+      avatarEl.style.display = 'none';
+      initialsEl.style.display = 'flex';
+    }
+  }
+
+  // Daily goal buttons
+  document.querySelectorAll('.settings-goal-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.xp) === state.dailyGoal);
+  });
+
+  // Push toggle
+  const pushOn = Notification.permission === 'granted';
+  document.getElementById('push-toggle').classList.toggle('on', pushOn);
+
+  // Stats
+  document.getElementById('s-total-xp').textContent = state.totalXp;
+  document.getElementById('s-lessons').textContent = state.lessonsCompleted;
+  document.getElementById('s-streak').textContent = state.streak;
+  const learnedCount = Object.values(state.vocabProgress || {}).reduce((sum, arr) => sum + arr.length, 0);
+  document.getElementById('s-vocab').textContent = learnedCount;
+
+  showScreen('screen-settings');
+}
+
+function setDailyGoal(xp) {
+  state.dailyGoal = xp;
+  saveState();
+  document.querySelectorAll('.settings-goal-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.xp) === xp);
+  });
+  renderHome();
+}
+
+async function togglePushSetting() {
+  if (Notification.permission === 'denied') {
+    alert('Уведомления заблокированы в настройках браузера. Разрешите их вручную.');
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    // Unsubscribe
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) await sub.unsubscribe();
+    if (currentUser) await db.collection('push_subscriptions').doc(currentUser.uid).delete().catch(() => {});
+    document.getElementById('push-toggle').classList.remove('on');
+  } else {
+    await setupPushNotifications();
+    document.getElementById('push-toggle').classList.toggle('on', Notification.permission === 'granted');
+  }
+}
+
 function showPaywall() {
   const monthlyUrl = `https://izigreek.lemonsqueezy.com/checkout/buy/ba321ab1-7852-4b45-8d8b-a39393003582?checkout[custom][user_id]=${currentUser?.uid || ''}`;
   const annualUrl = `https://izigreek.lemonsqueezy.com/checkout/buy/81d18e92-cb61-46fb-b84c-63b5c903b15d?checkout[custom][user_id]=${currentUser?.uid || ''}`;

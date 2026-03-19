@@ -1056,6 +1056,82 @@ body {
   cursor: pointer; width: 100%;
 }
 
+/* ============================================================ SETTINGS */
+.btn-settings-link {
+  padding: 10px; background: #f8f9fa; color: #333;
+  border: 2px solid #e8e8e8; border-radius: 10px;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; width: 100%; margin-bottom: 6px;
+}
+.settings-user-card {
+  display: flex; align-items: center; gap: 14px;
+  background: #f8f9fa; border-radius: 16px; padding: 16px;
+  margin-bottom: 20px;
+}
+.settings-avatar {
+  width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+}
+.settings-initials {
+  width: 52px; height: 52px; border-radius: 50%; background: var(--primary);
+  color: white; font-size: 22px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.settings-user-info { flex: 1; min-width: 0; }
+.settings-user-name { font-size: 16px; font-weight: 800; color: #1a1a2e; }
+.settings-user-email { font-size: 13px; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.settings-section { margin-bottom: 20px; }
+.settings-section-title { font-size: 12px; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+
+.settings-goal-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.settings-goal-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 12px 8px; background: #f8f9fa;
+  border: 2px solid #e8e8e8; border-radius: 14px;
+  cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.15s;
+}
+.settings-goal-btn.active { border-color: var(--primary); background: #fff9f0; }
+.goal-emoji { font-size: 22px; }
+.goal-label { font-size: 13px; font-weight: 700; color: #333; }
+.goal-xp { font-size: 12px; color: #888; font-weight: 600; }
+
+.settings-row {
+  display: flex; align-items: center; gap: 12px;
+  background: #f8f9fa; border-radius: 14px; padding: 14px;
+  cursor: pointer;
+}
+.settings-row-icon { font-size: 22px; flex-shrink: 0; }
+.settings-row-body { flex: 1; }
+.settings-row-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.settings-row-sub { font-size: 12px; color: #888; margin-top: 2px; }
+.settings-toggle {
+  width: 44px; height: 24px; background: #ddd; border-radius: 99px;
+  position: relative; flex-shrink: 0; transition: background 0.2s;
+}
+.settings-toggle.on { background: var(--primary); }
+.settings-toggle-knob {
+  width: 20px; height: 20px; background: white; border-radius: 50%;
+  position: absolute; top: 2px; left: 2px; transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.settings-toggle.on .settings-toggle-knob { left: 22px; }
+
+.settings-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.settings-stat {
+  background: #f8f9fa; border-radius: 14px; padding: 14px;
+  text-align: center;
+}
+.settings-stat-value { font-size: 24px; font-weight: 900; color: var(--primary); }
+.settings-stat-label { font-size: 12px; color: #888; font-weight: 600; margin-top: 2px; }
+
+.btn-signout-full {
+  width: 100%; padding: 14px; background: #fff0f0; color: var(--red);
+  border: 2px solid #ffcccc; border-radius: 14px;
+  font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer;
+}
+.settings-version { text-align: center; font-size: 12px; color: #ccc; padding: 16px 0 8px; }
+
 /* ============================================================ AUTH LOADING */
 .auth-loading-container {
   display: flex; flex-direction: column; align-items: center;
