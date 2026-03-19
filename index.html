@@ -620,7 +620,32 @@
       <h2>Лента</h2>
       <span class="feed-live-dot" title="Обновляется в реальном времени"></span>
     </div>
-    <p class="sub-desc">Успехи учеников — вдохновляйся и вдохновляй других 🇬🇷</p>
+
+    <!-- Composer -->
+    <div class="feed-composer">
+      <div class="feed-composer-top">
+        <div id="composer-avatar-wrap"></div>
+        <textarea id="composer-text" class="feed-composer-textarea"
+          placeholder="Поделись успехом, мыслью или вопросом... 🇬🇷"
+          maxlength="1000"
+          oninput="onComposerInput()"></textarea>
+      </div>
+      <div id="composer-image-preview" class="composer-image-preview" style="display:none">
+        <img id="composer-preview-img" src="" alt="">
+        <button class="composer-remove-img" onclick="removeComposerImage()">✕</button>
+      </div>
+      <div class="feed-composer-footer">
+        <div class="composer-left">
+          <label class="composer-attach-btn" for="composer-file-input" title="Прикрепить фото">
+            📎
+            <input type="file" id="composer-file-input" accept="image/*" style="display:none" onchange="onComposerFile(this)">
+          </label>
+          <span class="composer-char-count" id="composer-char-count">0 / 1000</span>
+        </div>
+        <button class="composer-submit-btn" id="composer-submit" onclick="submitPost()" disabled>Опубликовать</button>
+      </div>
+    </div>
+
     <div id="feed-container">
       <div class="feed-loading">Загружаем ленту...</div>
     </div>
@@ -655,6 +680,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

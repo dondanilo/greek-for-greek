@@ -13,6 +13,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const storage = firebase.storage();
 let currentUser = null;
 
 let _signingIn = false;
@@ -1495,11 +1496,106 @@ function scrollToTop() {
 // SOCIAL FEED
 // ============================================================
 let feedUnsubscribe = null;
+let composerFile = null;
 
 function showFeed() {
   showScreen('screen-feed');
   hideFeedBadge();
+  renderComposerAvatar();
   loadFeed();
+}
+
+function renderComposerAvatar() {
+  const wrap = document.getElementById('composer-avatar-wrap');
+  if (!wrap || !currentUser) return;
+  if (currentUser.photoURL) {
+    wrap.innerHTML = `<img class="feed-avatar" src="${currentUser.photoURL}" alt="" style="margin-top:4px">`;
+  } else {
+    wrap.innerHTML = `<div class="feed-avatar-initials" style="margin-top:4px">${getInitials(currentUser.displayName)}</div>`;
+  }
+}
+
+function onComposerInput() {
+  const ta = document.getElementById('composer-text');
+  const counter = document.getElementById('composer-char-count');
+  const btn = document.getElementById('composer-submit');
+  const len = ta.value.length;
+  counter.textContent = `${len} / 1000`;
+  counter.className = 'composer-char-count' + (len >= 1000 ? ' limit' : len >= 800 ? ' warn' : '');
+  btn.disabled = len === 0 && !composerFile;
+}
+
+function onComposerFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) {
+    alert('Файл слишком большой. Максимум 10 МБ.');
+    input.value = '';
+    return;
+  }
+  composerFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('composer-preview-img').src = e.target.result;
+    document.getElementById('composer-image-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('composer-submit').disabled = false;
+}
+
+function removeComposerImage() {
+  composerFile = null;
+  document.getElementById('composer-file-input').value = '';
+  document.getElementById('composer-image-preview').style.display = 'none';
+  document.getElementById('composer-preview-img').src = '';
+  onComposerInput();
+}
+
+async function submitPost() {
+  if (!currentUser) return;
+  const ta = document.getElementById('composer-text');
+  const text = ta.value.trim();
+  if (!text && !composerFile) return;
+
+  const btn = document.getElementById('composer-submit');
+  btn.classList.add('loading');
+  btn.textContent = 'Публикуем...';
+
+  try {
+    let imageUrl = null;
+    if (composerFile) {
+      const ext = composerFile.name.split('.').pop();
+      const path = `posts/${currentUser.uid}/${Date.now()}.${ext}`;
+      const ref = storage.ref(path);
+      await ref.put(composerFile);
+      imageUrl = await ref.getDownloadURL();
+    }
+
+    await db.collection('posts').add({
+      uid: currentUser.uid,
+      displayName: currentUser.displayName || 'Ученик',
+      photoURL: currentUser.photoURL || null,
+      type: 'user_post',
+      emoji: '✍️',
+      title: text || '',
+      subtitle: '',
+      imageUrl: imageUrl || null,
+      chips: [],
+      likes: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Reset composer
+    ta.value = '';
+    removeComposerImage();
+    onComposerInput();
+  } catch (e) {
+    console.error('submitPost error:', e);
+    alert('Не удалось опубликовать. Попробуй ещё раз.');
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = 'Опубликовать';
+  }
 }
 
 function hideFeedBadge() {
@@ -1592,6 +1688,8 @@ function renderFeedCard(docId, post) {
     `<span class="feed-chip ${c.color || ''}">${c.text}</span>`
   ).join('');
 
+  const isUserPost = post.type === 'user_post';
+
   card.innerHTML = `
     <div class="feed-card-header">
       ${avatarHtml}
@@ -1600,14 +1698,19 @@ function renderFeedCard(docId, post) {
         <div class="feed-card-time">${timeAgo}</div>
       </div>
     </div>
-    <div class="feed-card-body">
-      <div class="feed-card-icon">${post.emoji || '📌'}</div>
-      <div class="feed-card-text">
-        <div class="feed-card-title">${escHtml(post.title || '')}</div>
-        <div class="feed-card-sub">${escHtml(post.subtitle || '')}</div>
-        ${chipsHtml ? `<div class="feed-card-chips">${chipsHtml}</div>` : ''}
+    ${isUserPost ? `
+      ${post.title ? `<div class="feed-user-text">${escHtml(post.title)}</div>` : ''}
+      ${post.imageUrl ? `<div class="feed-card-image"><img src="${post.imageUrl}" alt="" loading="lazy" onclick="openFeedImage('${post.imageUrl}')"></div>` : ''}
+    ` : `
+      <div class="feed-card-body">
+        <div class="feed-card-icon">${post.emoji || '📌'}</div>
+        <div class="feed-card-text">
+          <div class="feed-card-title">${escHtml(post.title || '')}</div>
+          <div class="feed-card-sub">${escHtml(post.subtitle || '')}</div>
+          ${chipsHtml ? `<div class="feed-card-chips">${chipsHtml}</div>` : ''}
+        </div>
       </div>
-    </div>
+    `}
     <div class="feed-card-footer">
       <button class="feed-like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${docId}')">
         <span class="like-heart">${isLiked ? '❤️' : '🤍'}</span>
@@ -1716,6 +1819,14 @@ function escHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function openFeedImage(url) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+  overlay.innerHTML = `<img src="${url}" style="max-width:95vw;max-height:90vh;border-radius:12px;object-fit:contain">`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
 }
 
 // ============================================================
@@ -2044,7 +2155,8 @@ let vocabQuizState = {
 function showVocab(mode) {
   currentVocabMode = mode;
   document.getElementById('vocab-screen-title').textContent = mode === 'image' ? 'Карточки' : 'Перевод';
-  document.getElementById('vocab-screen-desc').textContent = mode === 'image'
+  const descEl = document.getElementById('vocab-screen-desc');
+  if (descEl) descEl.textContent = mode === 'image'
     ? 'Выбери картинку, которая соответствует греческому слову.'
     : 'Выбери правильный перевод греческого слова.';
 

@@ -1480,3 +1480,103 @@ body {
   width: 8px; height: 8px; border-radius: 50%;
   background: #FF4B4B;
 }
+
+/* ==================== FEED COMPOSER ==================== */
+.feed-composer {
+  margin: 0 16px 16px;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.feed-composer-top {
+  display: flex; gap: 10px; padding: 14px 14px 0;
+  align-items: flex-start;
+}
+.feed-composer-textarea {
+  flex: 1;
+  border: none; outline: none; resize: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px; color: var(--text);
+  background: transparent;
+  min-height: 72px; max-height: 200px;
+  line-height: 1.5;
+}
+.feed-composer-textarea::placeholder { color: var(--gray); }
+
+.composer-image-preview {
+  position: relative; margin: 8px 14px 0;
+  border-radius: 12px; overflow: hidden;
+  max-height: 240px;
+}
+.composer-image-preview img {
+  width: 100%; max-height: 240px;
+  object-fit: cover; display: block;
+  border-radius: 12px;
+}
+.composer-remove-img {
+  position: absolute; top: 8px; right: 8px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,0.55); color: white;
+  border: none; cursor: pointer;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.feed-composer-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px 12px;
+  border-top: 1px solid var(--gray-light);
+  margin-top: 10px;
+}
+.composer-left { display: flex; align-items: center; gap: 10px; }
+.composer-attach-btn {
+  font-size: 20px; cursor: pointer;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; transition: background 0.15s;
+}
+.composer-attach-btn:hover { background: var(--gray-bg); }
+.composer-char-count { font-size: 12px; color: var(--gray); font-weight: 600; }
+.composer-char-count.warn { color: #FF9600; }
+.composer-char-count.limit { color: var(--red); }
+
+.composer-submit-btn {
+  background: var(--green); color: white;
+  border: none; border-radius: 20px;
+  padding: 8px 18px; font-size: 14px; font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.composer-submit-btn:disabled {
+  background: var(--gray-light); color: var(--gray); cursor: default;
+}
+.composer-submit-btn.loading { opacity: 0.6; pointer-events: none; }
+
+/* Upload progress bar */
+.composer-upload-bar {
+  height: 3px; background: var(--green-light);
+  margin: 0 14px 8px; border-radius: 99px; display: none;
+}
+.composer-upload-bar-fill {
+  height: 100%; background: var(--green);
+  border-radius: 99px; width: 0%;
+  transition: width 0.2s;
+}
+
+/* User post text & image */
+.feed-user-text {
+  padding: 4px 16px 8px;
+  font-size: 15px; line-height: 1.55; color: var(--text);
+  white-space: pre-wrap; word-break: break-word;
+}
+.feed-card-image {
+  margin: 0 0 4px;
+  overflow: hidden;
+  border-radius: 0;
+}
+.feed-card-image img {
+  width: 100%; max-height: 320px;
+  object-fit: cover; display: block;
+  cursor: zoom-in;
+}
