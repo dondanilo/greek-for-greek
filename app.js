@@ -247,6 +247,158 @@ async function setupPushNotifications() {
   } catch (e) { console.error('Push setup error:', e); }
 }
 
+// ============================================================
+// PROGRESS DASHBOARD
+// ============================================================
+const LEAGUES = [
+  { id: 'bronze',   name: 'Бронзовая лига',   icon: '🥉', min: 1,  max: 10,  color: '#CD7F32' },
+  { id: 'silver',   name: 'Серебряная лига',   icon: '🥈', min: 11, max: 30,  color: '#A8A9AD' },
+  { id: 'gold',     name: 'Золотая лига',      icon: '🥇', min: 31, max: 50,  color: '#FFD700' },
+  { id: 'platinum', name: 'Платиновая лига',   icon: '💎', min: 51, max: 100, color: '#E5F0FF' },
+];
+
+function getLeague(level) {
+  return LEAGUES.find(l => level >= l.min && level <= l.max) || LEAGUES[LEAGUES.length - 1];
+}
+
+let activeProgressTab = 'xp';
+
+function showProgress(tab = 'xp') {
+  activeProgressTab = tab;
+  // Record start date if not set
+  if (!state.startedAt) {
+    state.startedAt = new Date().toISOString();
+    saveState();
+  }
+  renderProgressXP();
+  renderProgressLevel();
+  renderProgressLessons();
+  switchProgressTab(tab);
+  showScreen('screen-progress');
+}
+
+function switchProgressTab(tab) {
+  activeProgressTab = tab;
+  ['xp', 'level', 'lessons'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+    document.getElementById(`panel-${t}`).style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+function renderProgressXP() {
+  const xp = state.totalXp;
+  const level = state.level;
+  const xpForLevel = (level - 1) * 500;
+  const xpNextLevel = level * 500;
+  const xpInLevel = xp - xpForLevel;
+  const pct = Math.min(100, Math.round(xpInLevel / 500 * 100));
+
+  document.getElementById('pg-total-xp').textContent = xp.toLocaleString('ru-RU');
+  document.getElementById('pg-xp-bar').style.width = pct + '%';
+  document.getElementById('pg-xp-bar-label').textContent =
+    `${xpInLevel} / 500 XP до уровня ${level + 1}`;
+
+  const days = state.startedAt
+    ? Math.max(1, Math.ceil((Date.now() - new Date(state.startedAt).getTime()) / 86400000))
+    : 1;
+  document.getElementById('pg-xp-days').textContent = `${days} ${pluralDays(days)} в пути`;
+
+  document.getElementById('pg-daily-xp').textContent = state.dailyXp || 0;
+  document.getElementById('pg-streak-xp').textContent = state.streak || 0;
+  const lessons = state.lessonsCompleted || 0;
+  document.getElementById('pg-avg-xp').textContent = lessons > 0 ? Math.round(xp / lessons) : 0;
+  document.getElementById('pg-goal-xp').textContent = state.dailyGoal || 50;
+}
+
+function renderProgressLevel() {
+  const level = state.level;
+  const league = getLeague(level);
+  const nextLeague = LEAGUES[LEAGUES.indexOf(league) + 1];
+
+  document.getElementById('pg-league-badge').textContent = league.icon;
+  document.getElementById('pg-league-name').textContent = league.name;
+  document.getElementById('pg-level-val').textContent = level;
+
+  // Progress within league
+  const leagueLen = league.max - league.min + 1;
+  const inLeague = level - league.min;
+  const pct = Math.round(inLeague / leagueLen * 100);
+  document.getElementById('pg-league-bar').style.width = pct + '%';
+
+  if (nextLeague) {
+    document.getElementById('pg-league-progress-title').textContent =
+      `Прогресс в лиге (${inLeague} / ${leagueLen} уровней)`;
+    document.getElementById('pg-league-bar-label').textContent =
+      `До ${nextLeague.name}: ${league.max - level + 1} уровней`;
+  } else {
+    document.getElementById('pg-league-progress-title').textContent = 'Максимальная лига!';
+    document.getElementById('pg-league-bar-label').textContent = 'Ты достиг платинового уровня 💎';
+  }
+
+  // Highlight league rows
+  LEAGUES.forEach(l => {
+    const row = document.getElementById(`league-${l.id}`);
+    const check = document.getElementById(`lcheck-${l.id}`);
+    if (!row) return;
+    row.classList.remove('current', 'done');
+    if (l.id === league.id) { row.classList.add('current'); check.textContent = ''; }
+    else if (level > l.max) { row.classList.add('done'); check.textContent = '✅'; }
+    else { check.textContent = ''; }
+  });
+}
+
+function renderProgressLessons() {
+  const lessons = state.lessonsCompleted || 0;
+  document.getElementById('pg-lessons-val').textContent = lessons;
+  document.getElementById('pg-lessons-sub').textContent =
+    `Это примерно ${Math.round(lessons * 5)} минут практики`;
+
+  const milestones = [
+    { n: 1,   icon: '🌱', title: 'Первый урок',       sub: 'Начало большого пути' },
+    { n: 5,   icon: '🔥', title: '5 уроков',           sub: 'Войдёшь в ритм!' },
+    { n: 10,  icon: '⭐', title: '10 уроков',          sub: 'Ты серьёзен!' },
+    { n: 30,  icon: '🚀', title: '30 уроков',          sub: 'Месяц практики' },
+    { n: 50,  icon: '💪', title: '50 уроков',          sub: 'Полпути к мастерству' },
+    { n: 100, icon: '🏆', title: '100 уроков',         sub: 'Настоящий грек!' },
+  ];
+  const nextMilestone = milestones.find(m => m.n > lessons) || milestones[milestones.length - 1];
+  document.getElementById('pg-milestones').innerHTML = milestones.map(m => `
+    <div class="milestone-row ${lessons >= m.n ? 'done' : ''}">
+      <div class="milestone-icon">${m.icon}</div>
+      <div class="milestone-info">
+        <div class="milestone-title">${m.title}</div>
+        <div class="milestone-sub">${m.sub}</div>
+      </div>
+      <div class="milestone-check">${lessons >= m.n ? '✅' : `${m.n}`}</div>
+    </div>`).join('');
+
+  document.getElementById('pg-scenarios').textContent = (state.scenariosCompleted || []).length;
+  const vocabLearned = Object.values(state.vocabProgress || {}).reduce((s, a) => s + a.length, 0);
+  document.getElementById('pg-vocab-learned').textContent = vocabLearned;
+  document.getElementById('pg-achievements').textContent = (state.achievements || []).length;
+  document.getElementById('pg-streak-lessons').textContent = state.streak || 0;
+
+  // Motivation
+  const motivations = [
+    { emoji: '🔥', text: `Ещё ${nextMilestone.n - lessons} уроков до «${nextMilestone.title}»`, sub: 'Ты почти там!' },
+    { emoji: '🧠', text: `${vocabLearned} слов уже в голове`, sub: 'Каждое слово — шаг к гражданству' },
+    { emoji: '⚡', text: `${state.totalXp} XP заработано`, sub: 'Продолжай — каждый урок считается' },
+  ];
+  const m = motivations[lessons % motivations.length];
+  document.getElementById('pg-motivation').innerHTML = `
+    <div class="progress-motivation-emoji">${m.emoji}</div>
+    <div class="progress-motivation-text">${m.text}</div>
+    <div class="progress-motivation-sub">${m.sub}</div>`;
+}
+
+function pluralDays(n) {
+  if (n % 100 >= 11 && n % 100 <= 19) return 'дней';
+  const r = n % 10;
+  if (r === 1) return 'день';
+  if (r >= 2 && r <= 4) return 'дня';
+  return 'дней';
+}
+
 function showSettings() {
   // User info
   if (currentUser) {

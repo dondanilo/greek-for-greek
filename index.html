@@ -155,18 +155,18 @@
     </div>
 
     <div class="stats-row">
-      <div class="stat-item">
+      <button class="stat-item stat-item-btn" onclick="showProgress('xp')">
         <div class="stat-value" id="total-xp">0</div>
         <div class="stat-label">Всего XP</div>
-      </div>
-      <div class="stat-item">
+      </button>
+      <button class="stat-item stat-item-btn" onclick="showProgress('level')">
         <div class="stat-value" id="level-display">1</div>
         <div class="stat-label">Уровень</div>
-      </div>
-      <div class="stat-item">
+      </button>
+      <button class="stat-item stat-item-btn" onclick="showProgress('lessons')">
         <div class="stat-value" id="lessons-done">0</div>
         <div class="stat-label">Уроков</div>
-      </div>
+      </button>
     </div>
 
     <button class="btn-primary" onclick="startLesson()">Начать урок ▶</button>
@@ -645,6 +645,139 @@
 
     <div id="feed-container">
       <div class="feed-loading">Загружаем ленту...</div>
+    </div>
+  </div>
+
+  <!-- ==================== PROGRESS DASHBOARD ==================== -->
+  <div id="screen-progress" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Мой прогресс</h2>
+    </div>
+
+    <!-- Tabs -->
+    <div class="progress-tabs">
+      <button class="progress-tab active" id="tab-xp"      onclick="switchProgressTab('xp')">⚡ XP</button>
+      <button class="progress-tab"        id="tab-level"   onclick="switchProgressTab('level')">🏆 Лига</button>
+      <button class="progress-tab"        id="tab-lessons" onclick="switchProgressTab('lessons')">📖 Уроки</button>
+    </div>
+
+    <!-- XP Panel -->
+    <div class="progress-panel" id="panel-xp">
+      <div class="progress-hero">
+        <div class="progress-hero-icon">⚡</div>
+        <div class="progress-hero-value" id="pg-total-xp">0</div>
+        <div class="progress-hero-label">очков опыта</div>
+        <div class="progress-hero-sub" id="pg-xp-days"></div>
+      </div>
+      <div class="progress-card">
+        <div class="progress-card-title">До следующего уровня</div>
+        <div class="progress-bar-bg" style="height:12px;border-radius:99px">
+          <div class="progress-bar-fill" id="pg-xp-bar" style="border-radius:99px"></div>
+        </div>
+        <div class="progress-card-hint" id="pg-xp-bar-label"></div>
+      </div>
+      <div class="progress-stats-grid">
+        <div class="progress-stat-box">
+          <div class="progress-stat-val" id="pg-daily-xp">0</div>
+          <div class="progress-stat-lbl">XP сегодня</div>
+        </div>
+        <div class="progress-stat-box">
+          <div class="progress-stat-val" id="pg-streak-xp">0</div>
+          <div class="progress-stat-lbl">🔥 серия дней</div>
+        </div>
+        <div class="progress-stat-box">
+          <div class="progress-stat-val" id="pg-avg-xp">0</div>
+          <div class="progress-stat-lbl">XP / урок</div>
+        </div>
+        <div class="progress-stat-box">
+          <div class="progress-stat-val" id="pg-goal-xp">0</div>
+          <div class="progress-stat-lbl">цель XP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level / League Panel -->
+    <div class="progress-panel" id="panel-level" style="display:none">
+      <div class="league-hero">
+        <div class="league-badge" id="pg-league-badge"></div>
+        <div class="league-name" id="pg-league-name"></div>
+        <div class="league-level-row">
+          <span class="league-level-label">Уровень</span>
+          <span class="league-level-val" id="pg-level-val"></span>
+        </div>
+      </div>
+      <div class="progress-card">
+        <div class="progress-card-title" id="pg-league-progress-title"></div>
+        <div class="progress-bar-bg" style="height:14px;border-radius:99px">
+          <div class="progress-bar-fill" id="pg-league-bar" style="border-radius:99px"></div>
+        </div>
+        <div class="progress-card-hint" id="pg-league-bar-label"></div>
+      </div>
+      <div class="leagues-list">
+        <div class="league-row" id="league-bronze">
+          <span class="league-row-icon">🥉</span>
+          <div class="league-row-info">
+            <div class="league-row-name">Бронзовая лига</div>
+            <div class="league-row-range">Уровни 1–10</div>
+          </div>
+          <span class="league-row-check" id="lcheck-bronze"></span>
+        </div>
+        <div class="league-row" id="league-silver">
+          <span class="league-row-icon">🥈</span>
+          <div class="league-row-info">
+            <div class="league-row-name">Серебряная лига</div>
+            <div class="league-row-range">Уровни 11–30</div>
+          </div>
+          <span class="league-row-check" id="lcheck-silver"></span>
+        </div>
+        <div class="league-row" id="league-gold">
+          <span class="league-row-icon">🥇</span>
+          <div class="league-row-info">
+            <div class="league-row-name">Золотая лига</div>
+            <div class="league-row-range">Уровни 31–50</div>
+          </div>
+          <span class="league-row-check" id="lcheck-gold"></span>
+        </div>
+        <div class="league-row" id="league-platinum">
+          <span class="league-row-icon">💎</span>
+          <div class="league-row-info">
+            <div class="league-row-name">Платиновая лига</div>
+            <div class="league-row-range">Уровни 51–100</div>
+          </div>
+          <span class="league-row-check" id="lcheck-platinum"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lessons Panel -->
+    <div class="progress-panel" id="panel-lessons" style="display:none">
+      <div class="progress-hero">
+        <div class="progress-hero-icon">📖</div>
+        <div class="progress-hero-value" id="pg-lessons-val">0</div>
+        <div class="progress-hero-label">уроков пройдено</div>
+        <div class="progress-hero-sub" id="pg-lessons-sub"></div>
+      </div>
+      <div class="lessons-milestones" id="pg-milestones"></div>
+      <div class="progress-stats-grid">
+        <div class="progress-stat-box">
+          <div class="progress-stat-val" id="pg-scenarios">0</div>
+          <div class="progress-stat-lbl">сценариев</div>
+        </div>
+        <div class="progress-stat-box">
+          <div class="progress-stat-val" id="pg-vocab-learned">0</div>
+          <div class="progress-stat-lbl">слов выучено</div>
+        </div>
+        <div class="progress-stat-box">
+          <div class="progress-stat-val" id="pg-achievements">0</div>
+          <div class="progress-stat-lbl">достижений</div>
+        </div>
+        <div class="progress-stat-box">
+          <div class="progress-stat-val" id="pg-streak-lessons">0</div>
+          <div class="progress-stat-lbl">🔥 серия</div>
+        </div>
+      </div>
+      <div class="progress-card progress-motivation" id="pg-motivation"></div>
     </div>
   </div>
 

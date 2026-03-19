@@ -1600,3 +1600,114 @@ body {
   transition: background 0.15s, color 0.15s;
 }
 .feed-delete-btn:hover { background: var(--red-light); color: var(--red); }
+
+/* ==================== PROGRESS DASHBOARD ==================== */
+.stat-item-btn {
+  background: var(--white); border: none; cursor: pointer;
+  border-radius: var(--radius); padding: 12px 8px;
+  transition: transform 0.1s, box-shadow 0.1s;
+  flex: 1;
+}
+.stat-item-btn:active { transform: scale(0.96); }
+
+/* Tabs */
+.progress-tabs {
+  display: flex; gap: 8px; padding: 0 16px 16px;
+}
+.progress-tab {
+  flex: 1; padding: 10px 6px; border: 2px solid var(--gray-light);
+  border-radius: 12px; background: var(--white); font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; color: var(--gray); cursor: pointer;
+  transition: all 0.15s;
+}
+.progress-tab.active {
+  border-color: var(--green); background: var(--green-light); color: var(--green-dark);
+}
+
+/* Panels */
+.progress-panel { padding: 0 16px 24px; }
+
+/* Hero */
+.progress-hero {
+  background: linear-gradient(135deg, #58CC02, #1CB0F6);
+  border-radius: 20px; padding: 28px 20px;
+  text-align: center; color: white; margin-bottom: 16px;
+}
+.progress-hero-icon { font-size: 40px; margin-bottom: 6px; }
+.progress-hero-value { font-size: 52px; font-weight: 900; line-height: 1; }
+.progress-hero-label { font-size: 16px; font-weight: 600; opacity: 0.9; margin-top: 4px; }
+.progress-hero-sub   { font-size: 13px; opacity: 0.8; margin-top: 6px; }
+
+/* Card */
+.progress-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.progress-card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.progress-card-hint  { font-size: 12px; color: var(--gray); margin-top: 6px; text-align: right; }
+
+/* Mini stats grid */
+.progress-stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
+}
+.progress-stat-box {
+  background: var(--white); border-radius: var(--radius);
+  padding: 14px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.progress-stat-val { font-size: 26px; font-weight: 900; color: var(--green); }
+.progress-stat-lbl { font-size: 12px; color: var(--gray); font-weight: 600; margin-top: 2px; }
+
+/* League */
+.league-hero {
+  background: var(--white); border-radius: 20px;
+  padding: 28px 20px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+}
+.league-badge  { font-size: 64px; line-height: 1; margin-bottom: 8px; }
+.league-name   { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+.league-level-row { display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gray-bg); border-radius: 99px; padding: 6px 16px; }
+.league-level-label { font-size: 13px; color: var(--gray); font-weight: 600; }
+.league-level-val   { font-size: 18px; font-weight: 900; color: var(--text); }
+
+.leagues-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.league-row {
+  background: var(--white); border-radius: var(--radius);
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  opacity: 0.45;
+}
+.league-row.current { opacity: 1; border: 2px solid var(--green); }
+.league-row.done    { opacity: 1; }
+.league-row-icon    { font-size: 28px; flex-shrink: 0; }
+.league-row-info    { flex: 1; }
+.league-row-name    { font-size: 14px; font-weight: 700; color: var(--text); }
+.league-row-range   { font-size: 12px; color: var(--gray); }
+.league-row-check   { font-size: 18px; }
+
+/* Milestones */
+.lessons-milestones { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.milestone-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--white); border-radius: var(--radius);
+  padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.milestone-row.done .milestone-icon { filter: none; }
+.milestone-row:not(.done) { opacity: 0.5; }
+.milestone-icon  { font-size: 24px; }
+.milestone-info  { flex: 1; }
+.milestone-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.milestone-sub   { font-size: 12px; color: var(--gray); }
+.milestone-check { font-size: 18px; }
+
+/* Motivation card */
+.progress-motivation {
+  text-align: center; padding: 20px;
+  background: linear-gradient(135deg, #fff8cc, #fffbe6);
+  border: 2px solid #FFD900;
+}
+.progress-motivation-emoji { font-size: 36px; margin-bottom: 8px; }
+.progress-motivation-text  { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.progress-motivation-sub   { font-size: 13px; color: var(--text-light); }
