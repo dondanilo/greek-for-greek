@@ -3188,19 +3188,25 @@ function startSpeechRecognition() {
     return;
   }
 
-  // Запрашиваем разрешение на микрофон явно — это позволяет браузеру
-  // показать диалог ДО запуска распознавания, чтобы оно не прерывалось
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
-      stream.getTracks().forEach(t => t.stop()); // освобождаем, SR сам получит доступ
-      runSpeechRecognition(SR);
-    })
-    .catch(err => {
-      setSpeechUIState('idle');
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        alert('Нужен доступ к микрофону. Разреши его в настройках браузера и попробуй снова.');
-      }
-    });
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  if (!isMobile && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    // На десктопе — сначала запрашиваем разрешение явно
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        stream.getTracks().forEach(t => t.stop());
+        runSpeechRecognition(SR);
+      })
+      .catch(err => {
+        setSpeechUIState('idle');
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          alert('Нужен доступ к микрофону. Разреши его в настройках браузера и попробуй снова.');
+        }
+      });
+  } else {
+    // На мобиле — запускаем напрямую, getUserMedia конфликтует с SpeechRecognition
+    runSpeechRecognition(SR);
+  }
 }
 
 function runSpeechRecognition(SR) {
@@ -3212,7 +3218,20 @@ function runSpeechRecognition(SR) {
   r.maxAlternatives = 6;
   speechSession.recognition = r;
 
+  // Таймаут — если за 9 секунд ничего не распознано, останавливаем
+  const timeout = setTimeout(() => {
+    if (speechSession.uiState === 'recording') {
+      try { r.stop(); } catch(e) {}
+    }
+  }, 9000);
+
+  r.onspeechend = () => {
+    // Речь закончилась — принудительно останавливаем, чтобы получить результат
+    try { r.stop(); } catch(e) {}
+  };
+
   r.onresult = (event) => {
+    clearTimeout(timeout);
     const target = speechSession.words[speechSession.index].greek;
     const alts = Array.from(event.results[0]).map(a => a.transcript);
     document.getElementById('speech-recognized').textContent = alts[0] || '';
@@ -3227,10 +3246,15 @@ function runSpeechRecognition(SR) {
   };
 
   r.onerror = (e) => {
+    clearTimeout(timeout);
+    if (e.error === 'not-allowed') {
+      alert('Нужен доступ к микрофону. Разреши его в настройках браузера и попробуй снова.');
+    }
     if (e.error !== 'aborted') setSpeechUIState('idle');
   };
 
   r.onend = () => {
+    clearTimeout(timeout);
     if (speechSession.uiState === 'recording') setSpeechUIState('idle');
     speechSession.recognition = null;
   };
