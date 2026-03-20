@@ -1830,19 +1830,19 @@ body {
    SPEECH TRAINING
    ============================================================ */
 .speech-dark-screen {
-  background: #111827;
-  color: #fff;
+  background: var(--gray-bg);
+  color: var(--text);
   min-height: 100vh;
 }
 .speech-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 20px 12px;
+  padding: 4px 4px 4px;
 }
 .speech-back-btn {
-  background: rgba(255,255,255,0.12);
-  color: #fff;
+  background: var(--gray-light);
+  color: var(--text);
   border: none;
   border-radius: 50%;
   width: 38px;
@@ -1853,25 +1853,28 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Nunito', sans-serif;
 }
 .speech-progress-wrap { flex: 1; }
 .speech-progress-bg {
-  background: rgba(255,255,255,0.15);
+  background: var(--gray-light);
   border-radius: 99px;
-  height: 8px;
+  height: 10px;
 }
 .speech-progress-fill {
-  background: #4f9cf9;
-  height: 8px;
+  background: var(--green);
+  height: 10px;
   border-radius: 99px;
   transition: width 0.4s ease;
   width: 0%;
 }
 .speech-counter {
   font-size: 13px;
-  color: rgba(255,255,255,0.5);
+  font-weight: 700;
+  color: var(--gray);
   min-width: 36px;
   text-align: right;
+  font-family: 'Nunito', sans-serif;
 }
 
 /* Categories screen */
@@ -1879,14 +1882,17 @@ body {
   font-size: 18px;
   font-weight: 800;
   flex: 1;
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
 }
 .speech-cat-desc {
   font-size: 14px;
-  color: rgba(255,255,255,0.5);
-  padding: 0 20px 16px;
+  color: var(--text-light);
+  padding: 0 4px 16px;
+  font-family: 'Nunito', sans-serif;
 }
 .speech-categories-list {
-  padding: 0 16px 32px;
+  padding: 0 0 32px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1895,25 +1901,26 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #1e2a3a;
-  border: none;
-  border-radius: 16px;
+  background: var(--white);
+  border: 2px solid var(--gray-light);
+  border-radius: var(--radius);
   padding: 14px 16px;
   cursor: pointer;
   text-align: left;
-  color: #fff;
-  transition: background 0.15s;
+  color: var(--text);
+  transition: border-color 0.15s, background 0.15s;
   width: 100%;
+  font-family: 'Nunito', sans-serif;
 }
-.speech-cat-btn:active { background: #253548; }
+.speech-cat-btn:active { background: var(--green-light); border-color: var(--green); }
 .speech-cat-icon {
-  font-size: 28px;
+  font-size: 26px;
   width: 44px;
   height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.08);
+  background: var(--gray-bg);
   border-radius: 12px;
   flex-shrink: 0;
 }
@@ -1922,19 +1929,21 @@ body {
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 2px;
+  color: var(--text);
 }
 .speech-cat-count {
   font-size: 12px;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-light);
 }
 .speech-cat-arrow {
-  font-size: 18px;
-  color: rgba(255,255,255,0.3);
+  font-size: 20px;
+  color: var(--gray);
+  font-weight: 700;
 }
 
 /* Training screen */
 .speech-content {
-  padding: 8px 20px 0;
+  padding: 8px 0 0;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1945,7 +1954,7 @@ body {
   gap: 12px;
 }
 .speech-character {
-  font-size: 60px;
+  font-size: 58px;
   line-height: 1;
   flex-shrink: 0;
   transition: transform 0.3s;
@@ -1967,7 +1976,7 @@ body {
 }
 .speech-bubble-wrap { flex: 1; min-width: 0; }
 .speech-bubble-badge {
-  background: #e8600a;
+  background: #FF9600;
   color: #fff;
   font-size: 11px;
   font-weight: 800;
@@ -1977,54 +1986,63 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
+  font-family: 'Nunito', sans-serif;
 }
 .speech-retry-icon { font-size: 13px; }
 .speech-bubble {
-  background: #1e2a3a;
-  color: #fff;
+  background: var(--white);
+  color: var(--text);
   font-size: 16px;
   font-weight: 700;
   padding: 12px 14px;
-  border-radius: 0 12px 12px 12px;
+  border-radius: 0 var(--radius) var(--radius) var(--radius);
+  border: 2px solid var(--gray-light);
   line-height: 1.4;
+  font-family: 'Nunito', sans-serif;
 }
 .speech-bubble-badge + .speech-bubble {
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  border-top: none;
 }
 
 .speech-word-area {
   text-align: center;
-  padding: 16px 0 120px;
+  padding: 20px 0 130px;
 }
 .speech-greek-word {
   font-size: 46px;
   font-weight: 900;
-  color: #fff;
+  color: var(--text);
   margin-bottom: 10px;
   transition: color 0.3s;
   line-height: 1.1;
+  font-family: 'Nunito', sans-serif;
 }
-.speech-greek-word.speech-correct { color: #4ade80; }
-.speech-greek-word.speech-wrong   { color: #f97316; }
+.speech-greek-word.speech-correct { color: var(--green); }
+.speech-greek-word.speech-wrong   { color: #FF9600; }
 .speech-transcription {
   font-size: 17px;
-  color: rgba(255,255,255,0.55);
+  color: var(--text-light);
   margin-bottom: 6px;
+  font-family: 'Nunito', sans-serif;
 }
 .speech-translation {
   font-size: 14px;
-  color: rgba(255,255,255,0.35);
+  color: var(--gray);
   font-style: italic;
+  font-family: 'Nunito', sans-serif;
 }
 
 /* Footer mic */
 .speech-footer {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 20px 32px;
-  background: linear-gradient(to top, #111827 60%, transparent);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 520px;
+  padding: 8px 16px 32px;
+  background: linear-gradient(to top, var(--gray-bg) 65%, transparent);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2032,33 +2050,46 @@ body {
 }
 .speech-recognized {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-light);
   min-height: 18px;
   text-align: center;
+  font-family: 'Nunito', sans-serif;
 }
 .speech-mic-btn {
   width: 100%;
   max-width: 480px;
   height: 62px;
-  border-radius: 31px;
+  border-radius: 16px;
   border: none;
   font-size: 26px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.1s, background 0.25s;
+  transition: transform 0.08s, box-shadow 0.08s;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
 }
-.speech-mic-btn:active { transform: scale(0.97); }
-.speech-mic-idle    { background: #4f9cf9; }
+.speech-mic-btn:active { transform: translateY(4px); box-shadow: none !important; }
+.speech-mic-idle {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 4px 0 var(--green-dark);
+}
 .speech-mic-recording {
-  background: #4f9cf9;
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 4px 0 var(--blue-dark);
   animation: micPulse 1.1s ease-in-out infinite;
 }
-.speech-mic-correct { background: #22c55e; }
+.speech-mic-correct {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 4px 0 var(--green-dark);
+}
 @keyframes micPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(79,156,249,0.5); }
-  50%      { box-shadow: 0 0 0 18px rgba(79,156,249,0); }
+  0%,100% { box-shadow: 0 4px 0 var(--blue-dark), 0 0 0 0 rgba(28,176,246,0.4); }
+  50%      { box-shadow: 0 4px 0 var(--blue-dark), 0 0 0 14px rgba(28,176,246,0); }
 }
 /* Wave bars */
 .speech-waves {
@@ -2085,4 +2116,4 @@ body {
 }
 
 /* Nav highlight */
-.nav-btn-speech { border-color: #4f9cf9 !important; }
+.nav-btn-speech { border-color: var(--green) !important; }

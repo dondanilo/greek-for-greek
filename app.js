@@ -3187,6 +3187,23 @@ function startSpeechRecognition() {
     alert('Ваш браузер не поддерживает распознавание речи. Используйте Chrome или Safari.');
     return;
   }
+
+  // Запрашиваем разрешение на микрофон явно — это позволяет браузеру
+  // показать диалог ДО запуска распознавания, чтобы оно не прерывалось
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      stream.getTracks().forEach(t => t.stop()); // освобождаем, SR сам получит доступ
+      runSpeechRecognition(SR);
+    })
+    .catch(err => {
+      setSpeechUIState('idle');
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        alert('Нужен доступ к микрофону. Разреши его в настройках браузера и попробуй снова.');
+      }
+    });
+}
+
+function runSpeechRecognition(SR) {
   setSpeechUIState('recording');
   const r = new SR();
   r.lang = 'el-GR';
