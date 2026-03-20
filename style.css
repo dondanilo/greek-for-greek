@@ -2117,3 +2117,13 @@ body {
 
 /* Nav highlight */
 .nav-btn-speech { border-color: var(--green) !important; }
+.nav-btn-wide {
+  grid-column: span 2;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  padding: 18px;
+  font-size: 16px;
+}
+.nav-btn-wide .nav-icon { font-size: 26px; }
+.nav-btn-wide .nav-label { font-size: 15px; font-weight: 800; }
