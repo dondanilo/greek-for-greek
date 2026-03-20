@@ -213,6 +213,10 @@
         <span class="nav-label">Достижения</span>
         <span class="ach-nav-count" id="ach-nav-count">0/15</span>
       </button>
+      <button class="nav-btn nav-btn-speech" onclick="showSpeechTraining()">
+        <span class="nav-icon">🎤</span>
+        <span class="nav-label">Речь</span>
+      </button>
       <button class="nav-btn nav-btn-feed" onclick="showFeed()">
         <span class="nav-icon">👥</span>
         <span class="nav-label">Лента</span>
@@ -874,6 +878,82 @@
       <h2 id="blog-article-title" style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px"></h2>
     </div>
     <iframe id="blog-article-frame" src="" style="width:100%;border:none;min-height:calc(100vh - 60px);display:block"></iframe>
+  </div>
+
+  <!-- ==================== SPEECH CATEGORIES ==================== -->
+  <div id="screen-speech-categories" class="screen speech-dark-screen">
+    <div class="speech-header">
+      <button class="speech-back-btn" onclick="showHome()">✕</button>
+      <div class="speech-cat-title">Тренировка речи</div>
+    </div>
+    <div class="speech-cat-desc">Выбери категорию для тренировки произношения</div>
+    <div id="speech-categories-list" class="speech-categories-list"></div>
+  </div>
+
+  <!-- ==================== SPEECH TRAINING ==================== -->
+  <div id="screen-speech" class="screen speech-dark-screen">
+    <div class="speech-header">
+      <button class="speech-back-btn" onclick="exitSpeechTraining()">✕</button>
+      <div class="speech-progress-wrap">
+        <div class="speech-progress-bg">
+          <div class="speech-progress-fill" id="speech-progress"></div>
+        </div>
+      </div>
+      <div class="speech-counter" id="speech-counter">1/15</div>
+    </div>
+
+    <div class="speech-content">
+      <div class="speech-character-row">
+        <div class="speech-character" id="speech-character">👩‍🏫</div>
+        <div class="speech-bubble-wrap">
+          <div class="speech-bubble-badge" id="speech-bubble-badge" style="display:none">
+            <span class="speech-retry-icon">↺</span> ПОПРОБУЙТЕ СНОВА
+          </div>
+          <div class="speech-bubble" id="speech-bubble">Скажите это слово:</div>
+        </div>
+      </div>
+
+      <div class="speech-word-area">
+        <div class="speech-greek-word" id="speech-greek"></div>
+        <div class="speech-transcription" id="speech-transcription"></div>
+        <div class="speech-translation" id="speech-translation"></div>
+      </div>
+    </div>
+
+    <div class="speech-footer">
+      <div class="speech-recognized" id="speech-recognized"></div>
+      <button class="speech-mic-btn speech-mic-idle" id="speech-mic-btn" onclick="onSpeechMicClick()">
+        <span class="speech-mic-icon">🎤</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== SPEECH COMPLETE ==================== -->
+  <div id="screen-speech-complete" class="screen speech-dark-screen">
+    <div class="complete-content" style="color:#fff">
+      <div class="complete-animation">🎤</div>
+      <h2 style="color:#fff">Тренировка завершена!</h2>
+      <div class="complete-stars">⭐⭐⭐</div>
+      <div class="complete-stats">
+        <div class="complete-stat">
+          <div class="complete-stat-icon">✅</div>
+          <div class="complete-stat-value" id="speech-complete-correct" style="color:#fff">0</div>
+          <div class="complete-stat-label" style="color:rgba(255,255,255,0.6)">правильно</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-icon">⚡</div>
+          <div class="complete-stat-value" id="speech-complete-xp" style="color:#fff">+0</div>
+          <div class="complete-stat-label" style="color:rgba(255,255,255,0.6)">XP</div>
+        </div>
+        <div class="complete-stat">
+          <div class="complete-stat-icon">🎯</div>
+          <div class="complete-stat-value" id="speech-complete-total" style="color:#fff">15</div>
+          <div class="complete-stat-label" style="color:rgba(255,255,255,0.6)">слов</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="showSpeechTraining()" style="max-width:320px">Ещё раз</button>
+      <button class="btn-secondary" onclick="showHome()" style="margin-top:10px;max-width:320px;color:#fff;border-color:rgba(255,255,255,0.3)">На главную</button>
+    </div>
   </div>
 
   <button id="scroll-top-btn" onclick="scrollToTop()" aria-label="Наверх">↑</button>

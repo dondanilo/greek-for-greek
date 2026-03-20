@@ -3014,3 +3014,248 @@ function openBlogArticle(slug, title) {
   if (titleEl) titleEl.textContent = title;
   showScreen('screen-blog-article');
 }
+
+// ============================================================
+// SPEECH TRAINING
+// ============================================================
+const SPEECH_CATEGORIES = (() => {
+  const cats = [];
+
+  // Глаголы из VERBS
+  cats.push({
+    id: 'verbs',
+    icon: '📚',
+    name: 'Глаголы',
+    getWords: () => VERBS.map(v => ({
+      greek: v.infinitive,
+      transcription: v.transcription,
+      translation: v.translation
+    }))
+  });
+
+  // Фразы из PHRASES
+  if (typeof PHRASES !== 'undefined') {
+    PHRASES.forEach(cat => {
+      cats.push({
+        id: 'phrase_' + cat.id,
+        icon: cat.icon || '💬',
+        name: 'Фразы: ' + cat.category,
+        getWords: () => cat.phrases.map(p => ({
+          greek: p.greek,
+          transcription: p.transcription,
+          translation: p.translation
+        }))
+      });
+    });
+  }
+
+  // Словарь из VOCAB_CATEGORIES
+  if (typeof VOCAB_CATEGORIES !== 'undefined') {
+    VOCAB_CATEGORIES.forEach(cat => {
+      cats.push({
+        id: 'vocab_' + cat.id,
+        icon: cat.icon || '🔤',
+        name: cat.title,
+        getWords: () => cat.words.map(w => ({
+          greek: w.greek,
+          transcription: w.transcription,
+          translation: w.translation
+        }))
+      });
+    });
+  }
+
+  return cats;
+})();
+
+let speechSession = {
+  words: [],
+  index: 0,
+  total: 15,
+  correctCount: 0,
+  xpEarned: 0,
+  recognition: null,
+  uiState: 'idle' // idle | recording | correct | wrong
+};
+
+function showSpeechTraining() {
+  const list = document.getElementById('speech-categories-list');
+  list.innerHTML = '';
+  SPEECH_CATEGORIES.forEach(cat => {
+    const count = cat.getWords().length;
+    const btn = document.createElement('button');
+    btn.className = 'speech-cat-btn';
+    btn.innerHTML = `
+      <div class="speech-cat-icon">${cat.icon}</div>
+      <div class="speech-cat-info">
+        <div class="speech-cat-name">${cat.name}</div>
+        <div class="speech-cat-count">${count} слов / фраз</div>
+      </div>
+      <div class="speech-cat-arrow">›</div>`;
+    btn.onclick = () => startSpeechSession(cat.id);
+    list.appendChild(btn);
+  });
+  showScreen('screen-speech-categories');
+}
+
+function startSpeechSession(catId) {
+  const cat = SPEECH_CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  const all = cat.getWords().filter(w => w.greek && w.translation);
+  const shuffled = all.sort(() => Math.random() - 0.5);
+  speechSession.words = shuffled.slice(0, speechSession.total);
+  speechSession.index = 0;
+  speechSession.correctCount = 0;
+  speechSession.xpEarned = 0;
+  speechSession.uiState = 'idle';
+  renderSpeechCard();
+  showScreen('screen-speech');
+}
+
+function renderSpeechCard() {
+  const w = speechSession.words[speechSession.index];
+  document.getElementById('speech-greek').textContent = w.greek;
+  document.getElementById('speech-transcription').textContent = w.transcription || '';
+  document.getElementById('speech-translation').textContent = w.translation ? '"' + w.translation + '"' : '';
+  document.getElementById('speech-counter').textContent =
+    (speechSession.index + 1) + '/' + speechSession.total;
+  const pct = (speechSession.index / speechSession.total) * 100;
+  document.getElementById('speech-progress').style.width = pct + '%';
+  document.getElementById('speech-recognized').textContent = '';
+  setSpeechUIState('idle');
+}
+
+function setSpeechUIState(st) {
+  speechSession.uiState = st;
+  const btn    = document.getElementById('speech-mic-btn');
+  const bubble = document.getElementById('speech-bubble');
+  const badge  = document.getElementById('speech-bubble-badge');
+  const word   = document.getElementById('speech-greek');
+  const char   = document.getElementById('speech-character');
+
+  btn.className = 'speech-mic-btn';
+
+  if (st === 'idle') {
+    btn.classList.add('speech-mic-idle');
+    btn.innerHTML = '<span style="font-size:28px">🎤</span>';
+    bubble.textContent = 'Скажите это слово:';
+    badge.style.display = 'none';
+    word.className = 'speech-greek-word';
+    char.className = 'speech-character';
+  } else if (st === 'recording') {
+    btn.classList.add('speech-mic-recording');
+    btn.innerHTML = '<div class="speech-waves"><span></span><span></span><span></span><span></span><span></span></div>';
+    bubble.textContent = 'Слушаю...';
+    badge.style.display = 'none';
+    word.className = 'speech-greek-word';
+  } else if (st === 'correct') {
+    btn.classList.add('speech-mic-correct');
+    btn.innerHTML = '<span style="font-size:32px">✓</span>';
+    bubble.textContent = 'Отлично! Продолжаем!';
+    badge.style.display = 'none';
+    word.className = 'speech-greek-word speech-correct';
+    char.className = 'speech-character speech-character-happy';
+  } else if (st === 'wrong') {
+    btn.classList.add('speech-mic-idle');
+    btn.innerHTML = '<span style="font-size:28px">🎤</span>';
+    bubble.textContent = 'Скажите это слово:';
+    badge.style.display = 'flex';
+    word.className = 'speech-greek-word speech-wrong';
+    char.className = 'speech-character speech-character-thinking';
+  }
+}
+
+function onSpeechMicClick() {
+  if (speechSession.uiState === 'recording') return;
+
+  if (speechSession.uiState === 'correct') {
+    speechSession.index++;
+    if (speechSession.index >= speechSession.total) {
+      finishSpeechSession();
+    } else {
+      renderSpeechCard();
+    }
+    return;
+  }
+
+  startSpeechRecognition();
+}
+
+function startSpeechRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    alert('Ваш браузер не поддерживает распознавание речи. Используйте Chrome или Safari.');
+    return;
+  }
+  setSpeechUIState('recording');
+  const r = new SR();
+  r.lang = 'el-GR';
+  r.continuous = false;
+  r.interimResults = false;
+  r.maxAlternatives = 6;
+  speechSession.recognition = r;
+
+  r.onresult = (event) => {
+    const target = speechSession.words[speechSession.index].greek;
+    const alts = Array.from(event.results[0]).map(a => a.transcript);
+    document.getElementById('speech-recognized').textContent = alts[0] || '';
+    const ok = alts.some(t => normalizeGreekSpeech(t) === normalizeGreekSpeech(target));
+    if (ok) {
+      speechSession.correctCount++;
+      speechSession.xpEarned += 5;
+      setSpeechUIState('correct');
+    } else {
+      setSpeechUIState('wrong');
+    }
+  };
+
+  r.onerror = (e) => {
+    if (e.error !== 'aborted') setSpeechUIState('idle');
+  };
+
+  r.onend = () => {
+    if (speechSession.uiState === 'recording') setSpeechUIState('idle');
+    speechSession.recognition = null;
+  };
+
+  r.start();
+}
+
+function normalizeGreekSpeech(text) {
+  return text.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f\u0345]/g, '')
+    .replace(/[^α-ωa-z]/gi, '')
+    .trim();
+}
+
+function finishSpeechSession() {
+  // Award XP
+  const xp = speechSession.xpEarned + 10; // +10 bonus for finishing
+  state.totalXp += xp;
+  state.dailyXp = (state.dailyXp || 0) + xp;
+  state.level = Math.floor(state.totalXp / 500) + 1;
+  state.lessonsCompleted = (state.lessonsCompleted || 0) + 1;
+  const today = new Date().toDateString();
+  if (state.lastPlayed !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    state.streak = (state.lastPlayed === yesterday.toDateString()) ? state.streak + 1 : 1;
+    state.lastPlayed = today;
+  }
+  saveState();
+  checkAchievements({});
+
+  document.getElementById('speech-complete-correct').textContent = speechSession.correctCount;
+  document.getElementById('speech-complete-xp').textContent = '+' + xp;
+  document.getElementById('speech-complete-total').textContent = speechSession.total;
+  showScreen('screen-speech-complete');
+}
+
+function exitSpeechTraining() {
+  if (speechSession.recognition) {
+    try { speechSession.recognition.abort(); } catch(e) {}
+    speechSession.recognition = null;
+  }
+  showSpeechTraining();
+}
