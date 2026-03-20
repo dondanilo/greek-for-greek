@@ -2988,8 +2988,9 @@ function renderBlogList() {
     html += `<div class="blog-section-label${isPurple ? ' blog-section-purple' : ''}">${section.section}</div>`;
     html += `<div class="blog-section-grid">`;
     section.items.forEach(article => {
+      const safeTitle = article.title.replace(/"/g, '&quot;');
       html += `
-        <button class="blog-card" onclick="openBlogArticle('${article.slug}', ${JSON.stringify(article.title)})">
+        <button class="blog-card" data-slug="${article.slug}" data-title="${safeTitle}" onclick="openBlogArticle(this.dataset.slug, this.dataset.title)">
           <div class="blog-card-emoji${isPurple ? ' blog-card-emoji-purple' : ''}">${article.emoji}</div>
           <div class="blog-card-body">
             <div class="blog-card-tag${isPurple ? ' blog-card-tag-purple' : ''}">${article.tag}</div>
