@@ -126,6 +126,8 @@ const PRONOUNS_RU = {
   "εγώ": "я", "εσύ": "ты", "αυτός/ή/ό": "он/она/оно",
   "εμείς": "мы", "εσείς": "вы", "αυτοί/ές/ά": "они"
 };
+// VERBS array in data.js contains mixed data — filter real verbs only
+const VERBS_ONLY = VERBS.filter(v => v.infinitive);
 
 // ============================================================
 // PERSISTENCE
@@ -617,7 +619,7 @@ function generateLesson(verbPool = null) {
       });
     } else if (type === 2) {
       const correct = verb.translation;
-      const wrongs = VERBS.filter(v => v.id !== verb.id).sort(() => Math.random() - 0.5).slice(0, 3).map(v => v.translation);
+      const wrongs = VERBS_ONLY.filter(v => v.id !== verb.id).sort(() => Math.random() - 0.5).slice(0, 3).map(v => v.translation);
       exercises.push({
         type: 'word_meaning', verb, greek: verb.infinitive,
         correctAnswer: correct, options: shuffle([correct, ...wrongs])
@@ -647,7 +649,7 @@ function generateLesson(verbPool = null) {
 function getWrongForms(verb, correctForm) {
   const allForms = Object.values(verb.present).filter(f => f !== correctForm);
   if (allForms.length < 3) {
-    const extra = VERBS.find(v => v.id !== verb.id);
+    const extra = VERBS_ONLY.find(v => v.id !== verb.id);
     allForms.push(...Object.values(extra.present).filter(f => f !== correctForm));
   }
   return shuffle(allForms).slice(0, 3);
@@ -655,7 +657,7 @@ function getWrongForms(verb, correctForm) {
 
 function getWrongMeanings(verb, pronoun) {
   const pRu = PRONOUNS_RU[pronoun];
-  return VERBS.filter(v => v.id !== verb.id).sort(() => Math.random() - 0.5).slice(0, 3).map(v => `${pRu} ${v.translation}`);
+  return VERBS_ONLY.filter(v => v.id !== verb.id).sort(() => Math.random() - 0.5).slice(0, 3).map(v => `${pRu} ${v.translation}`);
 }
 
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
@@ -673,7 +675,7 @@ function startWeakLesson() {
   const weakIds = Object.keys(state.errorLog)
     .sort((a, b) => state.errorLog[b] - state.errorLog[a])
     .map(id => parseInt(id));
-  const weakVerbs = VERBS.filter(v => weakIds.includes(v.id));
+  const weakVerbs = VERBS_ONLY.filter(v => weakIds.includes(v.id));
   if (weakVerbs.length < 2) return;
   lessonState = {
     exercises: generateLesson(weakVerbs),
@@ -960,7 +962,7 @@ function srsRate(verbId, isCorrect) {
 function getSrsDueVerbs() {
   if (!state.srs) return [];
   const today = todayStr();
-  return VERBS.filter(v => state.srs[v.id]?.due <= today);
+  return VERBS_ONLY.filter(v => state.srs[v.id]?.due <= today);
 }
 
 function getSrsDueCount() {
@@ -969,7 +971,7 @@ function getSrsDueCount() {
 
 function renderSrsStats() {
   if (!state.srs) state.srs = {};
-  const total = VERBS.length;
+  const total = VERBS_ONLY.length;
   const studied = Object.keys(state.srs).length;
   const dueCount = getSrsDueCount();
   const newCount = total - studied;
@@ -994,7 +996,7 @@ function buildSrsPool() {
   if (!state.srs) state.srs = {};
   const today = todayStr();
   const pool = [];
-  VERBS.forEach(v => {
+  VERBS_ONLY.forEach(v => {
     const card = state.srs[v.id];
     if (!card) {
       // Новый — среднее: 2x
@@ -1340,18 +1342,18 @@ function renderVerbCards(verbs) {
 function filterVerbs(query) {
   const q = query.toLowerCase().trim();
   const filtered = q
-    ? VERBS.filter(v =>
+    ? VERBS_ONLY.filter(v =>
         v.infinitive.toLowerCase().includes(q) ||
         v.translation.toLowerCase().includes(q) ||
         Object.values(v.present).some(f => f.toLowerCase().includes(q))
       )
-    : VERBS;
+    : VERBS_ONLY;
   renderVerbCards(filtered);
 }
 
 function showVerbTable() {
   document.getElementById('verb-search').value = '';
-  renderVerbCards(VERBS);
+  renderVerbCards(VERBS_ONLY);
   showScreen('screen-verbs');
 }
 
@@ -1534,7 +1536,7 @@ function showAudit() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([id, count]) => {
-      const verb = VERBS.find(v => v.id === parseInt(id));
+      const verb = VERBS_ONLY.find(v => v.id === parseInt(id));
       return verb ? `<div class="weak-verb-row"><span class="wv-infinitive">${verb.infinitive}</span><span class="wv-translation">${verb.translation}</span><span class="wv-errors">${count} ошиб.</span></div>` : '';
     }).join('');
 
