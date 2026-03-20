@@ -3075,10 +3075,35 @@ let speechSession = {
   correctCount: 0,
   xpEarned: 0,
   recognition: null,
-  uiState: 'idle' // idle | recording | correct | wrong
+  uiState: 'idle', // idle | recording | correct | wrong
+  micGranted: false // разрешение на микрофон получено один раз
 };
 
+function requestMicPermissionOnce() {
+  if (speechSession.micGranted) return; // уже есть — не спрашиваем
+
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    // На мобиле проверяем через Permissions API без вызова getUserMedia
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: 'microphone' }).then(result => {
+        if (result.state === 'granted') speechSession.micGranted = true;
+      }).catch(() => {});
+    }
+    return;
+  }
+
+  // На десктопе — запрашиваем один раз при входе в раздел
+  navigator.mediaDevices && navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      stream.getTracks().forEach(t => t.stop());
+      speechSession.micGranted = true;
+    })
+    .catch(() => {}); // пользователь отказал — спросим при нажатии кнопки
+}
+
 function showSpeechTraining() {
+  requestMicPermissionOnce();
   const list = document.getElementById('speech-categories-list');
   list.innerHTML = '';
   SPEECH_CATEGORIES.forEach(cat => {
@@ -3190,11 +3215,15 @@ function startSpeechRecognition() {
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-  if (!isMobile && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    // На десктопе — сначала запрашиваем разрешение явно
+  if (speechSession.micGranted || isMobile) {
+    // Разрешение уже есть (или мобиль) — запускаем сразу
+    runSpeechRecognition(SR);
+  } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    // Первый раз на десктопе — запрашиваем разрешение
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
         stream.getTracks().forEach(t => t.stop());
+        speechSession.micGranted = true;
         runSpeechRecognition(SR);
       })
       .catch(err => {
@@ -3204,7 +3233,6 @@ function startSpeechRecognition() {
         }
       });
   } else {
-    // На мобиле — запускаем напрямую, getUserMedia конфликтует с SpeechRecognition
     runSpeechRecognition(SR);
   }
 }
