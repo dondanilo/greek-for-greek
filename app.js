@@ -2899,3 +2899,115 @@ function handleTouchEnd(e) {
   _touchTile = null;
   _touchClone = null;
 }
+
+// ============================================================
+// BLOG
+// ============================================================
+const BLOG_ARTICLES = [
+  {
+    section: '📚 С чего начать',
+    color: 'green',
+    items: [
+      { slug: 'grecheskiy-alfavit',               emoji: '🔤', tag: 'Основы',     title: 'Греческий алфавит за 1 час: таблица с русской транскрипцией' },
+      { slug: 'kak-govorit-po-grecheski',          emoji: '📚', tag: 'С нуля',     title: 'Как научиться говорить по-гречески с нуля: пошаговый план' },
+      { slug: 'grecheskiy-za-30-dney',             emoji: '📅', tag: 'Челлендж',   title: 'Греческий за 30 дней: реальный план с нуля до первого разговора' },
+      { slug: 'intervalnoe-povtorenie-grecheskiy', emoji: '🧠', tag: 'Методика',   title: 'Интервальное повторение: как запоминать греческие слова навсегда' },
+      { slug: 'grecheskiye-slova-kotoryye-ty-znaesh', emoji: '💡', tag: 'Мотивация', title: 'Греческие слова которые ты уже знаешь — и не подозревал' },
+      { slug: 'grecheskiye-filmy-seriali',         emoji: '🎬', tag: 'Погружение', title: 'Греческие фильмы и сериалы для изучения языка: топ рекомендации' },
+    ]
+  },
+  {
+    section: '🇨🇾 Жизнь на Кипре',
+    color: 'green',
+    items: [
+      { slug: 'grecheskiy-na-kipre',          emoji: '🇨🇾', tag: 'Гид',       title: 'Как выучить греческий на Кипре: реальный опыт русскоязычных' },
+      { slug: 'grecheskiy-frazy-dlya-kipra',  emoji: '💬', tag: 'Фразы',     title: '50 греческих фраз для жизни на Кипре: банк, ΚΕΠ, аптека, ресторан' },
+      { slug: 'grecheskiy-u-vracha',          emoji: '🏥', tag: 'Срочное',   title: 'Греческий у врача: ГЕСЙ, скорая помощь и аптека' },
+      { slug: 'arenda-kvartiry-kipre',        emoji: '🏠', tag: 'Быт',       title: 'Аренда квартиры на Кипре по-гречески: от звонка до договора' },
+      { slug: 'nalog-kommunalnyye-kipre',     emoji: '📋', tag: 'Документы', title: 'Налоговая и коммунальные услуги на Кипре по-гречески' },
+      { slug: 'dorozhnyye-znaki-grecheskiy',  emoji: '🚗', tag: 'Транспорт', title: 'Дорожные знаки на Кипре и греческий для водителей' },
+      { slug: 'grecheskiy-na-rabote',         emoji: '💼', tag: 'Карьера',   title: 'Греческий на работе: фразы для офиса и собеседования' },
+      { slug: 'grecheskiy-dlya-detey',        emoji: '👨‍👩‍👧', tag: 'Семья',    title: 'Греческий для детей на Кипре: как помочь ребёнку освоить язык' },
+    ]
+  },
+  {
+    section: '📖 Грамматика и словарь',
+    color: 'green',
+    items: [
+      { slug: 'grecheskaya-grammatika-dlya-nachinayuschikh', emoji: '📖', tag: 'Грамматика', title: 'Греческая грамматика для русских: что общего и в чём отличия' },
+      { slug: 'proshedshee-vremya-grecheskiy',               emoji: '⏳', tag: 'Грамматика', title: 'Прошедшее время в греческом: простое объяснение для начинающих' },
+      { slug: 'voprositelnyye-slova-grecheskiy',             emoji: '❓', tag: 'Грамматика', title: 'Вопросительные слова в греческом: как задать любой вопрос' },
+      { slug: 'grecheskiye-prilagatelnye',                   emoji: '✨', tag: 'Словарь',    title: 'Топ-50 греческих прилагательных с примерами и транскрипцией' },
+      { slug: 'grecheskiye-glagoly',                         emoji: '⚡', tag: 'Словарь',    title: '50 самых нужных греческих глаголов с примерами' },
+      { slug: 'grecheskiy-chislitelnyye',                    emoji: '🔢', tag: 'Словарь',    title: 'Числа на греческом: от 1 до 1000 с произношением' },
+      { slug: 'lozhnye-druzya-grecheskiy',                   emoji: '🪤', tag: 'Ошибки',     title: 'Ложные друзья: греческие слова которые обманывают русских' },
+    ]
+  },
+  {
+    section: '🎭 Культура и жизнь',
+    color: 'green',
+    items: [
+      { slug: 'kiprskoye-narechiye',         emoji: '🗣️', tag: 'Диалект',    title: 'Кипрский диалект vs стандартный греческий: главные отличия' },
+      { slug: 'grecheskiye-prazdniki-frazy', emoji: '🎉', tag: 'Культура',   title: 'Греческие праздники и традиции: что говорить и как себя вести' },
+      { slug: 'grecheskaya-kukhnya-slovar',  emoji: '🍽️', tag: 'Кухня',      title: 'Греческая кухня: словарь для ресторана и рынка λαϊκή' },
+      { slug: 'grecheskiye-zhesty',          emoji: '🤙', tag: 'Культура',   title: 'Греческие жесты и язык тела: что значит кивок вверх' },
+      { slug: 'grecheskiye-poslovitsy',      emoji: '📜', tag: 'Культура',   title: 'Греческие пословицы с переводом: мудрость тысячелетий' },
+      { slug: 'grecheskiy-sleng',            emoji: '😎', tag: 'Разговорный', title: 'Греческий сленг и неформальная речь: как говорят греки на самом деле' },
+    ]
+  },
+  {
+    section: '🧠 Техники и психология',
+    color: 'purple',
+    items: [
+      { slug: 'metod-kato-lomb',                           emoji: '📗', tag: 'Методика',   title: 'Метод Като Ломб: как выучить язык читая книги' },
+      { slug: 'tehnika-shadowing',                         emoji: '🎙️', tag: 'Методика',   title: 'Техника shadowing: повторяй за носителем и заговоришь быстрее' },
+      { slug: 'metod-krashena-comprehensible-input',       emoji: '🌊', tag: 'Наука',      title: 'Метод Крашена: comprehensible input — самый естественный способ учить язык' },
+      { slug: 'strakh-oshibok-pri-izuchenii-yazyka',       emoji: '💪', tag: 'Психология', title: 'Страх ошибок при изучении языка: как перестать бояться говорить' },
+      { slug: '10-minut-v-den-effektivnost',               emoji: '⏱️', tag: 'Наука',      title: '10 минут в день vs 2 часа в неделю: что работает лучше' },
+      { slug: 'kak-sozdat-privychku-uchit-yazyk',          emoji: '🔄', tag: 'Психология', title: 'Как создать привычку учить язык: нейронаука и практика' },
+      { slug: 'metod-pareto-80-20-yazyk',                  emoji: '📊', tag: 'Стратегия',  title: 'Метод 80/20 в изучении языка: что учить в первую очередь' },
+      { slug: 'poligloty-mira-kak-uchat-yazyki',           emoji: '🌍', tag: 'Полиглоты',  title: 'Полиглоты мира: как Бенни Льюис, Като Ломб и другие учат языки' },
+      { slug: 'metod-pogruzheniya-bez-poyezdki',           emoji: '🏠', tag: 'Immersion',  title: 'Метод погружения в язык без поездки за рубеж: полный гид' },
+      { slug: 'sindrom-samozvantsa-pri-izuchenii-yazyka',  emoji: '🦸', tag: 'Психология', title: 'Синдром самозванца при изучении языка: ты лучше чем думаешь' },
+    ]
+  },
+];
+
+function showBlog() {
+  showScreen('screen-blog');
+  renderBlogList();
+}
+
+function renderBlogList() {
+  const container = document.getElementById('blog-list');
+  if (!container) return;
+
+  let html = '';
+  BLOG_ARTICLES.forEach(section => {
+    const isPurple = section.color === 'purple';
+    html += `<div class="blog-section-label${isPurple ? ' blog-section-purple' : ''}">${section.section}</div>`;
+    html += `<div class="blog-section-grid">`;
+    section.items.forEach(article => {
+      html += `
+        <button class="blog-card" onclick="openBlogArticle('${article.slug}', ${JSON.stringify(article.title)})">
+          <div class="blog-card-emoji${isPurple ? ' blog-card-emoji-purple' : ''}">${article.emoji}</div>
+          <div class="blog-card-body">
+            <div class="blog-card-tag${isPurple ? ' blog-card-tag-purple' : ''}">${article.tag}</div>
+            <div class="blog-card-title">${article.title}</div>
+          </div>
+          <div class="blog-card-arrow${isPurple ? ' blog-card-arrow-purple' : ''}">→</div>
+        </button>`;
+    });
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function openBlogArticle(slug, title) {
+  const frame = document.getElementById('blog-article-frame');
+  const titleEl = document.getElementById('blog-article-title');
+  if (frame) frame.src = `https://izigreek.com/blog/${slug}.html`;
+  if (titleEl) titleEl.textContent = title;
+  showScreen('screen-blog-article');
+}

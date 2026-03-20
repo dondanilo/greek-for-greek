@@ -218,6 +218,10 @@
         <span class="nav-label">Лента</span>
         <span class="feed-nav-badge" id="feed-nav-badge" style="display:none"></span>
       </button>
+      <button class="nav-btn" onclick="showBlog()">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Блог</span>
+      </button>
     </div>
 
     <button class="weak-lesson-btn" id="weak-lesson-btn" onclick="startWeakLesson()" style="display:none">
@@ -854,6 +858,24 @@
   </div>
 
   <!-- Scroll to top button -->
+  <!-- ==================== BLOG ==================== -->
+  <div id="screen-blog" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Блог</h2>
+    </div>
+    <div id="blog-list"></div>
+  </div>
+
+  <!-- ==================== BLOG ARTICLE ==================== -->
+  <div id="screen-blog-article" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showBlog()">← Блог</button>
+      <h2 id="blog-article-title" style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px"></h2>
+    </div>
+    <iframe id="blog-article-frame" src="" style="width:100%;border:none;min-height:calc(100vh - 60px);display:block"></iframe>
+  </div>
+
   <button id="scroll-top-btn" onclick="scrollToTop()" aria-label="Наверх">↑</button>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
