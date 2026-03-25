@@ -228,7 +228,7 @@ async function checkSubscription() {
         const s = doc.data();
         if (s.status === 'active' || s.status === 'trialing') {
           // Sync to state
-          state.subscription = { status: s.status, expiresAt: s.expiresAt };
+          state.subscription = { status: s.status, ...(s.expiresAt ? { expiresAt: s.expiresAt } : {}) };
           saveState();
           return true;
         }
