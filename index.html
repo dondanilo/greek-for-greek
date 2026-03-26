@@ -246,6 +246,47 @@
       <span class="weak-lesson-arrow">→</span>
     </button>
     <button class="support-btn" onclick="showSupportForm()">💬 Написать в поддержку</button>
+    <button class="support-btn" onclick="showPwaGuide()" style="margin-top:0">📲 Установить как приложение</button>
+  </div>
+
+  <!-- ==================== PWA GUIDE MODAL ==================== -->
+  <div id="pwa-modal" class="modal-overlay" onclick="hidePwaGuide()" style="display:none">
+    <div class="modal-box pwa-modal-box" onclick="event.stopPropagation()">
+      <div class="support-modal-header">
+        <div class="support-modal-title">📲 Установить приложение</div>
+        <button class="modal-close-btn" onclick="hidePwaGuide()">✕</button>
+      </div>
+      <div class="pwa-guide-body">
+        <p class="pwa-guide-intro">Неважно, <strong>Android</strong> у вас или <strong>iPhone</strong> — можно установить IziGreek прямо на экран телефона. Работает как полноценное приложение.</p>
+
+        <div class="pwa-os-block">
+          <div class="pwa-os-title">🍎 iPhone / iPad (Safari)</div>
+          <ol class="pwa-steps">
+            <li>Откройте <strong>cabinet.izigreek.com</strong> в браузере <strong>Safari</strong></li>
+            <li>Нажмите кнопку <strong>«Поделиться»</strong> внизу экрана — значок квадрата со стрелкой вверх <span class="pwa-icon-hint">⬆</span></li>
+            <li>Прокрутите список вниз и выберите <strong>«На экран "Домой"»</strong></li>
+            <li>Нажмите <strong>«Добавить»</strong> в правом верхнем углу</li>
+            <li>Готово — значок IziGreek появится на рабочем столе 🎉</li>
+          </ol>
+        </div>
+
+        <div class="pwa-os-block">
+          <div class="pwa-os-title">🤖 Android (Chrome)</div>
+          <ol class="pwa-steps">
+            <li>Откройте <strong>cabinet.izigreek.com</strong> в браузере <strong>Chrome</strong></li>
+            <li>Нажмите <strong>три точки ⋮</strong> в правом верхнем углу</li>
+            <li>Выберите <strong>«Добавить на главный экран»</strong></li>
+            <li>Нажмите <strong>«Установить»</strong> или <strong>«Добавить»</strong></li>
+            <li>Готово — откройте приложение с рабочего стола 🎉</li>
+          </ol>
+        </div>
+
+        <div class="pwa-reason-box">
+          <div class="pwa-reason-icon">💡</div>
+          <div class="pwa-reason-text">Благодаря этому IziGreek стоит <strong>дешевле аналогов</strong> — нам не нужно платить комиссию App Store и Google Play (до 30% от цены). Эту экономию мы передаём вам.</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ==================== SUPPORT MODAL ==================== -->

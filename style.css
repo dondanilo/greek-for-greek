@@ -1723,6 +1723,19 @@ body {
 }
 .support-btn:hover { border-color: var(--green); color: var(--green-dark); }
 
+/* PWA Guide Modal */
+.pwa-modal-box { max-height: 88vh; overflow-y: auto; }
+.pwa-guide-body { padding: 0 20px 20px; }
+.pwa-guide-intro { font-size: 15px; color: var(--text); margin-bottom: 20px; line-height: 1.5; }
+.pwa-os-block { margin-bottom: 20px; }
+.pwa-os-title { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 16px; color: var(--text); margin-bottom: 10px; }
+.pwa-steps { padding-left: 20px; margin: 0; }
+.pwa-steps li { font-size: 14px; color: var(--text); line-height: 1.55; margin-bottom: 8px; }
+.pwa-icon-hint { font-size: 13px; background: var(--gray-light); border-radius: 4px; padding: 1px 5px; }
+.pwa-reason-box { display: flex; gap: 12px; align-items: flex-start; background: linear-gradient(135deg, #f0fce8, #e8f9dd); border: 1.5px solid var(--green); border-radius: 12px; padding: 14px 16px; margin-top: 4px; }
+.pwa-reason-icon { font-size: 22px; flex-shrink: 0; }
+.pwa-reason-text { font-size: 14px; color: var(--text); line-height: 1.5; }
+
 .support-modal-box {
   max-height: 90vh; overflow-y: auto; width: 100%; max-width: 480px;
 }

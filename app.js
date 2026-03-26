@@ -1701,6 +1701,16 @@ function hideSupportForm() {
   document.getElementById('support-success').style.display = 'none';
 }
 
+function showPwaGuide() {
+  document.getElementById('pwa-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function hidePwaGuide() {
+  document.getElementById('pwa-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 async function submitSupportForm() {
   const name    = document.getElementById('sf-name').value.trim();
   const email   = document.getElementById('sf-email').value.trim();
