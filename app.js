@@ -214,8 +214,10 @@ async function checkSubscription() {
   if (currentUser.email?.toLowerCase() === 'dondanilo1994@gmail.com') return true;
 
   // 1. Check users/{uid}.subscription (set by webhook)
+  const ACTIVE_STATUSES = ['active', 'trialing', 'on_trial', 'paid'];
+
   const sub = state.subscription;
-  if (sub && (sub.status === 'active' || sub.status === 'trialing')) {
+  if (sub && ACTIVE_STATUSES.includes(sub.status)) {
     return true;
   }
 
@@ -226,7 +228,7 @@ async function checkSubscription() {
       const doc = await db.collection('subscriptions').doc(email).get();
       if (doc.exists) {
         const s = doc.data();
-        if (s.status === 'active' || s.status === 'trialing') {
+        if (ACTIVE_STATUSES.includes(s.status)) {
           // Sync to state
           state.subscription = { status: s.status, ...(s.expiresAt ? { expiresAt: s.expiresAt } : {}) };
           saveState();
