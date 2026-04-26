@@ -2283,6 +2283,28 @@ body {
   padding: 8px 12px; font-size: 13px; color: #7a6000;
 }
 
+/* Exam vocab table (sprint 5) */
+.vocab-ex-intro {
+  font-size: 13px; color: #888; text-align: center;
+  margin-bottom: 4px; padding: 0 4px;
+}
+.vocab-ex-table {
+  width: 100%; border-collapse: collapse; font-size: 12.5px;
+}
+.vocab-ex-table thead th {
+  font-size: 11px; color: #999; font-weight: 600;
+  padding: 4px 6px; border-bottom: 1.5px solid #eee; text-align: left;
+}
+.vocab-ex-table tbody tr { border-bottom: 1px solid #f3f3f3; }
+.vocab-ex-table tbody tr:last-child { border-bottom: none; }
+.vocab-ex-gr {
+  font-weight: 700; color: #1b5e20; padding: 7px 6px;
+  cursor: pointer; white-space: nowrap;
+}
+.vocab-ex-speak { font-size: 11px; opacity: .6; }
+.vocab-ex-tr { color: #888; font-style: italic; padding: 7px 6px; }
+.vocab-ex-ru { color: #444; padding: 7px 6px; }
+
 /* Grammar TOC nav (sprint 4) */
 .gram-nav {
   position: sticky; top: 0; z-index: 10;
