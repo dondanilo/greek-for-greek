@@ -3484,14 +3484,16 @@ function showExamPrep() {
 }
 
 function showExamSection(section) {
-  if (section === 'tests') { startExamMockTest(); return; }
+  if (section === 'tests')     { startExamMockTest(); return; }
+  if (section === 'listening') { startExamListening(); return; }
   const map = {
     structure: ['🗺️ Как устроен экзамен', getExamStructureHTML],
     writing:   ['✍️ Письмо',              getExamWritingHTML],
     speaking:  ['🗣️ Говорение',           getExamSpeakingHTML],
     grammar:   ['📚 Грамматика A2/B1',    getExamGrammarHTML],
     tips:      ['💡 Лайфхаки',            getExamTipsHTML],
-    vocab:     ['📖 Экзаменационный словарь', getExamVocabHTML],
+    vocab:      ['📖 Экзаменационный словарь', getExamVocabHTML],
+    listening:  ['🎧 Аудирование',            null],
   };
   const [title, fn] = map[section] || map.tips;
   document.getElementById('exam-detail-title').textContent = title;
@@ -4405,4 +4407,199 @@ function nextExamTestQuestion() {
   examTestState.idx++;
   examTestState.answered = false;
   renderExamTestQuestion();
+}
+
+// ===================== EXAM LISTENING (sprint 7) =====================
+
+const EXAM_LISTENING_TRACKS = [
+  {
+    title: 'Τηλεφωνική κλήση',
+    titleRu: 'Звонок в клинику',
+    emoji: '📞',
+    text: 'Καλημέρα, θέλω να κλείσω ένα ραντεβού με τον γιατρό. Είμαι η Μαρία Παπαδοπούλου. Έχω πονοκέφαλο και πυρετό από χθες. Μπορώ να έρθω αύριο το πρωί στις δέκα;',
+    textRu: 'Доброе утро, я хочу записаться к врачу. Я Мария Пападопулу. У меня головная боль и температура со вчерашнего дня. Могу ли я прийти завтра утром в десять?',
+    questions: [
+      { q: 'Τι θέλει η Μαρία;', opts: ['Να κλείσει ραντεβού', 'Να αγοράσει φάρμακα', 'Να μιλήσει με νοσοκόμα', 'Να πάει στο νοσοκομείο'], correct: 0, exp: 'Μαρία говорит: «θέλω να κλείσω ένα ραντεβού» — хочу записаться' },
+      { q: 'Τι έχει η Μαρία;', opts: ['Πονοκέφαλο και πυρετό', 'Πόνο στην πλάτη', 'Κρύο και βήχα', 'Στομαχόπονο'], correct: 0, exp: 'Она говорит: «έχω πονοκέφαλο και πυρετό» — головная боль и температура' },
+      { q: 'Πότε θέλει να έρθει;', opts: ['Αύριο το πρωί', 'Σήμερα το απόγευμα', 'Μεθαύριο', 'Την Παρασκευή'], correct: 0, exp: 'Она говорит: «αύριο το πρωί στις δέκα» — завтра утром в десять' },
+    ]
+  },
+  {
+    title: 'Ανακοίνωση στο σούπερ μάρκετ',
+    titleRu: 'Объявление в супермаркете',
+    emoji: '🛒',
+    text: 'Αγαπητοί πελάτες, σας ενημερώνουμε ότι σήμερα έχουμε μεγάλες εκπτώσεις στο τμήμα των φρούτων και λαχανικών. Επίσης, από τις έξι το απόγευμα, το κατάστημα θα κλείσει νωρίτερα λόγω αργίας. Σας ευχαριστούμε για την κατανόησή σας.',
+    textRu: 'Уважаемые покупатели, сообщаем вам, что сегодня у нас большие скидки в отделе фруктов и овощей. Также с шести вечера магазин закроется раньше в связи с праздником. Благодарим за понимание.',
+    questions: [
+      { q: 'Πού υπάρχουν εκπτώσεις;', opts: ['Φρούτα και λαχανικά', 'Κρέας και ψάρια', 'Ποτά', 'Είδη καθαρισμού'], correct: 0, exp: 'В объявлении: «εκπτώσεις στο τμήμα των φρούτων και λαχανικών»' },
+      { q: 'Πότε κλείνει το κατάστημα;', opts: ['Στις έξι το απόγευμα', 'Στις οκτώ', 'Στις εννιά', 'Στις δέκα'], correct: 0, exp: '«από τις έξι το απόγευμα, το κατάστημα θα κλείσει»' },
+      { q: 'Γιατί κλείνει νωρίς;', opts: ['Λόγω αργίας', 'Λόγω επισκευής', 'Λόγω απεργίας', 'Λόγω καθαρισμού'], correct: 0, exp: '«θα κλείσει νωρίτερα λόγω αργίας» — из-за праздника' },
+    ]
+  },
+  {
+    title: 'Διάλογος για ενοίκιο',
+    titleRu: 'Разговор об аренде',
+    emoji: '🏠',
+    text: '— Καλησπέρα, είδα την αγγελία σας για το διαμέρισμα. Είναι ακόμα διαθέσιμο;\n— Ναι, είναι. Είναι δύο υπνοδωμάτια, στον τρίτο όροφο. Το ενοίκιο είναι οκτακόσια ευρώ το μήνα.\n— Περιλαμβάνει τα κοινόχρηστα;\n— Ναι, περιλαμβάνει νερό και σκουπίδια, αλλά όχι ρεύμα.',
+    textRu: '— Добрый вечер, я видел ваше объявление о квартире. Она ещё свободна?\n— Да. Две спальни, третий этаж. Аренда 800 евро в месяц.\n— Включены ли коммунальные?\n— Да, включает воду и мусор, но не электричество.',
+    questions: [
+      { q: 'Πόσα υπνοδωμάτια έχει το διαμέρισμα;', opts: ['Δύο', 'Ένα', 'Τρία', 'Τέσσερα'], correct: 0, exp: '«Είναι δύο υπνοδωμάτια» — две спальни' },
+      { q: 'Πόσο είναι το ενοίκιο;', opts: ['800 ευρώ', '600 ευρώ', '1000 ευρώ', '750 ευρώ'], correct: 0, exp: '«Το ενοίκιο είναι οκτακόσια ευρώ» — 800 евро' },
+      { q: 'Τι ΔΕΝ περιλαμβάνεται στο ενοίκιο;', opts: ['Το ρεύμα', 'Το νερό', 'Τα σκουπίδια', 'Η θέρμανση'], correct: 0, exp: '«αλλά όχι ρεύμα» — электричество не включено' },
+    ]
+  },
+  {
+    title: 'Μήνυμα στον τηλεφωνητή',
+    titleRu: 'Сообщение на автоответчике',
+    emoji: '📱',
+    text: 'Γεια σου Νίκο, είμαι η Ελένη. Σε καλώ για να θυμηθείς ότι αύριο έχουμε μάθημα ελληνικών στις επτά το βράδυ. Το μάθημα γίνεται στο πολιτιστικό κέντρο στην οδό Μακαρίου. Αν δεν μπορείς να έρθεις, παρακαλώ στείλε μου μήνυμα.',
+    textRu: 'Привет, Нико, это Элени. Звоню напомнить, что завтра у нас урок греческого в семь вечера. Занятие проходит в культурном центре на улице Макариу. Если не сможешь прийти, пожалуйста, напиши мне.',
+    questions: [
+      { q: 'Πότε είναι το μάθημα;', opts: ['Αύριο στις 7 το βράδυ', 'Σήμερα στις 7', 'Αύριο το πρωί', 'Μεθαύριο'], correct: 0, exp: '«αύριο έχουμε μάθημα... στις επτά το βράδυ» — завтра в 7 вечера' },
+      { q: 'Πού γίνεται το μάθημα;', opts: ['Πολιτιστικό κέντρο', 'Σχολείο', 'Βιβλιοθήκη', 'Σπίτι της Ελένης'], correct: 0, exp: '«γίνεται στο πολιτιστικό κέντρο» — в культурном центре' },
+      { q: 'Τι να κάνει ο Νίκος αν δεν μπορεί να έρθει;', opts: ['Να στείλει μήνυμα', 'Να τηλεφωνήσει', 'Να έρθει αργότερα', 'Να στείλει email'], correct: 0, exp: '«παρακαλώ στείλε μου μήνυμα» — написать сообщение' },
+    ]
+  },
+  {
+    title: 'Οδηγίες στην πόλη',
+    titleRu: 'Маршрут по городу',
+    emoji: '🗺️',
+    text: 'Για να πάτε στο δημαρχείο, πηγαίνετε ευθεία στην κεντρική οδό για διακόσια μέτρα. Στο πρώτο φανάρι, στρίψτε αριστερά. Συνεχίστε για εκατό μέτρα και το δημαρχείο είναι στα δεξιά σας, δίπλα στην τράπεζα.',
+    textRu: 'Чтобы добраться до мэрии, идите прямо по центральной улице 200 метров. На первом светофоре поверните налево. Продолжайте 100 метров — мэрия будет справа от вас, рядом с банком.',
+    questions: [
+      { q: 'Πού στρίβει κανείς στο φανάρι;', opts: ['Αριστερά', 'Δεξιά', 'Ευθεία', 'Πίσω'], correct: 0, exp: '«στρίψτε αριστερά» — поверните налево' },
+      { q: 'Πού βρίσκεται το δημαρχείο;', opts: ['Στα δεξιά, δίπλα στην τράπεζα', 'Στα αριστερά', 'Απέναντι από το φανάρι', 'Δίπλα στο σχολείο'], correct: 0, exp: '«στα δεξιά σας, δίπλα στην τράπεζα» — справа, рядом с банком' },
+      { q: 'Πόσα μέτρα να πάει κανείς ευθεία πρώτα;', opts: ['200 μέτρα', '100 μέτρα', '300 μέτρα', '500 μέτρα'], correct: 0, exp: '«ευθεία... για διακόσια μέτρα» — 200 метров прямо' },
+    ]
+  },
+];
+
+let listeningState = { trackIdx: null, answered: [], ttsPlaying: false };
+
+function startExamListening() {
+  document.getElementById('exam-detail-title').textContent = '🎧 Аудирование';
+  listeningState = { trackIdx: null, answered: [], ttsPlaying: false };
+  renderListeningTracks();
+  showScreen('screen-exam-detail');
+}
+
+function renderListeningTracks() {
+  const cards = EXAM_LISTENING_TRACKS.map((t, i) => {
+    const done = listeningState.answered[i] !== undefined;
+    const score = done ? listeningState.answered[i] : null;
+    const badge = done ? `<span class="listen-done-badge">${score}/${t.questions.length}</span>` : '';
+    return `
+<div class="listen-track-card${done ? ' listen-track-done' : ''}" onclick="startListeningTrack(${i})">
+  <span class="listen-track-emoji">${t.emoji}</span>
+  <div class="listen-track-info">
+    <div class="listen-track-title">${t.title}</div>
+    <div class="listen-track-sub">${t.titleRu} · ${t.questions.length} вопроса</div>
+  </div>
+  ${badge}
+  <span class="listen-track-arrow">${done ? '✓' : '›'}</span>
+</div>`;
+  }).join('');
+
+  const totalDone = listeningState.answered.filter(x => x !== undefined).length;
+  document.getElementById('exam-detail-body').innerHTML = `
+<div class="listen-intro">Нажми ▶ чтобы услышать текст, затем ответь на вопросы. Текст скрыт — тренируй настоящее слушание.</div>
+<div class="listen-tracks">${cards}</div>
+${totalDone > 0 ? `<div class="listen-total">Пройдено: ${totalDone} / ${EXAM_LISTENING_TRACKS.length}</div>` : ''}`;
+}
+
+function startListeningTrack(idx) {
+  listeningState.trackIdx = idx;
+  listeningState.ttsPlaying = false;
+  renderListeningTrack();
+}
+
+function renderListeningTrack() {
+  const idx = listeningState.trackIdx;
+  const t = EXAM_LISTENING_TRACKS[idx];
+  const qs = t.questions.map((q, qi) => `
+<div class="listen-q-block" id="listen-q-${qi}">
+  <div class="listen-q-text">${qi+1}. ${q.q}</div>
+  <div class="mock-opts">${q.opts.map((o, oi) =>
+    `<button class="mock-opt" id="lopt-${qi}-${oi}" onclick="answerListeningQ(${idx},${qi},${oi})">${String.fromCharCode(65+oi)}. ${o}</button>`
+  ).join('')}</div>
+  <div class="mock-explanation" id="listen-exp-${qi}" style="display:none"></div>
+</div>`).join('');
+
+  document.getElementById('exam-detail-body').innerHTML = `
+<button class="btn-back-inline" onclick="renderListeningTracks()">← К списку</button>
+<div class="listen-track-header">
+  <span style="font-size:28px">${t.emoji}</span>
+  <div>
+    <div class="listen-th-title">${t.title}</div>
+    <div class="listen-th-sub">${t.titleRu}</div>
+  </div>
+</div>
+<div class="listen-play-area">
+  <button class="listen-play-btn" id="listen-play-btn" onclick="playListeningTrack(${idx})">▶ Слушать</button>
+  <div class="listen-play-hint">Нажми — текст озвучится по-гречески</div>
+</div>
+<div id="listen-transcript" class="listen-transcript" style="display:none">${t.text.replace(/\n/g,'<br>')}</div>
+<button class="listen-reveal-btn" id="listen-reveal-btn" onclick="toggleListeningTranscript()">👁 Показать текст</button>
+<div class="listen-qs-title">Вопросы по тексту:</div>
+<div id="listen-qs">${qs}</div>
+<div id="listen-track-result" style="display:none"></div>`;
+}
+
+function playListeningTrack(idx) {
+  const t = EXAM_LISTENING_TRACKS[idx];
+  const btn = document.getElementById('listen-play-btn');
+  if (speechSynthesis.speaking) { speechSynthesis.cancel(); btn.textContent = '▶ Слушать'; return; }
+  const utt = new SpeechSynthesisUtterance(t.text.replace(/\n/g, ' '));
+  utt.lang = 'el-GR';
+  utt.rate = 0.85;
+  const voices = speechSynthesis.getVoices();
+  const elVoice = voices.find(v => v.lang.startsWith('el'));
+  if (elVoice) utt.voice = elVoice;
+  utt.onstart = () => { btn.textContent = '⏹ Остановить'; };
+  utt.onend = utt.onerror = () => { btn.textContent = '▶ Слушать снова'; };
+  speechSynthesis.speak(utt);
+}
+
+function toggleListeningTranscript() {
+  const el = document.getElementById('listen-transcript');
+  const btn = document.getElementById('listen-reveal-btn');
+  const hidden = el.style.display === 'none';
+  el.style.display = hidden ? 'block' : 'none';
+  btn.textContent = hidden ? '👁 Скрыть текст' : '👁 Показать текст';
+}
+
+let listenQScores = {};
+
+function answerListeningQ(trackIdx, qi, oi) {
+  const t = EXAM_LISTENING_TRACKS[trackIdx];
+  const q = t.questions[qi];
+  const key = `${trackIdx}-${qi}`;
+  if (listenQScores[key] !== undefined) return;
+
+  const correct = q.correct;
+  listenQScores[key] = (oi === correct) ? 1 : 0;
+
+  document.querySelectorAll(`[id^="lopt-${qi}-"]`).forEach(btn => {
+    const btnOi = parseInt(btn.id.split('-')[2]);
+    btn.disabled = true;
+    if (btnOi === correct) btn.classList.add('mock-opt-correct');
+    else if (btnOi === oi) btn.classList.add('mock-opt-wrong');
+  });
+  const expEl = document.getElementById(`listen-exp-${qi}`);
+  expEl.textContent = (oi === correct ? '✅ ' : '❌ ') + q.exp;
+  expEl.style.display = 'block';
+
+  const allAnswered = t.questions.every((_, i) => listenQScores[`${trackIdx}-${i}`] !== undefined);
+  if (allAnswered) {
+    const score = t.questions.reduce((s, _, i) => s + (listenQScores[`${trackIdx}-${i}`] || 0), 0);
+    if (!listeningState.answered) listeningState.answered = [];
+    listeningState.answered[trackIdx] = score;
+    const pct = Math.round(score / t.questions.length * 100);
+    document.getElementById('listen-track-result').innerHTML = `
+<div class="listen-result-bar">
+  ${pct >= 67 ? '✅' : '💪'} Результат: <strong>${score}/${t.questions.length}</strong>
+  <button class="btn-back-inline" style="margin-left:auto" onclick="renderListeningTracks()">← К списку</button>
+</div>`;
+    document.getElementById('listen-track-result').style.display = 'block';
+  }
 }

@@ -2333,6 +2333,77 @@ body {
 .mock-result-pct   { font-size: 18px; font-weight: 700; color: #9B59B6; }
 .mock-result-msg   { font-size: 14px; color: #555; text-align: center; line-height: 1.5; margin-top: 4px; }
 
+/* Exam listening (sprint 7) */
+.listen-intro {
+  font-size: 13px; color: #888; text-align: center;
+  padding: 0 4px; margin-bottom: 12px; line-height: 1.5;
+}
+.listen-tracks { display: flex; flex-direction: column; gap: 10px; }
+.listen-track-card {
+  display: flex; align-items: center; gap: 12px;
+  background: white; border: 1.5px solid #e5e5e5; border-radius: 14px;
+  padding: 14px; cursor: pointer; transition: border-color .15s;
+}
+.listen-track-card:active { border-color: #9B59B6; background: #faf5ff; }
+.listen-track-done { border-color: #a5d6a7; background: #f1f8f1; }
+.listen-track-emoji { font-size: 26px; flex-shrink: 0; }
+.listen-track-info { flex: 1; }
+.listen-track-title { font-size: 14px; font-weight: 700; color: #222; }
+.listen-track-sub   { font-size: 12px; color: #888; margin-top: 2px; }
+.listen-done-badge {
+  background: #43a047; color: white; border-radius: 10px;
+  font-size: 12px; font-weight: 700; padding: 2px 8px;
+}
+.listen-track-arrow { font-size: 20px; color: #bbb; }
+.listen-total {
+  text-align: center; font-size: 13px; color: #888;
+  margin-top: 8px;
+}
+.btn-back-inline {
+  background: none; border: none; color: #9B59B6;
+  font-size: 13px; font-weight: 600; padding: 0;
+  cursor: pointer; display: block; margin-bottom: 10px;
+}
+.listen-track-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+.listen-th-title { font-size: 16px; font-weight: 800; }
+.listen-th-sub   { font-size: 12px; color: #888; }
+.listen-play-area {
+  display: flex; align-items: center; gap: 12px;
+  background: #f0e8f8; border-radius: 14px; padding: 14px;
+  margin-bottom: 10px;
+}
+.listen-play-btn {
+  flex-shrink: 0; padding: 10px 20px;
+  background: #9B59B6; color: white; border: none;
+  border-radius: 10px; font-size: 15px; font-weight: 700;
+  cursor: pointer;
+}
+.listen-play-hint { font-size: 12px; color: #7d3c98; line-height: 1.4; }
+.listen-transcript {
+  background: #f7f7f7; border-left: 3px solid #9B59B6;
+  border-radius: 0 10px 10px 0; padding: 12px 14px;
+  font-size: 13.5px; color: #333; line-height: 1.7;
+  margin-bottom: 8px;
+}
+.listen-reveal-btn {
+  background: none; border: 1.5px solid #ccc; border-radius: 20px;
+  padding: 5px 14px; font-size: 12px; color: #666; cursor: pointer;
+  margin-bottom: 16px; display: block;
+}
+.listen-qs-title {
+  font-size: 13px; font-weight: 700; color: #555;
+  margin-bottom: 10px; margin-top: 4px;
+}
+.listen-q-block { margin-bottom: 16px; }
+.listen-q-text  { font-size: 14px; font-weight: 700; color: #222; margin-bottom: 8px; }
+.listen-result-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: #e8f5e9; border-radius: 12px; padding: 12px 14px;
+  font-size: 14px; margin-top: 8px;
+}
+
 /* Exam vocab table (sprint 5) */
 .vocab-ex-intro {
   font-size: 13px; color: #888; text-align: center;
