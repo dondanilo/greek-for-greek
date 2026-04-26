@@ -3489,6 +3489,7 @@ function showExamSection(section) {
   const map = {
     structure: ['🗺️ Как устроен экзамен', getExamStructureHTML],
     writing:   ['✍️ Письмо',              getExamWritingHTML],
+    speaking:  ['🗣️ Говорение',           getExamSpeakingHTML],
     grammar:   ['📚 Грамматика A2/B1',    getExamGrammarHTML],
     tips:      ['💡 Лайфхаки',            getExamTipsHTML],
   };
@@ -3583,6 +3584,87 @@ function getExamStructureHTML() {
   <div class="exam-scoring-row"><span>Итого максимум</span><span>100 баллов</span></div>
   <div class="exam-scoring-row exam-scoring-pass"><span>Минимум для сдачи</span><span>60 баллов</span></div>
   <div class="exam-scoring-note">Можно слабо написать одну часть и компенсировать другими.</div>
+</div>`;
+}
+
+function sp(text) {
+  return `onclick="speakGreek('${text.replace(/'/g,"\\'")}')"`;
+}
+
+function getExamSpeakingHTML() {
+  return `
+<div class="speaking-intro">
+  Говорение — <strong>3 этапа</strong>, ~15 минут. Оценивают правильность, словарный запас и уверенность. Говори медленно — это плюс, не минус.
+</div>
+
+<div class="speaking-stage-header">Этап 1 · Представление себя</div>
+<div class="speaking-stage-hint">Экзаменатор задаёт вопросы о тебе. Знай ответы наизусть.</div>
+
+${[
+  ['Πώς σας λένε;','Как вас зовут?','Με λένε Όλγα Ιβάνοβα.','Меня зовут Ольга Иванова.'],
+  ['Από πού είστε;','Откуда вы?','Είμαι από τη Ρωσία, από τη Μόσχα.','Я из России, из Москвы.'],
+  ['Πόσο καιρό μένετε στην Κύπρο;','Сколько времени живёте на Кипре?','Μένω στην Κύπρο εδώ και τέσσερα χρόνια.','Живу на Кипре уже четыре года.'],
+  ['Τι δουλειά κάνετε;','Кем вы работаете?','Είμαι λογίστρια και δουλεύω σε μια εταιρεία.','Я бухгалтер и работаю в компании.'],
+  ['Έχετε οικογένεια;','У вас есть семья?','Ναι, είμαι παντρεμένη και έχω δύο παιδιά.','Да, я замужем и у меня двое детей.'],
+  ['Γιατί μαθαίνετε ελληνικά;','Почему учите греческий?','Μαθαίνω ελληνικά για να πάρω την κυπριακή υπηκοότητα και να επικοινωνώ με τους γείτονες.','Учу греческий чтобы получить кипрское гражданство и общаться с соседями.'],
+].map(([q,qru,a,aru]) => `
+  <div class="speaking-qa-card">
+    <div class="speaking-q-row">
+      <div class="speaking-q">${q}</div>
+      <button class="speaking-tts-btn" ${sp(q)}>🔊</button>
+    </div>
+    <div class="speaking-qru">${qru}</div>
+    <div class="speaking-a-row">
+      <div class="speaking-a">${a}</div>
+      <button class="speaking-tts-btn" ${sp(a)}>🔊</button>
+    </div>
+    <div class="speaking-aru">${aru}</div>
+  </div>`).join('')}
+
+<div class="speaking-stage-header">Этап 2 · Описание картинки</div>
+<div class="speaking-stage-hint">Дают фото — нужно описать что видишь. Используй эти фразы:</div>
+
+<div class="speaking-phrases-card">
+${[
+  ['Στη φωτογραφία βλέπω...','На фотографии я вижу...'],
+  ['Στο κέντρο της εικόνας υπάρχει...','В центре картинки есть...'],
+  ['Στο βάθος βλέπω...','На заднем плане я вижу...'],
+  ['Νομίζω ότι είναι...','Думаю, что это...'],
+  ['Φαίνεται ότι οι άνθρωποι...','Похоже, что люди...'],
+  ['Ο καιρός φαίνεται...','Погода, кажется,...'],
+  ['Μου αρέσει αυτή η φωτογραφία γιατί...','Мне нравится эта фотография, потому что...'],
+].map(([gr,ru]) => `
+  <div class="speaking-phrase-row">
+    <div class="speaking-phrase-left">
+      <div class="speaking-phrase-gr">${gr}</div>
+      <div class="speaking-phrase-ru">${ru}</div>
+    </div>
+    <button class="speaking-tts-btn" ${sp(gr)}>🔊</button>
+  </div>`).join('')}
+</div>
+
+<div class="speaking-stage-header">Этап 3 · Диалог с партнёром</div>
+<div class="speaking-stage-hint">Вместе с другим участником решаете ситуацию. Типичные темы:</div>
+
+${[
+  ['🍽️ Выбрать ресторан',['Πού θα πάμε για φαγητό;','Τι προτιμάς — ψάρι ή κρέας;','Πόσο κοστίζει περίπου;','Τι ώρα θα συναντηθούμε;']],
+  ['✈️ Спланировать поездку',['Πού θέλεις να πας;','Πότε είσαι ελεύθερος/η;','Πόσες μέρες θα μείνουμε;','Με τι θα πάμε — αεροπλάνο ή πλοίο;']],
+  ['🎉 Организовать праздник',['Πότε κάνουμε το πάρτι;','Ποιους θα καλέσουμε;','Τι φαγητό θα φέρουμε;','Ποιος φέρνει τη μουσική;']],
+  ['🛒 Купить подержанную вещь',['Σε τι κατάσταση είναι;','Πόσο καιρό το έχετε;','Μπορείτε να κατεβάσετε λίγο την τιμή;','Πότε μπορούμε να το παραλάβουμε;']],
+].map(([title, phrases]) => `
+  <details class="speaking-topic-card">
+    <summary>${title}</summary>
+    <div class="speaking-topic-phrases">
+      ${phrases.map(p => `
+        <div class="speaking-topic-phrase-row">
+          <span>${p}</span>
+          <button class="speaking-tts-btn" ${sp(p)}>🔊</button>
+        </div>`).join('')}
+    </div>
+  </details>`).join('')}
+
+<div class="speaking-tip-block">
+  💡 <strong>Если не знаешь слово</strong> — скажи <em onclick="${sp('Πώς λέγεται στα ελληνικά;')}" style="cursor:pointer;color:#9B59B6">«Πώς λέγεται στα ελληνικά;»</em> (Как это по-гречески?) или опиши его другими словами. Экзаменаторы это ценят.
 </div>`;
 }
 

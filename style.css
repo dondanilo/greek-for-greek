@@ -2420,3 +2420,73 @@ body {
 .writing-phrase-row:last-child { border-bottom: none; }
 .writing-phrase-gr { font-weight: 600; color: #1b5e20; flex: 1; }
 .writing-phrase-ru { color: #555; flex: 1; text-align: right; }
+
+/* ===================== SPEAKING SECTION ===================== */
+.speaking-intro {
+  background: #f0ebff; border-radius: 12px;
+  padding: 12px 14px; font-size: 13px; color: #444; line-height: 1.6;
+}
+.speaking-stage-header {
+  font-size: 15px; font-weight: 800; color: #9B59B6;
+  padding: 4px 0 0;
+}
+.speaking-stage-hint {
+  font-size: 12px; color: #888; margin-bottom: 4px;
+}
+.speaking-qa-card {
+  background: white; border: 1.5px solid #e5e5e5;
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.speaking-q-row, .speaking-a-row {
+  display: flex; align-items: flex-start; gap: 8px; justify-content: space-between;
+}
+.speaking-q {
+  font-size: 14px; font-weight: 700; color: #333; flex: 1;
+}
+.speaking-qru { font-size: 11px; color: #aaa; margin-bottom: 6px; }
+.speaking-a {
+  font-size: 13px; color: #1a5e20; font-weight: 600;
+  background: #e8f5e9; border-radius: 8px;
+  padding: 6px 10px; flex: 1;
+}
+.speaking-aru { font-size: 11px; color: #888; margin-top: 2px; }
+.speaking-tts-btn {
+  background: none; border: 1.5px solid #ddd; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 14px; cursor: pointer;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.speaking-tts-btn:active { background: #f0ebff; }
+.speaking-phrases-card {
+  background: white; border: 1.5px solid #e5e5e5;
+  border-radius: 12px; overflow: hidden;
+}
+.speaking-phrase-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-bottom: 1px solid #f5f5f5;
+  justify-content: space-between;
+}
+.speaking-phrase-row:last-child { border-bottom: none; }
+.speaking-phrase-left { flex: 1; }
+.speaking-phrase-gr { font-size: 13px; font-weight: 600; color: #222; }
+.speaking-phrase-ru { font-size: 11px; color: #999; margin-top: 1px; }
+.speaking-topic-card {
+  background: white; border: 1.5px solid #e5e5e5;
+  border-radius: 12px; overflow: hidden;
+}
+.speaking-topic-card summary {
+  font-size: 14px; font-weight: 700; padding: 12px 14px;
+  cursor: pointer; list-style: none;
+}
+.speaking-topic-card summary::-webkit-details-marker { display: none; }
+.speaking-topic-card[open] summary { border-bottom: 1px solid #eee; }
+.speaking-topic-phrases { padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 2px; }
+.speaking-topic-phrase-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; color: #333;
+}
+.speaking-topic-phrase-row:last-child { border-bottom: none; }
+.speaking-tip-block {
+  background: #fff9e6; border-radius: 12px;
+  padding: 12px 14px; font-size: 13px; color: #555; line-height: 1.6;
+}
