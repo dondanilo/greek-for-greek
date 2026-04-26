@@ -3486,11 +3486,103 @@ function showExamPrep() {
 function showExamSection(section) {
   if (section === 'vocab') { showVocab('translation'); return; }
   if (section === 'tests') { showQuiz(); return; }
-  const title = section === 'grammar' ? '📚 Грамматика A2/B1' : '💡 Лайфхаки для экзамена';
-  const body = section === 'grammar' ? getExamGrammarHTML() : getExamTipsHTML();
+  const map = {
+    structure: ['🗺️ Как устроен экзамен', getExamStructureHTML],
+    grammar:   ['📚 Грамматика A2/B1',    getExamGrammarHTML],
+    tips:      ['💡 Лайфхаки',            getExamTipsHTML],
+  };
+  const [title, fn] = map[section] || map.tips;
   document.getElementById('exam-detail-title').textContent = title;
-  document.getElementById('exam-detail-body').innerHTML = body;
+  document.getElementById('exam-detail-body').innerHTML = fn();
   showScreen('screen-exam-detail');
+}
+
+function getExamStructureHTML() {
+  return `
+<div class="exam-info-banner">
+  <div class="exam-info-row"><span>📍 Организатор</span><strong>Кипрский университет (UCY) + Минобр</strong></div>
+  <div class="exam-info-row"><span>💶 Стоимость</span><strong>€90</strong></div>
+  <div class="exam-info-row"><span>📅 Сессии</span><strong>Январь · Май · Сентябрь</strong></div>
+  <div class="exam-info-row"><span>🎯 Для гражданства</span><strong>A2 (5 лет) · B1 (4 года)</strong></div>
+</div>
+
+<div class="exam-part-card">
+  <div class="exam-part-header">
+    <span class="exam-part-num">1</span>
+    <div><div class="exam-part-title">🎧 Аудирование</div><div class="exam-part-time">~20 минут · 25 баллов</div></div>
+  </div>
+  <div class="exam-part-desc">3–4 коротких диалога — слушаешь и отвечаешь на вопросы.</div>
+  <div class="exam-part-label">Типы заданий:</div>
+  <ul class="exam-part-list">
+    <li>Верно / Неверно / Не упоминается</li>
+    <li>Выбор из 3 вариантов (A/B/C)</li>
+    <li>Записать ключевое слово или цифру</li>
+  </ul>
+  <div class="exam-part-example">
+    <b>Примеры ситуаций:</b> таксист и пассажир · звонок в ресторан · диалог в магазине · объявление по радио
+  </div>
+</div>
+
+<div class="exam-part-card">
+  <div class="exam-part-header">
+    <span class="exam-part-num">2</span>
+    <div><div class="exam-part-title">📖 Чтение</div><div class="exam-part-time">~30 минут · 25 баллов</div></div>
+  </div>
+  <div class="exam-part-desc">2–3 текста (объявления, письма, статьи) — читаешь и отвечаешь.</div>
+  <div class="exam-part-label">Типы заданий:</div>
+  <ul class="exam-part-list">
+    <li>Верно / Неверно по тексту</li>
+    <li>Вставить слово из списка в пропуск</li>
+    <li>Соединить части предложений</li>
+    <li>Ответить на вопросы по тексту</li>
+  </ul>
+  <div class="exam-part-example">
+    <b>Примеры тем:</b> объявление о мероприятии · письмо от друга · расписание · меню · реклама
+  </div>
+</div>
+
+<div class="exam-part-card">
+  <div class="exam-part-header">
+    <span class="exam-part-num">3</span>
+    <div><div class="exam-part-title">✍️ Письмо</div><div class="exam-part-time">~45 минут · 25 баллов</div></div>
+  </div>
+  <div class="exam-part-desc"><strong>2 текста по 80–100 слов каждый.</strong> Артикли и предлоги считаются как слова.</div>
+  <div class="exam-part-label">Задание 1 — Письмо другу (неформальное):</div>
+  <ul class="exam-part-list">
+    <li>Рассказать о событии, поездке, покупке</li>
+    <li>Описать свой день / выходные / праздник</li>
+    <li>Пригласить на встречу</li>
+  </ul>
+  <div class="exam-part-label" style="margin-top:8px">Задание 2 — Официальный текст:</div>
+  <ul class="exam-part-list">
+    <li>Заявление (в школу, муниципалитет)</li>
+    <li>Запрос информации (о курсах, событии)</li>
+    <li>Объявление (продаю / ищу / предлагаю)</li>
+  </ul>
+  <div class="exam-part-example">💡 Структура важнее словарного запаса. Выучи шаблоны — и этот блок станет самым лёгким.</div>
+</div>
+
+<div class="exam-part-card">
+  <div class="exam-part-header">
+    <span class="exam-part-num">4</span>
+    <div><div class="exam-part-title">🗣️ Говорение</div><div class="exam-part-time">~15 минут · 25 баллов</div></div>
+  </div>
+  <div class="exam-part-desc">Разговор с экзаменатором и с другим участником. 3 этапа:</div>
+  <ul class="exam-part-list">
+    <li><strong>Представление себя</strong> — кто ты, семья, работа, Кипр</li>
+    <li><strong>Описание картинки</strong> — что видишь, что происходит</li>
+    <li><strong>Диалог с партнёром</strong> — вместе решаете ситуацию</li>
+  </ul>
+  <div class="exam-part-example">💡 Говори медленно. Простое правильное предложение лучше сложного с ошибками. Не знаешь слово — опиши его другими словами.</div>
+</div>
+
+<div class="exam-scoring-block">
+  <div class="exam-scoring-title">⚖️ Проходной балл</div>
+  <div class="exam-scoring-row"><span>Каждая часть</span><span>макс. 25 баллов</span></div>
+  <div class="exam-scoring-row"><span>Итого максимум</span><span>100 баллов</span></div>
+  <div class="exam-scoring-row exam-scoring-pass"><span>Минимум для сдачи</span><span>60 баллов</span></div>
+  <div class="exam-scoring-note">Можно слабо написать одну часть и компенсировать другими.</div>
+</div>`;
 }
 
 function getExamGrammarHTML() {

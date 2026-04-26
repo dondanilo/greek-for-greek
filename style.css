@@ -2301,3 +2301,58 @@ body {
 }
 .tip-title { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
 .tip-text { font-size: 13px; color: #555; line-height: 1.5; }
+
+/* ===================== EXAM STRUCTURE ===================== */
+.exam-section-btn-featured {
+  border-color: #9B59B6 !important;
+  background: linear-gradient(135deg, #f9f4ff, #fff);
+}
+.exam-section-btn-featured .exam-section-title { color: #7d3fb5; }
+
+.exam-info-banner {
+  background: #f0ebff; border-radius: 14px;
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+}
+.exam-info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px;
+}
+.exam-info-row span { color: #777; }
+.exam-info-row strong { color: #333; font-weight: 700; text-align: right; }
+
+.exam-part-card {
+  background: white; border: 1.5px solid #e5e5e5;
+  border-radius: 16px; padding: 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.exam-part-header {
+  display: flex; align-items: center; gap: 12px;
+}
+.exam-part-num {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #9B59B6; color: white;
+  font-size: 16px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.exam-part-title { font-size: 16px; font-weight: 800; }
+.exam-part-time { font-size: 12px; color: #999; margin-top: 1px; }
+.exam-part-desc { font-size: 13px; color: #555; line-height: 1.5; }
+.exam-part-label { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; margin-top: 4px; }
+.exam-part-list { margin: 4px 0 0 16px; padding: 0; font-size: 13px; color: #444; line-height: 1.8; }
+.exam-part-example {
+  background: #f7f7f7; border-radius: 10px;
+  padding: 10px 12px; font-size: 12px; color: #666; line-height: 1.6;
+}
+
+.exam-scoring-block {
+  background: #e8f5e9; border-radius: 14px;
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
+}
+.exam-scoring-title { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+.exam-scoring-row {
+  display: flex; justify-content: space-between;
+  font-size: 13px; color: #555;
+}
+.exam-scoring-pass { font-weight: 700; color: #2e7d32; }
+.exam-scoring-note { font-size: 12px; color: #777; margin-top: 4px; }
