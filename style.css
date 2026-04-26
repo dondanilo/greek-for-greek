@@ -2140,3 +2140,164 @@ body {
 }
 .nav-btn-wide .nav-icon { font-size: 26px; }
 .nav-btn-wide .nav-label { font-size: 15px; font-weight: 800; }
+
+/* ===================== LESSON BUTTON ===================== */
+.lesson-start-btn { font-size: 17px; }
+.lesson-btn-hint {
+  text-align: center; font-size: 12px; color: #aaa;
+  margin-top: -6px;
+}
+
+/* ===================== EXAM BUTTON ===================== */
+.nav-btn-exam { border-color: #9B59B6 !important; }
+.nav-btn-exam .nav-icon { color: #9B59B6; }
+
+/* ===================== TEACH PHASE ===================== */
+.teach-phase-label {
+  font-size: 13px; font-weight: 700; color: #888;
+  text-transform: uppercase; letter-spacing: .5px;
+  text-align: center; flex-shrink: 0;
+}
+.teach-card-area {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+  padding: 8px 0;
+}
+.teach-greek-row {
+  display: flex; align-items: center; gap: 12px;
+  justify-content: center;
+}
+.teach-greek-word {
+  font-size: 38px; font-weight: 900; color: #222;
+  text-align: center; line-height: 1.1;
+}
+.teach-speak-btn {
+  background: none; border: 2px solid var(--blue);
+  color: var(--blue); border-radius: 50%; width: 44px; height: 44px;
+  font-size: 20px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.teach-speak-btn:active { opacity: .7; }
+.teach-transcription {
+  font-size: 14px; color: #888; text-align: center;
+  font-style: italic;
+}
+.teach-translation {
+  font-size: 24px; font-weight: 800; color: var(--blue);
+  text-align: center;
+}
+.teach-note {
+  font-size: 12px; background: #FFF9C4; color: #7a6000;
+  border-radius: 8px; padding: 4px 12px; text-align: center;
+}
+.teach-example-box {
+  width: 100%; background: #f7f7f7; border-radius: 12px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 4px;
+  position: relative;
+}
+.teach-example-label { font-size: 11px; color: #999; font-weight: 700; text-transform: uppercase; }
+.teach-example-speak {
+  position: absolute; top: 10px; right: 10px;
+  background: none; border: 1.5px solid #ccc; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.teach-example-greek { font-size: 15px; color: #333; font-weight: 600; padding-right: 36px; }
+.teach-example-ru { font-size: 13px; color: #777; }
+.teach-conj-details {
+  width: 100%; background: #f0f8ff; border-radius: 10px;
+  padding: 8px 12px;
+}
+.teach-conj-summary {
+  font-size: 13px; color: var(--blue); font-weight: 700; cursor: pointer;
+  list-style: none;
+}
+.teach-conj-grid {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 4px 12px; margin-top: 8px;
+}
+.teach-conj-pr { font-size: 12px; color: #888; }
+.teach-conj-form {
+  font-size: 14px; font-weight: 700; color: #333; cursor: pointer;
+}
+.teach-conj-form:hover { color: var(--blue); }
+.teach-summary-card {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 14px; padding: 20px 0;
+}
+.teach-summary-icon { font-size: 52px; }
+.teach-summary-title { font-size: 20px; font-weight: 900; text-align: center; }
+.teach-summary-words {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  max-width: 320px;
+}
+.teach-summary-word {
+  background: var(--green-light); color: var(--green-dark);
+  border-radius: 20px; padding: 4px 12px; font-size: 13px; font-weight: 700;
+}
+.teach-summary-hint { font-size: 14px; color: #888; text-align: center; }
+.teach-footer { flex-shrink: 0; padding-bottom: 8px; }
+.teach-footer .btn-primary { width: 100%; }
+
+/* ===================== EXAM PREP SCREEN ===================== */
+.exam-sections { display: flex; flex-direction: column; gap: 12px; }
+.exam-section-btn {
+  display: flex; align-items: center; gap: 14px;
+  background: white; border: 2px solid #e5e5e5;
+  border-radius: 16px; padding: 16px 14px; cursor: pointer;
+  text-align: left; width: 100%;
+  transition: border-color .15s, box-shadow .15s;
+}
+.exam-section-btn:hover { border-color: #9B59B6; box-shadow: 0 2px 8px rgba(155,89,182,.15); }
+.exam-section-btn:active { opacity: .85; }
+.exam-section-icon { font-size: 28px; flex-shrink: 0; }
+.exam-section-info { flex: 1; }
+.exam-section-title { font-size: 15px; font-weight: 800; color: #222; }
+.exam-section-sub { font-size: 12px; color: #888; margin-top: 2px; }
+.exam-section-arrow { font-size: 22px; color: #ccc; flex-shrink: 0; }
+
+/* ===================== EXAM DETAIL (grammar / tips) ===================== */
+#exam-detail-body { display: flex; flex-direction: column; gap: 16px; }
+
+/* Grammar */
+.gram-block {
+  background: white; border: 1.5px solid #e5e5e5; border-radius: 14px;
+  padding: 14px 14px 16px;
+}
+.gram-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.gram-subtitle { font-size: 12px; color: #888; margin-bottom: 10px; }
+.gram-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.gram-table td, .gram-table th {
+  padding: 5px 8px; border-bottom: 1px solid #f0f0f0;
+}
+.gram-table th { font-weight: 700; color: #555; font-size: 12px; }
+.gram-rule {
+  font-size: 16px; font-weight: 700; color: #333;
+  background: #f7f7f7; border-radius: 8px; padding: 8px 12px;
+  margin-bottom: 8px;
+}
+.gram-examples { display: flex; flex-direction: column; gap: 4px; }
+.gram-examples div { font-size: 13px; color: #555; }
+.gram-tip {
+  margin-top: 10px; background: #FFF9C4; border-radius: 8px;
+  padding: 8px 12px; font-size: 13px; color: #7a6000;
+}
+
+/* Tips */
+.tips-intro {
+  font-size: 14px; color: #888; text-align: center;
+  margin-bottom: 4px;
+}
+.tip-item {
+  display: flex; gap: 12px; background: white;
+  border: 1.5px solid #e5e5e5; border-radius: 14px;
+  padding: 14px;
+}
+.tip-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #9B59B6; color: white; font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tip-title { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+.tip-text { font-size: 13px; color: #555; line-height: 1.5; }

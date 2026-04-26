@@ -121,7 +121,8 @@ const DEFAULT_STATE = {
   achievements: [],
   srs: {},  // { verbId: { interval, ef, due } }
   onboardingDone: false,
-  vocabProgress: {}  // { categoryId: [greek, greek, ...] }
+  vocabProgress: {},  // { categoryId: [greek, greek, ...] }
+  currentLesson: 1
 };
 
 let state = { ...DEFAULT_STATE };
@@ -159,6 +160,18 @@ const PRONOUNS_RU = {
 };
 // VERBS array in data.js contains mixed data — filter real verbs only
 const VERBS_ONLY = VERBS.filter(v => v.infinitive);
+
+const LESSON_VERBS_COUNT = 5;
+function getLessonModules() {
+  const modules = [];
+  for (let i = 0; i < VERBS_ONLY.length; i += LESSON_VERBS_COUNT) {
+    const num = Math.floor(i / LESSON_VERBS_COUNT) + 1;
+    modules.push({ id: num, verbs: VERBS_ONLY.slice(i, i + LESSON_VERBS_COUNT) });
+  }
+  return modules;
+}
+
+let teachState = { module: null, cards: [], currentCard: 0 };
 
 // ============================================================
 // PERSISTENCE
@@ -616,6 +629,12 @@ function renderHome() {
     srsBtn.style.display = dueCount > 0 ? 'flex' : 'none';
     document.getElementById('srs-due-count').textContent = `${dueCount} ${dueCount === 1 ? 'глагол' : dueCount < 5 ? 'глагола' : 'глаголов'}`;
   }
+
+  // Lesson button
+  const mods = getLessonModules();
+  const lessonNum = Math.min(state.currentLesson || 1, mods.length);
+  const lessonBtnText = document.getElementById('lesson-btn-text');
+  if (lessonBtnText) lessonBtnText.textContent = `Урок ${lessonNum} · ${LESSON_VERBS_COUNT} слов ▶`;
 }
 
 function showHome() {
@@ -699,9 +718,9 @@ function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 // LESSON — FLOW
 // ============================================================
 function startLesson() {
-  lessonState = { exercises: generateLesson(), currentIndex: 0, hearts: 3, xpEarned: 0, correct: 0, answered: false, isWeakMode: false };
-  showScreen('screen-lesson');
-  renderExercise();
+  const mods = getLessonModules();
+  const num = Math.min(state.currentLesson || 1, mods.length);
+  startTeachPhase(mods[num - 1]);
 }
 
 function startWeakLesson() {
@@ -925,6 +944,10 @@ function completeLesson() {
     const practicedIds = [...new Set(lessonState.exercises.filter(e => e.verb).map(e => e.verb.id))];
     practicedIds.forEach(id => { delete state.errorLog[id]; });
   }
+  if (!lessonState.isWeakMode && !lessonState.isSrsMode) {
+    const mods = getLessonModules();
+    state.currentLesson = Math.min((state.currentLesson || 1) + 1, mods.length);
+  }
   saveState();
   checkAchievements({ perfectLesson: isPerfect, weakMode: lessonState.isWeakMode });
   createPost('lesson_complete', {
@@ -958,12 +981,22 @@ function randomCorrectPhrase() {
 function speakGreek(text, event) {
   if (event) event.stopPropagation();
   if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'el-GR';
-  utterance.rate = 0.85;
-  utterance.pitch = 1;
-  speechSynthesis.speak(utterance);
+  const doSpeak = () => {
+    speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'el-GR';
+    utt.rate = 0.85;
+    utt.pitch = 1;
+    speechSynthesis.speak(utt);
+  };
+  if (speechSynthesis.getVoices().length > 0) {
+    doSpeak();
+  } else {
+    let fired = false;
+    const go = () => { if (!fired) { fired = true; doSpeak(); } };
+    speechSynthesis.addEventListener('voiceschanged', go, { once: true });
+    setTimeout(go, 500);
+  }
 }
 
 // ============================================================
@@ -2673,15 +2706,6 @@ function completeVocabQuiz() {
 function restartVocabQuiz() { startVocabQuiz(vocabQuizState.categoryId); }
 function exitVocabQuiz() { showVocab(currentVocabMode); }
 
-function speakGreek(text) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = 'el-GR';
-    utt.rate = 0.85;
-    window.speechSynthesis.speak(utt);
-  }
-}
 
 // ============================================================
 // QUIZ — SENTENCE ORDERING
@@ -3370,4 +3394,241 @@ function exitSpeechTraining() {
     speechSession.recognition = null;
   }
   showSpeechTraining();
+}
+
+// ============================================================
+// TEACH PHASE — карточки перед уроком
+// ============================================================
+function startTeachPhase(mod) {
+  teachState = { module: mod, cards: mod.verbs, currentCard: 0 };
+  renderTeachCard();
+  showScreen('screen-teach');
+}
+
+function renderTeachCard() {
+  const { cards, currentCard, module } = teachState;
+  const total = cards.length;
+  const pct = (currentCard / total) * 100;
+  document.getElementById('teach-progress').style.width = pct + '%';
+  document.getElementById('teach-counter').textContent = `${Math.min(currentCard + 1, total)}/${total}`;
+
+  if (currentCard >= total) {
+    document.getElementById('teach-label').textContent = 'Готово — ты изучил все слова!';
+    document.getElementById('teach-card-area').innerHTML = `
+      <div class="teach-summary-card">
+        <div class="teach-summary-icon">🎯</div>
+        <div class="teach-summary-title">Урок ${module.id} · Слова изучены</div>
+        <div class="teach-summary-words">${cards.map(v =>
+          `<span class="teach-summary-word">${v.infinitive} — ${v.translation}</span>`
+        ).join('')}</div>
+        <div class="teach-summary-hint">Теперь проверим, как ты запомнил</div>
+      </div>`;
+    const btn = document.getElementById('teach-next-btn');
+    btn.textContent = 'Начать упражнения ▶';
+    btn.onclick = finishTeachPhase;
+    return;
+  }
+
+  const verb = cards[currentCard];
+  document.getElementById('teach-label').textContent = `Урок ${module.id} · Слово ${currentCard + 1} из ${total}`;
+  document.getElementById('teach-card-area').innerHTML = `
+    <div class="teach-greek-row">
+      <div class="teach-greek-word">${verb.infinitive}</div>
+      <button class="teach-speak-btn" onclick="speakGreek('${verb.infinitive.replace(/'/g, "\\'")}')">🔊</button>
+    </div>
+    ${verb.transcription ? `<div class="teach-transcription">${verb.transcription}</div>` : ''}
+    <div class="teach-translation">${verb.translation}</div>
+    ${verb.note ? `<div class="teach-note">${verb.note}</div>` : ''}
+    ${verb.example ? `
+    <div class="teach-example-box">
+      <div class="teach-example-label">Пример:</div>
+      <button class="teach-example-speak" onclick="speakGreek('${verb.example.greek.replace(/'/g, "\\'")}')">🔊</button>
+      <div class="teach-example-greek">${verb.example.greek}</div>
+      <div class="teach-example-ru">${verb.example.ru}</div>
+    </div>` : ''}
+    <details class="teach-conj-details">
+      <summary class="teach-conj-summary">Спряжение ▾</summary>
+      <div class="teach-conj-grid">
+        ${Object.entries(verb.present || {}).map(([pr, form]) =>
+          `<span class="teach-conj-pr">${pr}</span><span class="teach-conj-form" onclick="speakGreek('${form}')">${form}</span>`
+        ).join('')}
+      </div>
+    </details>`;
+
+  const btn = document.getElementById('teach-next-btn');
+  btn.textContent = currentCard < total - 1 ? 'Следующее слово →' : 'Последнее! →';
+  btn.onclick = nextTeachCard;
+}
+
+function nextTeachCard() {
+  teachState.currentCard++;
+  renderTeachCard();
+}
+
+function finishTeachPhase() {
+  const mod = teachState.module;
+  lessonState = {
+    exercises: generateLesson(mod.verbs),
+    currentIndex: 0, hearts: 3, xpEarned: 0, correct: 0,
+    answered: false, isWeakMode: false, isSrsMode: false
+  };
+  showScreen('screen-lesson');
+  renderExercise();
+}
+
+// ============================================================
+// EXAM PREP — подготовка к экзамену
+// ============================================================
+function showExamPrep() {
+  showScreen('screen-exam');
+}
+
+function showExamSection(section) {
+  if (section === 'vocab') { showVocab('translation'); return; }
+  if (section === 'tests') { showQuiz(); return; }
+  const title = section === 'grammar' ? '📚 Грамматика A2/B1' : '💡 Лайфхаки для экзамена';
+  const body = section === 'grammar' ? getExamGrammarHTML() : getExamTipsHTML();
+  document.getElementById('exam-detail-title').textContent = title;
+  document.getElementById('exam-detail-body').innerHTML = body;
+  showScreen('screen-exam-detail');
+}
+
+function getExamGrammarHTML() {
+  return `
+<div class="gram-block">
+  <div class="gram-title">🔵 Глаголы A-спряжения (на -ω)</div>
+  <div class="gram-subtitle">Самые частые: κάνω, έχω, λέω, ξέρω, θέλω, βλέπω, πηγαίνω</div>
+  <table class="gram-table">
+    <tr><td>εγώ</td><td>-<b>ω</b></td><td>κάν<b>ω</b></td></tr>
+    <tr><td>εσύ</td><td>-<b>εις</b></td><td>κάν<b>εις</b></td></tr>
+    <tr><td>αυτός/ή/ό</td><td>-<b>ει</b></td><td>κάν<b>ει</b></td></tr>
+    <tr><td>εμείς</td><td>-<b>ουμε</b></td><td>κάν<b>ουμε</b></td></tr>
+    <tr><td>εσείς</td><td>-<b>ετε</b></td><td>κάν<b>ετε</b></td></tr>
+    <tr><td>αυτοί/ές/ά</td><td>-<b>ουν</b></td><td>κάν<b>ουν</b></td></tr>
+  </table>
+</div>
+<div class="gram-block">
+  <div class="gram-title">🟣 Глаголы B-спряжения (на -άω / -ώ)</div>
+  <div class="gram-subtitle">Самые частые: μιλώ (говорить), αγαπώ (любить), περνώ (проводить время)</div>
+  <table class="gram-table">
+    <tr><td>εγώ</td><td>-<b>ώ / -άω</b></td><td>μιλ<b>ώ</b></td></tr>
+    <tr><td>εσύ</td><td>-<b>άς</b></td><td>μιλ<b>άς</b></td></tr>
+    <tr><td>αυτός/ή/ό</td><td>-<b>ά</b></td><td>μιλ<b>ά</b></td></tr>
+    <tr><td>εμείς</td><td>-<b>άμε / ούμε</b></td><td>μιλ<b>άμε</b></td></tr>
+    <tr><td>εσείς</td><td>-<b>άτε</b></td><td>μιλ<b>άτε</b></td></tr>
+    <tr><td>αυτοί/ές/ά</td><td>-<b>άνε / ούν</b></td><td>μιλ<b>άνε</b></td></tr>
+  </table>
+</div>
+<div class="gram-block">
+  <div class="gram-title">🟠 Конструкция «хочу сделать»</div>
+  <div class="gram-rule"><b>θέλω να</b> + глагол в конъюнктиве</div>
+  <div class="gram-examples">
+    <div>θέλω <b>να πάω</b> — я хочу пойти</div>
+    <div>θέλω <b>να αγοράσω</b> — я хочу купить</div>
+    <div>θέλω <b>να μιλήσω</b> — я хочу поговорить</div>
+  </div>
+  <div class="gram-tip">💡 Эта конструкция используется в 80% разговорных ситуаций!</div>
+</div>
+<div class="gram-block">
+  <div class="gram-title">🟢 Отрицание</div>
+  <table class="gram-table">
+    <tr><td><b>δεν</b> + глагол</td><td>утвердительные предложения</td><td>δεν ξέρω — я не знаю</td></tr>
+    <tr><td><b>μην</b> + глагол</td><td>просьбы и запреты</td><td>μην μιλάς — не говори</td></tr>
+  </table>
+</div>
+<div class="gram-block">
+  <div class="gram-title">🔴 Вопросительные слова</div>
+  <table class="gram-table">
+    <tr><td><b>τι;</b></td><td>что?</td></tr>
+    <tr><td><b>ποιος/ποια;</b></td><td>кто?</td></tr>
+    <tr><td><b>πού;</b></td><td>где? куда?</td></tr>
+    <tr><td><b>πότε;</b></td><td>когда?</td></tr>
+    <tr><td><b>πώς;</b></td><td>как?</td></tr>
+    <tr><td><b>πόσο;</b></td><td>сколько?</td></tr>
+    <tr><td><b>γιατί;</b></td><td>почему?</td></tr>
+  </table>
+</div>
+<div class="gram-block">
+  <div class="gram-title">🔷 Артикли (именительный падеж)</div>
+  <table class="gram-table">
+    <tr><th></th><th>м.р.</th><th>ж.р.</th><th>ср.р.</th></tr>
+    <tr><td>определённый</td><td><b>ο</b></td><td><b>η</b></td><td><b>το</b></td></tr>
+    <tr><td>неопределённый</td><td><b>ένας</b></td><td><b>μια</b></td><td><b>ένα</b></td></tr>
+  </table>
+</div>`;
+}
+
+function getExamTipsHTML() {
+  return `
+<div class="tips-intro">Практические советы от тех, кто уже сдал экзамен на гражданство.</div>
+<div class="tip-item">
+  <div class="tip-num">1</div>
+  <div class="tip-body">
+    <div class="tip-title">Структура экзамена A2/B1</div>
+    <div class="tip-text">4 части: аудирование (слушать и отвечать), чтение (понять текст), письмо (написать письмо/описание), говорение (диалог с экзаменатором). Каждая часть оценивается отдельно.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">2</div>
+  <div class="tip-body">
+    <div class="tip-title">Уровень для гражданства</div>
+    <div class="tip-text">Для гражданства Греции/Кипра нужен B1. Если знаешь A2 — пробуй B1, экзаменаторы ценят старание. Сертификат признаётся при 6+ годах проживания.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">3</div>
+  <div class="tip-body">
+    <div class="tip-title">Приоритет: спряжение εγώ/εσύ/αυτός</div>
+    <div class="tip-text">90% разговора — три лица: я, ты, он/она. Выучи спряжение 30 ключевых глаголов для этих лиц — и ты уже можешь строить предложения.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">4</div>
+  <div class="tip-body">
+    <div class="tip-title">θέλω να + глагол — твоё главное оружие</div>
+    <div class="tip-text">«Я хочу [что-то сделать]» — эта конструкция работает в магазине, банке, у врача, в КЕП. Выучи θέλω να + базовые глаголы и ты можешь попросить что угодно.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">5</div>
+  <div class="tip-body">
+    <div class="tip-title">Аудирование: слушай фоново</div>
+    <div class="tip-text">Включай греческое радио (ERT) или новости фоном дома. Не пытайся всё понять — просто привыкай к ритму языка. 30 минут в день = +20% на аудировании через месяц.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">6</div>
+  <div class="tip-body">
+    <div class="tip-title">Письмо: 3 шаблона покрывают всё</div>
+    <div class="tip-text">Выучи 3 шаблона письма: 1) представление себя и семьи, 2) описание своего дня/распорядка, 3) что тебе нравится/не нравится в Греции/Кипре. Экзаменаторы дают именно эти темы.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">7</div>
+  <div class="tip-body">
+    <div class="tip-title">Говорение: медленно и уверенно</div>
+    <div class="tip-text">Говори медленно — экзаменатор ставит очки за правильность, не за скорость. Простое предложение, сказанное без ошибок, лучше сложного с запинками.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">8</div>
+  <div class="tip-body">
+    <div class="tip-title">Чтение: смотри на контекст, не на каждое слово</div>
+    <div class="tip-text">Не нужно понимать каждое слово. Читай абзац целиком — контекст обычно даёт понимание общего смысла. Вопросы всегда о главной идее, а не о деталях.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">9</div>
+  <div class="tip-body">
+    <div class="tip-title">Минимальный словарный запас A2</div>
+    <div class="tip-text">~600-800 слов. Приоритет: числа, дни/месяцы, семья, еда, работа, здоровье, транспорт, магазины. Все эти темы есть в разделе «Карточки» этого приложения.</div>
+  </div>
+</div>
+<div class="tip-item">
+  <div class="tip-num">10</div>
+  <div class="tip-body">
+    <div class="tip-title">За месяц до экзамена</div>
+    <div class="tip-text">Пройди все сценарии (раздел «Сценарии»), порепетируй диалоги вслух, сделай пробный письменный текст 100–150 слов. Попроси грека-друга проверить или запишись на пробный урок.</div>
+  </div>
+</div>`;
 }

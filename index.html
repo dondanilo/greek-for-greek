@@ -169,7 +169,10 @@
       </button>
     </div>
 
-    <button class="btn-primary" onclick="startLesson()">Начать урок ▶</button>
+    <button class="btn-primary lesson-start-btn" onclick="startLesson()">
+      <span id="lesson-btn-text">Урок 1 · 5 слов ▶</span>
+    </button>
+    <div class="lesson-btn-hint">Сначала карточки, потом упражнения</div>
 
     <div class="nav-grid">
       <button class="nav-btn" onclick="showScenarios()">
@@ -221,6 +224,10 @@
       <button class="nav-btn" onclick="showBlog()">
         <span class="nav-icon">📝</span>
         <span class="nav-label">Блог</span>
+      </button>
+      <button class="nav-btn nav-btn-exam nav-btn-wide" onclick="showExamPrep()">
+        <span class="nav-icon">🎓</span>
+        <span class="nav-label">Подготовка к экзамену</span>
       </button>
       <button class="nav-btn nav-btn-speech nav-btn-wide" onclick="showSpeechTraining()">
         <span class="nav-icon">🎤</span>
@@ -998,6 +1005,76 @@
   </div>
 
   <button id="scroll-top-btn" onclick="scrollToTop()" aria-label="Наверх">↑</button>
+
+  <!-- ==================== TEACH PHASE ==================== -->
+  <div id="screen-teach" class="screen">
+    <div class="lesson-header">
+      <button class="btn-back-sm" onclick="showHome()">✕</button>
+      <div class="lesson-progress-wrap">
+        <div class="lesson-progress-bg">
+          <div class="lesson-progress-fill" id="teach-progress"></div>
+        </div>
+      </div>
+      <div class="lesson-xp" id="teach-counter" style="min-width:44px;text-align:center">1/5</div>
+    </div>
+    <div class="teach-phase-label" id="teach-label">Урок 1 · Слово 1 из 5</div>
+    <div class="teach-card-area" id="teach-card-area"></div>
+    <div class="teach-footer">
+      <button class="btn-primary" id="teach-next-btn">Следующее слово →</button>
+    </div>
+  </div>
+
+  <!-- ==================== EXAM PREP ==================== -->
+  <div id="screen-exam" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>🎓 К экзамену</h2>
+    </div>
+    <p class="sub-desc">Готовься к A2/B1 шаг за шагом — тесты, грамматика и лайфхаки.</p>
+    <div class="exam-sections">
+      <button class="exam-section-btn" onclick="showExamSection('grammar')">
+        <span class="exam-section-icon">📚</span>
+        <div class="exam-section-info">
+          <div class="exam-section-title">Грамматика</div>
+          <div class="exam-section-sub">Таблицы, правила, схемы A2/B1</div>
+        </div>
+        <span class="exam-section-arrow">›</span>
+      </button>
+      <button class="exam-section-btn" onclick="showExamSection('tips')">
+        <span class="exam-section-icon">💡</span>
+        <div class="exam-section-info">
+          <div class="exam-section-title">Лайфхаки для экзамена</div>
+          <div class="exam-section-sub">Структура, стратегия, советы</div>
+        </div>
+        <span class="exam-section-arrow">›</span>
+      </button>
+      <button class="exam-section-btn" onclick="showExamSection('tests')">
+        <span class="exam-section-icon">📋</span>
+        <div class="exam-section-info">
+          <div class="exam-section-title">Тесты в формате экзамена</div>
+          <div class="exam-section-sub">Составь предложение — как на B1</div>
+        </div>
+        <span class="exam-section-arrow">›</span>
+      </button>
+      <button class="exam-section-btn" onclick="showExamSection('vocab')">
+        <span class="exam-section-icon">📖</span>
+        <div class="exam-section-info">
+          <div class="exam-section-title">Экзаменационный словарь</div>
+          <div class="exam-section-sub">Слова по темам с переводом</div>
+        </div>
+        <span class="exam-section-arrow">›</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== EXAM DETAIL ==================== -->
+  <div id="screen-exam-detail" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showExamPrep()">← Назад</button>
+      <h2 id="exam-detail-title" style="font-size:16px;"></h2>
+    </div>
+    <div id="exam-detail-body"></div>
+  </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
