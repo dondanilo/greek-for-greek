@@ -3809,66 +3809,135 @@ function getExamWritingHTML() {
 
 function getExamGrammarHTML() {
   return `
-<div class="gram-block">
-  <div class="gram-title">🔵 Глаголы A-спряжения (на -ω)</div>
-  <div class="gram-subtitle">Самые частые: κάνω, έχω, λέω, ξέρω, θέλω, βλέπω, πηγαίνω</div>
+<div class="gram-nav">Нажми на тему:</div>
+<div class="gram-toc">
+  <button class="gram-toc-btn" onclick="document.getElementById('gr1').scrollIntoView({behavior:'smooth'})">Настоящее</button>
+  <button class="gram-toc-btn" onclick="document.getElementById('gr2').scrollIntoView({behavior:'smooth'})">Прошедшее</button>
+  <button class="gram-toc-btn" onclick="document.getElementById('gr3').scrollIntoView({behavior:'smooth'})">Будущее</button>
+  <button class="gram-toc-btn" onclick="document.getElementById('gr4').scrollIntoView({behavior:'smooth'})">Артикли</button>
+  <button class="gram-toc-btn" onclick="document.getElementById('gr5').scrollIntoView({behavior:'smooth'})">Предлоги</button>
+  <button class="gram-toc-btn" onclick="document.getElementById('gr6').scrollIntoView({behavior:'smooth'})">Конструкции</button>
+</div>
+
+<div id="gr1" class="gram-block">
+  <div class="gram-title">🔵 Настоящее время</div>
+  <div class="gram-subtitle">A-спряжение (-ω): κάνω, έχω, θέλω, βλέπω, ξέρω, πηγαίνω</div>
   <table class="gram-table">
-    <tr><td>εγώ</td><td>-<b>ω</b></td><td>κάν<b>ω</b></td></tr>
-    <tr><td>εσύ</td><td>-<b>εις</b></td><td>κάν<b>εις</b></td></tr>
-    <tr><td>αυτός/ή/ό</td><td>-<b>ει</b></td><td>κάν<b>ει</b></td></tr>
-    <tr><td>εμείς</td><td>-<b>ουμε</b></td><td>κάν<b>ουμε</b></td></tr>
-    <tr><td>εσείς</td><td>-<b>ετε</b></td><td>κάν<b>ετε</b></td></tr>
-    <tr><td>αυτοί/ές/ά</td><td>-<b>ουν</b></td><td>κάν<b>ουν</b></td></tr>
+    <tr><td>εγώ</td><td>κάν<b>ω</b></td><td>έχ<b>ω</b></td></tr>
+    <tr><td>εσύ</td><td>κάν<b>εις</b></td><td>έχ<b>εις</b></td></tr>
+    <tr><td>αυτός/ή</td><td>κάν<b>ει</b></td><td>έχ<b>ει</b></td></tr>
+    <tr><td>εμείς</td><td>κάν<b>ουμε</b></td><td>έχ<b>ουμε</b></td></tr>
+    <tr><td>εσείς</td><td>κάν<b>ετε</b></td><td>έχ<b>ετε</b></td></tr>
+    <tr><td>αυτοί</td><td>κάν<b>ουν</b></td><td>έχ<b>ουν</b></td></tr>
+  </table>
+  <div class="gram-subtitle" style="margin-top:10px">B-спряжение (-ώ/-άω): μιλώ, αγαπώ, περνώ, ρωτώ</div>
+  <table class="gram-table">
+    <tr><td>εγώ</td><td>μιλ<b>ώ</b></td><td>εσύ</td><td>μιλ<b>άς</b></td></tr>
+    <tr><td>αυτός/ή</td><td>μιλ<b>ά</b></td><td>εμείς</td><td>μιλ<b>άμε</b></td></tr>
+    <tr><td>εσείς</td><td>μιλ<b>άτε</b></td><td>αυτοί</td><td>μιλ<b>άνε</b></td></tr>
+  </table>
+  <div class="gram-subtitle" style="margin-top:10px">Неправильные — учи отдельно</div>
+  <table class="gram-table">
+    <tr><td>είμαι</td><td>είμαι / είσαι / είναι / είμαστε / είστε / είναι</td></tr>
+    <tr><td>λέω</td><td>λέω / λες / λέει / λέμε / λέτε / λένε</td></tr>
   </table>
 </div>
-<div class="gram-block">
-  <div class="gram-title">🟣 Глаголы B-спряжения (на -άω / -ώ)</div>
-  <div class="gram-subtitle">Самые частые: μιλώ (говорить), αγαπώ (любить), περνώ (проводить время)</div>
+
+<div id="gr2" class="gram-block">
+  <div class="gram-title">🟠 Прошедшее время (αόριστος)</div>
+  <div class="gram-tip">💡 Самое важное для письма и говорения — рассказываешь о том, что уже произошло.</div>
+  <div class="gram-subtitle" style="margin-top:8px">Правило для A-глаголов: убери -ω, добавь -α/-ες/-ε/-αμε/-ατε/-αν</div>
   <table class="gram-table">
-    <tr><td>εγώ</td><td>-<b>ώ / -άω</b></td><td>μιλ<b>ώ</b></td></tr>
-    <tr><td>εσύ</td><td>-<b>άς</b></td><td>μιλ<b>άς</b></td></tr>
-    <tr><td>αυτός/ή/ό</td><td>-<b>ά</b></td><td>μιλ<b>ά</b></td></tr>
-    <tr><td>εμείς</td><td>-<b>άμε / ούμε</b></td><td>μιλ<b>άμε</b></td></tr>
-    <tr><td>εσείς</td><td>-<b>άτε</b></td><td>μιλ<b>άτε</b></td></tr>
-    <tr><td>αυτοί/ές/ά</td><td>-<b>άνε / ούν</b></td><td>μιλ<b>άνε</b></td></tr>
+    <tr><th>Сейчас</th><th>В прошлом</th><th>Перевод</th></tr>
+    <tr><td>κάνω</td><td>έ<b>καν</b>α</td><td>я сделал(а)</td></tr>
+    <tr><td>αγοράζω</td><td>αγόρ<b>ασ</b>α</td><td>я купил(а)</td></tr>
+    <tr><td>μιλώ</td><td>μίλ<b>ησ</b>α</td><td>я поговорил(а)</td></tr>
+    <tr><td>περνώ</td><td>πέρ<b>ασ</b>α</td><td>я провёл(а) время</td></tr>
+    <tr><td>τρώω</td><td>έφαγα</td><td>я поел(а)</td></tr>
   </table>
-</div>
-<div class="gram-block">
-  <div class="gram-title">🟠 Конструкция «хочу сделать»</div>
-  <div class="gram-rule"><b>θέλω να</b> + глагол в конъюнктиве</div>
-  <div class="gram-examples">
-    <div>θέλω <b>να πάω</b> — я хочу пойти</div>
-    <div>θέλω <b>να αγοράσω</b> — я хочу купить</div>
-    <div>θέλω <b>να μιλήσω</b> — я хочу поговорить</div>
+  <div class="gram-subtitle" style="margin-top:10px">Неправильные прошедшие — выучи наизусть</div>
+  <table class="gram-table">
+    <tr><th>Глагол</th><th>εγώ</th><th>αυτός/ή</th></tr>
+    <tr><td>πηγαίνω (идти)</td><td><b>πήγα</b></td><td>πήγε</td></tr>
+    <tr><td>έχω (иметь)</td><td><b>είχα</b></td><td>είχε</td></tr>
+    <tr><td>είμαι (быть)</td><td><b>ήμουν</b></td><td>ήταν</td></tr>
+    <tr><td>λέω (говорить)</td><td><b>είπα</b></td><td>είπε</td></tr>
+    <tr><td>βλέπω (видеть)</td><td><b>είδα</b></td><td>είδε</td></tr>
+    <tr><td>έρχομαι (приходить)</td><td><b>ήρθα</b></td><td>ήρθε</td></tr>
+    <tr><td>παίρνω (брать)</td><td><b>πήρα</b></td><td>πήρε</td></tr>
+  </table>
+  <div class="gram-example-sent">
+    <div>Χθες <b>πήγα</b> στο σούπερ μάρκετ. — Вчера я ходил(а) в супермаркет.</div>
+    <div>Το Σαββατοκύριακο <b>είδα</b> τους φίλους μου. — На выходных я видел(а) друзей.</div>
+    <div>Η βραδιά <b>ήταν</b> πολύ ωραία! — Вечер был очень приятный!</div>
   </div>
-  <div class="gram-tip">💡 Эта конструкция используется в 80% разговорных ситуаций!</div>
 </div>
-<div class="gram-block">
-  <div class="gram-title">🟢 Отрицание</div>
+
+<div id="gr3" class="gram-block">
+  <div class="gram-title">🟢 Будущее время</div>
+  <div class="gram-rule"><b>θα</b> + форма глагола (как настоящее, но с θα)</div>
   <table class="gram-table">
-    <tr><td><b>δεν</b> + глагол</td><td>утвердительные предложения</td><td>δεν ξέρω — я не знаю</td></tr>
-    <tr><td><b>μην</b> + глагол</td><td>просьбы и запреты</td><td>μην μιλάς — не говори</td></tr>
+    <tr><th>Настоящее</th><th>Будущее</th><th>Перевод</th></tr>
+    <tr><td>πηγαίνω</td><td><b>θα πάω</b></td><td>я пойду / поеду</td></tr>
+    <tr><td>κάνω</td><td><b>θα κάνω</b></td><td>я сделаю</td></tr>
+    <tr><td>αγοράζω</td><td><b>θα αγοράσω</b></td><td>я куплю</td></tr>
+    <tr><td>μιλώ</td><td><b>θα μιλήσω</b></td><td>я поговорю</td></tr>
+    <tr><td>έρχομαι</td><td><b>θα έρθω</b></td><td>я приду</td></tr>
   </table>
+  <div class="gram-example-sent">
+    <div>Αύριο <b>θα πάω</b> στη δουλειά. — Завтра я пойду на работу.</div>
+    <div>Το καλοκαίρι <b>θα ταξιδέψουμε</b> στην Ελλάδα. — Летом мы поедем в Грецию.</div>
+  </div>
+  <div class="gram-tip">💡 θα + δεν = δεν θα: Δεν θα πάω — я не пойду</div>
 </div>
-<div class="gram-block">
-  <div class="gram-title">🔴 Вопросительные слова</div>
-  <table class="gram-table">
-    <tr><td><b>τι;</b></td><td>что?</td></tr>
-    <tr><td><b>ποιος/ποια;</b></td><td>кто?</td></tr>
-    <tr><td><b>πού;</b></td><td>где? куда?</td></tr>
-    <tr><td><b>πότε;</b></td><td>когда?</td></tr>
-    <tr><td><b>πώς;</b></td><td>как?</td></tr>
-    <tr><td><b>πόσο;</b></td><td>сколько?</td></tr>
-    <tr><td><b>γιατί;</b></td><td>почему?</td></tr>
-  </table>
-</div>
-<div class="gram-block">
-  <div class="gram-title">🔷 Артикли (именительный падеж)</div>
+
+<div id="gr4" class="gram-block">
+  <div class="gram-title">🔷 Артикли и падежи</div>
+  <div class="gram-subtitle">Именительный (кто? что?) — субъект предложения</div>
   <table class="gram-table">
     <tr><th></th><th>м.р.</th><th>ж.р.</th><th>ср.р.</th></tr>
-    <tr><td>определённый</td><td><b>ο</b></td><td><b>η</b></td><td><b>το</b></td></tr>
-    <tr><td>неопределённый</td><td><b>ένας</b></td><td><b>μια</b></td><td><b>ένα</b></td></tr>
+    <tr><td>определённый</td><td><b>ο</b> φίλος</td><td><b>η</b> φίλη</td><td><b>το</b> παιδί</td></tr>
+    <tr><td>неопределённый</td><td><b>ένας</b> φίλος</td><td><b>μια</b> φίλη</td><td><b>ένα</b> παιδί</td></tr>
   </table>
+  <div class="gram-subtitle" style="margin-top:10px">Винительный (кого? что?) — объект действия</div>
+  <table class="gram-table">
+    <tr><th></th><th>м.р.</th><th>ж.р.</th><th>ср.р.</th></tr>
+    <tr><td>определённый</td><td><b>τον</b> φίλο</td><td><b>την</b> φίλη</td><td><b>το</b> παιδί</td></tr>
+    <tr><td>неопределённый</td><td><b>έναν</b> φίλο</td><td><b>μια</b> φίλη</td><td><b>ένα</b> παιδί</td></tr>
+  </table>
+  <div class="gram-example-sent">
+    <div><b>Ο</b> φίλος μου μένει στη Λεμεσό. — Мой друг живёт в Лимасоле.</div>
+    <div>Βλέπω <b>τον</b> φίλο μου κάθε μέρα. — Я вижу своего друга каждый день.</div>
+  </div>
+  <div class="gram-tip">💡 Среднего рода артикль <b>το</b> не меняется никогда.</div>
+</div>
+
+<div id="gr5" class="gram-block">
+  <div class="gram-title">🟡 Предлоги + артикли (слияние)</div>
+  <div class="gram-subtitle">σε + τον/την/το → στον / στην / στο</div>
+  <table class="gram-table">
+    <tr><th>Предлог</th><th>Значение</th><th>Пример</th></tr>
+    <tr><td><b>στο / στη / στον</b></td><td>в, на, к</td><td>στο σπίτι — дома, στην Κύπρο — на Кипре</td></tr>
+    <tr><td><b>από</b></td><td>из, от, с</td><td>από την Ελλάδα — из Греции</td></tr>
+    <tr><td><b>με</b></td><td>с (вместе)</td><td>με τον άντρα μου — с мужем</td></tr>
+    <tr><td><b>για</b></td><td>для, о, про</td><td>για τη δουλειά — о работе</td></tr>
+    <tr><td><b>μετά</b></td><td>после, потом</td><td>μετά το φαγητό — после еды</td></tr>
+    <tr><td><b>πριν</b></td><td>до, перед</td><td>πριν από δύο χρόνια — два года назад</td></tr>
+  </table>
+</div>
+
+<div id="gr6" class="gram-block">
+  <div class="gram-title">🟣 Ключевые конструкции A2</div>
+  <table class="gram-table">
+    <tr><th>Конструкция</th><th>Пример</th><th>Перевод</th></tr>
+    <tr><td><b>θέλω να</b> + гл.</td><td>Θέλω να πάω σπίτι.</td><td>Хочу пойти домой.</td></tr>
+    <tr><td><b>μπορώ να</b> + гл.</td><td>Μπορώ να σε βοηθήσω;</td><td>Могу тебе помочь?</td></tr>
+    <tr><td><b>πρέπει να</b> + гл.</td><td>Πρέπει να μελετώ.</td><td>Нужно учиться.</td></tr>
+    <tr><td><b>δεν</b> + гл.</td><td>Δεν καταλαβαίνω.</td><td>Я не понимаю.</td></tr>
+    <tr><td><b>γιατί</b> / <b>επειδή</b></td><td>Πήγα γιατί ήθελα...</td><td>Пошёл(а), потому что...</td></tr>
+    <tr><td><b>όταν</b></td><td>Όταν ήμουν μικρή...</td><td>Когда я была маленькой...</td></tr>
+  </table>
+  <div class="gram-tip">💡 μπορώ να + θέλω να + πρέπει να — три конструкции которые покрывают 70% разговорных ситуаций на экзамене.</div>
 </div>`;
 }
 

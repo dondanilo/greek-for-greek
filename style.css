@@ -2283,6 +2283,29 @@ body {
   padding: 8px 12px; font-size: 13px; color: #7a6000;
 }
 
+/* Grammar TOC nav (sprint 4) */
+.gram-nav {
+  position: sticky; top: 0; z-index: 10;
+  background: #fafafa; padding: 6px 0 8px;
+}
+.gram-toc {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding-bottom: 2px; scrollbar-width: none;
+}
+.gram-toc::-webkit-scrollbar { display: none; }
+.gram-toc-btn {
+  flex-shrink: 0; padding: 5px 12px;
+  border: 1.5px solid #c7c7c7; border-radius: 20px;
+  background: white; font-size: 12px; font-weight: 600;
+  color: #444; cursor: pointer; transition: background .15s, color .15s;
+}
+.gram-toc-btn:active { background: #9B59B6; color: white; border-color: #9B59B6; }
+.gram-example-sent {
+  font-size: 13px; color: #555; padding: 3px 0;
+  border-bottom: 1px solid #f3f3f3;
+}
+.gram-example-sent:last-child { border-bottom: none; }
+
 /* Tips */
 .tips-intro {
   font-size: 14px; color: #888; text-align: center;
