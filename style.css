@@ -2356,3 +2356,67 @@ body {
 }
 .exam-scoring-pass { font-weight: 700; color: #2e7d32; }
 .exam-scoring-note { font-size: 12px; color: #777; margin-top: 4px; }
+
+/* ===================== WRITING SECTION ===================== */
+.writing-intro {
+  background: #f0ebff; border-radius: 12px;
+  padding: 12px 14px; font-size: 13px; color: #444; line-height: 1.6;
+}
+.writing-type-header {
+  font-size: 15px; font-weight: 800; color: #333;
+  padding: 4px 0 2px;
+}
+.writing-template-card {
+  background: white; border: 1.5px solid #e0d0f5;
+  border-radius: 14px; overflow: hidden;
+}
+.writing-template-title {
+  background: #9B59B6; color: white;
+  font-size: 12px; font-weight: 700; padding: 6px 14px;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.writing-block {
+  padding: 10px 14px; border-bottom: 1px solid #f0e8ff;
+}
+.writing-block-open { background: #faf7ff; }
+.writing-block-close { background: #faf7ff; border-bottom: none; }
+.writing-block-label {
+  font-size: 10px; font-weight: 700; color: #9B59B6;
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+}
+.writing-greek {
+  font-size: 14px; font-weight: 600; color: #222; line-height: 1.5;
+}
+.writing-ru {
+  font-size: 12px; color: #888; margin-top: 2px; line-height: 1.4;
+}
+.writing-topics-label {
+  font-size: 13px; font-weight: 700; color: #555; padding: 4px 0 2px;
+}
+.writing-topic {
+  background: white; border: 1.5px solid #e5e5e5;
+  border-radius: 12px; overflow: hidden;
+}
+.writing-topic summary {
+  font-size: 14px; font-weight: 700; padding: 12px 14px;
+  cursor: pointer; list-style: none;
+}
+.writing-topic summary::-webkit-details-marker { display: none; }
+.writing-topic[open] summary { border-bottom: 1px solid #eee; }
+.writing-topic-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.writing-topic-body .writing-greek { font-size: 13px; }
+.writing-topic-body .writing-ru { font-size: 12px; }
+.writing-phrases-block {
+  background: #e8f5e9; border-radius: 14px; padding: 14px;
+}
+.writing-phrases-title {
+  font-size: 13px; font-weight: 800; margin-bottom: 10px;
+}
+.writing-phrase-row {
+  display: flex; justify-content: space-between; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid #c8e6c9;
+  font-size: 13px;
+}
+.writing-phrase-row:last-child { border-bottom: none; }
+.writing-phrase-gr { font-weight: 600; color: #1b5e20; flex: 1; }
+.writing-phrase-ru { color: #555; flex: 1; text-align: right; }

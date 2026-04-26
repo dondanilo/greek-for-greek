@@ -3488,6 +3488,7 @@ function showExamSection(section) {
   if (section === 'tests') { showQuiz(); return; }
   const map = {
     structure: ['🗺️ Как устроен экзамен', getExamStructureHTML],
+    writing:   ['✍️ Письмо',              getExamWritingHTML],
     grammar:   ['📚 Грамматика A2/B1',    getExamGrammarHTML],
     tips:      ['💡 Лайфхаки',            getExamTipsHTML],
   };
@@ -3582,6 +3583,145 @@ function getExamStructureHTML() {
   <div class="exam-scoring-row"><span>Итого максимум</span><span>100 баллов</span></div>
   <div class="exam-scoring-row exam-scoring-pass"><span>Минимум для сдачи</span><span>60 баллов</span></div>
   <div class="exam-scoring-note">Можно слабо написать одну часть и компенсировать другими.</div>
+</div>`;
+}
+
+function getExamWritingHTML() {
+  return `
+<div class="writing-intro">
+  На экзамене нужно написать <strong>2 текста по 80–100 слов</strong> за 45 минут.<br>
+  Выучи эти шаблоны — и письмо станет самой лёгкой частью.
+</div>
+
+<!-- ===== ПИСЬМО ДРУГУ ===== -->
+<div class="writing-type-header">📩 Тип 1 — Письмо другу (неформальное)</div>
+
+<div class="writing-template-card">
+  <div class="writing-template-title">Универсальный шаблон</div>
+  <div class="writing-block writing-block-open">
+    <div class="writing-block-label">Обращение</div>
+    <div class="writing-greek">Αγαπητή μου Μαρία, / Γεια σου Νίκο!</div>
+    <div class="writing-ru">Дорогая Мария, / Привет Никос!</div>
+  </div>
+  <div class="writing-block">
+    <div class="writing-block-label">Начало — как дела</div>
+    <div class="writing-greek">Πώς είσαι; Ελπίζω να είσαι καλά.</div>
+    <div class="writing-ru">Как ты? Надеюсь, у тебя всё хорошо.</div>
+  </div>
+  <div class="writing-block">
+    <div class="writing-block-label">Основная часть (меняется по теме)</div>
+    <div class="writing-greek">Σου γράφω γιατί θέλω να σου πω για...</div>
+    <div class="writing-ru">Пишу тебе, потому что хочу рассказать о...</div>
+  </div>
+  <div class="writing-block">
+    <div class="writing-block-label">Вопрос в конце</div>
+    <div class="writing-greek">Εσύ τι κάνεις; Πώς περνάς;</div>
+    <div class="writing-ru">А ты как? Как проводишь время?</div>
+  </div>
+  <div class="writing-block writing-block-close">
+    <div class="writing-block-label">Закрытие</div>
+    <div class="writing-greek">Τα λέμε σύντομα! Φιλιά πολλά,<br><em>Όλγα</em></div>
+    <div class="writing-ru">Увидимся скоро! Много поцелуев, Ольга</div>
+  </div>
+</div>
+
+<div class="writing-topics-label">📋 Темы которые дают на экзамене + что писать:</div>
+
+<details class="writing-topic">
+  <summary>🛍️ Поход в торговый центр</summary>
+  <div class="writing-topic-body">
+    <div class="writing-greek">Την Κυριακή πήγα στο εμπορικό κέντρο με την οικογένειά μου. Αγόρασα ένα ζευγάρι παπούτσια και ένα φόρεμα. Τα ρούχα ήταν πολύ φθηνά γιατί είχε εκπτώσεις. Μετά φάγαμε σε ένα εστιατόριο στον τρίτο όροφο. Ήταν πολύ νόστιμο!</div>
+    <div class="writing-ru">В воскресенье я ходила в торговый центр с семьёй. Купила пару обуви и платье. Одежда была очень дешёвой, потому что были скидки. Потом поели в ресторане на третьем этаже. Было очень вкусно!</div>
+  </div>
+</details>
+
+<details class="writing-topic">
+  <summary>🎂 День рождения / праздник</summary>
+  <div class="writing-topic-body">
+    <div class="writing-greek">Χθες ήταν τα γενέθλιά μου και έκανα ένα μικρό πάρτι στο σπίτι. Ήρθαν οι φίλοι μου και η οικογένειά μου. Φάγαμε, χορέψαμε και γελάσαμε πολύ. Έλαβα πολλά δώρα! Ήταν μια υπέροχη βραδιά που δεν θα ξεχάσω ποτέ.</div>
+    <div class="writing-ru">Вчера был мой день рождения и я устроила небольшую вечеринку дома. Пришли мои друзья и семья. Мы ели, танцевали и много смеялись. Я получила много подарков! Это был прекрасный вечер, который я никогда не забуду.</div>
+  </div>
+</details>
+
+<details class="writing-topic">
+  <summary>🏖️ Поездка / отпуск</summary>
+  <div class="writing-topic-body">
+    <div class="writing-greek">Τον Αύγουστο πήγα διακοπές στην Ελλάδα με τον άντρα μου. Μείναμε σε ένα ξενοδοχείο κοντά στη θάλασσα. Κάθε μέρα κολυμπούσαμε και επισκεπτόμασταν αρχαία μνημεία. Ο καιρός ήταν υπέροχος. Θέλω να ξαναπάω του χρόνου!</div>
+    <div class="writing-ru">В августе я ездила в отпуск в Грецию с мужем. Мы жили в отеле рядом с морем. Каждый день купались и посещали древние памятники. Погода была прекрасной. Хочу поехать снова в следующем году!</div>
+  </div>
+</details>
+
+<details class="writing-topic">
+  <summary>📅 Приглашение на встречу</summary>
+  <div class="writing-topic-body">
+    <div class="writing-greek">Θέλω να σε προσκαλέσω στο σπίτι μου το Σάββατο στις 7 το βράδυ. Θα κάνουμε ένα μικρό τραπέζι με φίλους. Θα υπάρχει φαγητό, μουσική και πολλή διασκέδαση! Μπορείς να έρθεις; Απάντησέ μου σύντομα.</div>
+    <div class="writing-ru">Хочу пригласить тебя к себе в субботу в 7 вечера. Мы устраиваем небольшой ужин с друзьями. Будет еда, музыка и много веселья! Сможешь прийти? Ответь мне скоро.</div>
+  </div>
+</details>
+
+<!-- ===== ОФИЦИАЛЬНОЕ ПИСЬМО ===== -->
+<div class="writing-type-header" style="margin-top:8px">🏛️ Тип 2 — Официальное письмо / заявление</div>
+
+<div class="writing-template-card">
+  <div class="writing-template-title">Универсальный шаблон</div>
+  <div class="writing-block writing-block-open">
+    <div class="writing-block-label">Кому (адресат)</div>
+    <div class="writing-greek">Προς τη Διεύθυνση / Κύριε Διευθυντή,</div>
+    <div class="writing-ru">В адрес Дирекции / Господин директор,</div>
+  </div>
+  <div class="writing-block">
+    <div class="writing-block-label">Тема</div>
+    <div class="writing-greek">Θέμα: Αίτηση για πληροφορίες / εγγραφή</div>
+    <div class="writing-ru">Тема: Запрос информации / заявление о записи</div>
+  </div>
+  <div class="writing-block">
+    <div class="writing-block-label">Представление себя</div>
+    <div class="writing-greek">Ονομάζομαι [όνομα] και μένω στη Λεμεσό εδώ και τρία χρόνια.</div>
+    <div class="writing-ru">Меня зовут [имя] и я живу в Лимасоле уже три года.</div>
+  </div>
+  <div class="writing-block">
+    <div class="writing-block-label">Цель письма</div>
+    <div class="writing-greek">Σας γράφω γιατί θα ήθελα να μάθω / να εγγραφώ / να ζητήσω...</div>
+    <div class="writing-ru">Пишу вам, потому что хотел(а) бы узнать / записаться / попросить...</div>
+  </div>
+  <div class="writing-block">
+    <div class="writing-block-label">Вопрос / просьба</div>
+    <div class="writing-greek">Θα ήθελα να μάθω: Ποιες είναι οι ώρες; Πόσο κοστίζει; Πότε αρχίζει;</div>
+    <div class="writing-ru">Хотел(а) бы узнать: Какое расписание? Сколько стоит? Когда начинается?</div>
+  </div>
+  <div class="writing-block writing-block-close">
+    <div class="writing-block-label">Закрытие</div>
+    <div class="writing-greek">Σας ευχαριστώ εκ των προτέρων.<br>Με εκτίμηση,<br><em>[Όνομα Επώνυμο]</em></div>
+    <div class="writing-ru">Заранее благодарю вас.<br>С уважением,<br><em>[Имя Фамилия]</em></div>
+  </div>
+</div>
+
+<details class="writing-topic">
+  <summary>📚 Запрос о курсах греческого</summary>
+  <div class="writing-topic-body">
+    <div class="writing-greek">Σας γράφω γιατί ενδιαφέρομαι να παρακολουθήσω μαθήματα ελληνικής γλώσσας στο κέντρο σας. Θα ήθελα να μάθω: πότε αρχίζουν τα μαθήματα, πόσες φορές την εβδομάδα γίνονται, πόσο κοστίζει η εγγραφή και αν υπάρχουν μαθήματα για επίπεδο Α2.</div>
+    <div class="writing-ru">Пишу вам, потому что хочу посещать курсы греческого языка в вашем центре. Хотел(а) бы узнать: когда начинаются занятия, сколько раз в неделю они проходят, сколько стоит запись и есть ли занятия для уровня A2.</div>
+  </div>
+</details>
+
+<details class="writing-topic">
+  <summary>📢 Объявление (продаю / ищу)</summary>
+  <div class="writing-topic-body">
+    <div class="writing-greek">Πωλείται καναπές σε καλή κατάσταση. Χρώμα: γκρι. Διαστάσεις: 2 μέτρα. Τιμή: 150 ευρώ, διαπραγματεύσιμη. Λόγος πώλησης: μετακόμιση. Για πληροφορίες τηλεφωνήστε στο 99-123456. Παράδοση δυνατή.</div>
+    <div class="writing-ru">Продаётся диван в хорошем состоянии. Цвет: серый. Размер: 2 метра. Цена: 150 евро, возможен торг. Причина продажи: переезд. Для информации звоните: 99-123456. Возможна доставка.</div>
+  </div>
+</details>
+
+<div class="writing-phrases-block">
+  <div class="writing-phrases-title">🔑 Ключевые фразы — выучи наизусть</div>
+  <div class="writing-phrase-row"><span class="writing-phrase-gr">Σου γράφω γιατί...</span><span class="writing-phrase-ru">Пишу тебе, потому что...</span></div>
+  <div class="writing-phrase-row"><span class="writing-phrase-gr">Θέλω να σου πω ότι...</span><span class="writing-phrase-ru">Хочу сказать тебе, что...</span></div>
+  <div class="writing-phrase-row"><span class="writing-phrase-gr">Ήταν πολύ ωραία!</span><span class="writing-phrase-ru">Было очень хорошо!</span></div>
+  <div class="writing-phrase-row"><span class="writing-phrase-gr">Χάρηκα πολύ που...</span><span class="writing-phrase-ru">Я очень обрадовалась, что...</span></div>
+  <div class="writing-phrase-row"><span class="writing-phrase-gr">Ανυπομονώ να σε δω!</span><span class="writing-phrase-ru">Не могу дождаться встречи с тобой!</span></div>
+  <div class="writing-phrase-row"><span class="writing-phrase-gr">Σε ευχαριστώ για το γράμμα σου.</span><span class="writing-phrase-ru">Спасибо за твоё письмо.</span></div>
+  <div class="writing-phrase-row"><span class="writing-phrase-gr">Θα ήθελα να μάθω...</span><span class="writing-phrase-ru">Хотел(а) бы узнать...</span></div>
+  <div class="writing-phrase-row"><span class="writing-phrase-gr">Σας ευχαριστώ εκ των προτέρων.</span><span class="writing-phrase-ru">Заранее благодарю вас.</span></div>
 </div>`;
 }
 
