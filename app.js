@@ -3484,7 +3484,7 @@ function showExamPrep() {
 }
 
 function showExamSection(section) {
-  if (section === 'tests') { showQuiz(); return; }
+  if (section === 'tests') { startExamMockTest(); return; }
   const map = {
     structure: ['🗺️ Как устроен экзамен', getExamStructureHTML],
     writing:   ['✍️ Письмо',              getExamWritingHTML],
@@ -4210,4 +4210,199 @@ function getExamVocabHTML() {
 </div>
 <div class="vocab-ex-intro">100 ключевых слов по темам экзамена. Нажми 🔊 чтобы услышать.</div>
 ${blocks}`;
+}
+
+// ===================== EXAM MOCK TEST (sprint 6) =====================
+
+const EXAM_MOCK_QUESTIONS = [
+  // -- GRAMMAR --
+  {
+    type: 'grammar',
+    q: 'Выбери правильную форму глагола:\nΕγώ ___ στην Κύπρο.',
+    opts: ['μένω', 'μένεις', 'μένει', 'μένουμε'],
+    correct: 0,
+    exp: 'Εγώ (я) → 1-е лицо ед.ч.: μένω'
+  },
+  {
+    type: 'grammar',
+    q: 'Выбери правильную форму:\nΗ Μαρία ___ καφέ κάθε πρωί.',
+    opts: ['πίνει', 'πίνω', 'πίνετε', 'πίνουν'],
+    correct: 0,
+    exp: 'Η Μαρία — 3-е лицо ед.ч.: πίνει'
+  },
+  {
+    type: 'grammar',
+    q: 'Прошедшее время (αόριστος). Выбери верное:\nΧθες εγώ ___ στο σούπερ μάρκετ.',
+    opts: ['πήγα', 'πάω', 'πηγαίνω', 'πάμε'],
+    correct: 0,
+    exp: 'Αόριστος от πηγαίνω (я шёл/пошёл) → πήγα'
+  },
+  {
+    type: 'grammar',
+    q: 'Будущее время θα. Выбери верное:\nΑύριο εμείς ___ στη θάλασσα.',
+    opts: ['θα πάμε', 'θα πάω', 'θα πάει', 'πάμε'],
+    correct: 0,
+    exp: 'Εμείς (мы) + θα → θα πάμε'
+  },
+  {
+    type: 'grammar',
+    q: 'Выбери правильный артикль:\n___ δάσκαλος είναι πολύ καλός.',
+    opts: ['Ο', 'Η', 'Το', 'Τα'],
+    correct: 0,
+    exp: 'δάσκαλος — мужской род → ο δάσκαλος'
+  },
+  {
+    type: 'grammar',
+    q: 'Вин. падеж. Выбери верное:\nΑγαπώ ___ μητέρα μου.',
+    opts: ['την', 'η', 'της', 'τη'],
+    correct: 0,
+    exp: 'Вин. падеж жен. рода ед.ч. → την (перед согласным: τη)'
+  },
+  // -- VOCABULARY --
+  {
+    type: 'vocab',
+    q: 'Что значит слово «το ενοίκιο»?',
+    opts: ['аренда/арендная плата', 'электричество', 'страховка', 'налог'],
+    correct: 0,
+    exp: 'Το ενοίκιο = арендная плата, аренда квартиры'
+  },
+  {
+    type: 'vocab',
+    q: 'Выбери верный перевод:\n«Έχω πυρετό»',
+    opts: ['У меня температура', 'Мне холодно', 'У меня болит голова', 'Я устал'],
+    correct: 0,
+    exp: 'Πυρετός = жар/температура; έχω πυρετό = у меня жар'
+  },
+  {
+    type: 'vocab',
+    q: 'Как по-гречески «скидка»?',
+    opts: ['η έκπτωση', 'η απόδειξη', 'η τιμή', 'η πληρωμή'],
+    correct: 0,
+    exp: 'Η έκπτωση = скидка'
+  },
+  {
+    type: 'vocab',
+    q: 'Что значит «αριστερά»?',
+    opts: ['налево', 'направо', 'прямо', 'назад'],
+    correct: 0,
+    exp: 'Αριστερά = налево; δεξιά = направо; ευθεία = прямо'
+  },
+  // -- READING --
+  {
+    type: 'reading',
+    passage: 'Η Άννα είναι νοσοκόμα. Δουλεύει σε νοσοκομείο στη Λευκωσία. Κάθε μέρα πηγαίνει στη δουλειά με το λεωφορείο.',
+    q: 'Πού δουλεύει η Άννα;',
+    opts: ['Σε νοσοκομείο', 'Σε σχολείο', 'Σε φαρμακείο', 'Στο σούπερ μάρκετ'],
+    correct: 0,
+    exp: 'В тексте: «Δουλεύει σε νοσοκομείο» — работает в больнице'
+  },
+  {
+    type: 'reading',
+    passage: 'Η Άννα είναι νοσοκόμα. Δουλεύει σε νοσοκομείο στη Λευκωσία. Κάθε μέρα πηγαίνει στη δουλειά με το λεωφορείο.',
+    q: 'Πώς πηγαίνει στη δουλειά;',
+    opts: ['Με το λεωφορείο', 'Με το αυτοκίνητο', 'Με το ταξί', 'Με τα πόδια'],
+    correct: 0,
+    exp: 'В тексте: «πηγαίνει στη δουλειά με το λεωφορείο» — на автобусе'
+  },
+  {
+    type: 'grammar',
+    q: 'Выбери правильный предлог:\nΠηγαίνω ___ δουλειά κάθε μέρα.',
+    opts: ['στη', 'από', 'με', 'για'],
+    correct: 0,
+    exp: 'Πηγαίνω στη δουλειά = иду на работу (στη = σε + τη)'
+  },
+  {
+    type: 'vocab',
+    q: 'Фраза «κατά τη γνώμη μου» означает:',
+    opts: ['по моему мнению', 'в конце концов', 'с другой стороны', 'например'],
+    correct: 0,
+    exp: 'Κατά τη γνώμη μου = по моему мнению — важная фраза для Speaking/Writing'
+  },
+  {
+    type: 'grammar',
+    q: 'Выбери верную конструкцию:\nΘέλω ___ πάω στην παραλία.',
+    opts: ['να', 'θα', 'ότι', 'που'],
+    correct: 0,
+    exp: 'Θέλω να + гл. = хочу + инфинитив (θέλω να πάω = хочу пойти)'
+  },
+];
+
+let examTestState = { idx: 0, score: 0, answered: false };
+
+function startExamMockTest() {
+  document.getElementById('exam-detail-title').textContent = '📝 Пробный тест A2';
+  examTestState = { idx: 0, score: 0, answered: false };
+  renderExamTestQuestion();
+  showScreen('screen-exam-detail');
+}
+
+function renderExamTestQuestion() {
+  const body = document.getElementById('exam-detail-body');
+  const { idx, score } = examTestState;
+  const total = EXAM_MOCK_QUESTIONS.length;
+
+  if (idx >= total) {
+    const pct = Math.round(score / total * 100);
+    const medal = pct >= 80 ? '🥇' : pct >= 60 ? '🥈' : '💪';
+    const msg = pct >= 80 ? 'Отличный результат! Ты готов к экзамену.' :
+                pct >= 60 ? 'Хороший результат. Повтори слабые темы.' :
+                'Продолжай учиться — каждая попытка делает тебя лучше.';
+    body.innerHTML = `
+<div class="mock-result">
+  <div class="mock-result-medal">${medal}</div>
+  <div class="mock-result-score">${score} / ${total}</div>
+  <div class="mock-result-pct">${pct}%</div>
+  <div class="mock-result-msg">${msg}</div>
+  <button class="btn-primary" style="margin-top:20px" onclick="startExamMockTest()">Пройти снова</button>
+</div>`;
+    return;
+  }
+
+  const q = EXAM_MOCK_QUESTIONS[idx];
+  const typeLbl = { grammar: '📚 Грамматика', vocab: '📖 Лексика', reading: '📄 Чтение' }[q.type];
+  const passage = q.passage
+    ? `<div class="mock-passage">${q.passage}</div>`
+    : '';
+  const opts = q.opts.map((o, i) => `
+    <button class="mock-opt" id="mock-opt-${i}" onclick="selectExamTestOpt(${i})">${String.fromCharCode(65+i)}. ${o}</button>
+  `).join('');
+
+  body.innerHTML = `
+<div class="mock-progress-row">
+  <div class="mock-progress-bar"><div class="mock-progress-fill" style="width:${idx/total*100}%"></div></div>
+  <span class="mock-progress-lbl">${idx+1} / ${total}</span>
+</div>
+<div class="mock-type-badge">${typeLbl}</div>
+${passage}
+<div class="mock-question">${q.q.replace(/\n/g, '<br>')}</div>
+<div class="mock-opts" id="mock-opts">${opts}</div>
+<div class="mock-explanation" id="mock-exp" style="display:none"></div>
+<button class="btn-primary mock-next-btn" id="mock-next" style="display:none" onclick="nextExamTestQuestion()">
+  ${idx + 1 < total ? 'Следующий вопрос →' : 'Показать результат'}
+</button>`;
+}
+
+function selectExamTestOpt(i) {
+  if (examTestState.answered) return;
+  examTestState.answered = true;
+  const q = EXAM_MOCK_QUESTIONS[examTestState.idx];
+  const correct = q.correct;
+  if (i === correct) examTestState.score++;
+
+  document.querySelectorAll('.mock-opt').forEach((btn, j) => {
+    btn.disabled = true;
+    if (j === correct) btn.classList.add('mock-opt-correct');
+    else if (j === i) btn.classList.add('mock-opt-wrong');
+  });
+
+  const expEl = document.getElementById('mock-exp');
+  expEl.textContent = (i === correct ? '✅ ' : '❌ ') + q.exp;
+  expEl.style.display = 'block';
+  document.getElementById('mock-next').style.display = 'block';
+}
+
+function nextExamTestQuestion() {
+  examTestState.idx++;
+  examTestState.answered = false;
+  renderExamTestQuestion();
 }

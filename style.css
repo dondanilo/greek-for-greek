@@ -2283,6 +2283,56 @@ body {
   padding: 8px 12px; font-size: 13px; color: #7a6000;
 }
 
+/* Exam mock test (sprint 6) */
+.mock-progress-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.mock-progress-bar {
+  flex: 1; height: 6px; background: #eee; border-radius: 3px; overflow: hidden;
+}
+.mock-progress-fill {
+  height: 100%; background: #9B59B6; border-radius: 3px; transition: width .3s;
+}
+.mock-progress-lbl { font-size: 12px; color: #888; white-space: nowrap; }
+.mock-type-badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  background: #f0e8f8; color: #7d3c98; border-radius: 12px;
+  padding: 3px 10px; margin-bottom: 10px;
+}
+.mock-passage {
+  background: #f7f7f7; border-left: 3px solid #9B59B6;
+  border-radius: 0 10px 10px 0; padding: 10px 12px;
+  font-size: 13px; color: #333; line-height: 1.6;
+  margin-bottom: 12px;
+}
+.mock-question {
+  font-size: 15px; font-weight: 700; color: #222;
+  line-height: 1.5; margin-bottom: 14px;
+}
+.mock-opts { display: flex; flex-direction: column; gap: 8px; }
+.mock-opt {
+  text-align: left; padding: 11px 14px;
+  border: 1.5px solid #ddd; border-radius: 12px;
+  background: white; font-size: 14px; color: #333;
+  cursor: pointer; transition: background .15s, border-color .15s;
+}
+.mock-opt:active:not(:disabled) { background: #f0e8f8; border-color: #9B59B6; }
+.mock-opt-correct { background: #e8f5e9 !important; border-color: #43a047 !important; color: #1b5e20 !important; font-weight: 700; }
+.mock-opt-wrong   { background: #ffebee !important; border-color: #e53935 !important; color: #b71c1c !important; }
+.mock-explanation {
+  margin-top: 12px; background: #FFF9C4; border-radius: 10px;
+  padding: 10px 12px; font-size: 13px; color: #6a4f00; line-height: 1.5;
+}
+.mock-next-btn { margin-top: 16px; width: 100%; }
+.mock-result {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 32px 16px; gap: 8px;
+}
+.mock-result-medal { font-size: 52px; }
+.mock-result-score { font-size: 32px; font-weight: 900; color: #333; }
+.mock-result-pct   { font-size: 18px; font-weight: 700; color: #9B59B6; }
+.mock-result-msg   { font-size: 14px; color: #555; text-align: center; line-height: 1.5; margin-top: 4px; }
+
 /* Exam vocab table (sprint 5) */
 .vocab-ex-intro {
   font-size: 13px; color: #888; text-align: center;
