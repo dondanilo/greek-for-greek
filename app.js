@@ -1096,24 +1096,61 @@ function startSrsLesson() {
 // ============================================================
 let achToastQueue = [];
 
+// Сколько слов выучено суммарно по всем категориям словаря
+function vocabWordsLearned() {
+  return Object.values(state.vocabProgress || {}).reduce((sum, arr) => sum + arr.length, 0);
+}
+
+// Сколько категорий словаря пройдено целиком
+function vocabCategoriesCompleted() {
+  return VOCAB_CATEGORIES.filter(cat => {
+    const learned = (state.vocabProgress || {})[cat.id] || [];
+    return learned.length >= cat.words.length;
+  }).length;
+}
+
 function checkAchievements(ctx = {}) {
   if (!state.achievements) state.achievements = [];
+  const vocabWords = vocabWordsLearned();
+  const vocabCats = vocabCategoriesCompleted();
+  const srsCount = Object.keys(state.srs || {}).length;
   const conditions = {
     'first_lesson':   state.lessonsCompleted >= 1,
     'perfect_lesson': ctx.perfectLesson === true,
     'lessons_5':      state.lessonsCompleted >= 5,
     'lessons_10':     state.lessonsCompleted >= 10,
     'lessons_30':     state.lessonsCompleted >= 30,
+    'lessons_50':     state.lessonsCompleted >= 50,
+    'lessons_100':    state.lessonsCompleted >= 100,
     'streak_3':       state.streak >= 3,
     'streak_7':       state.streak >= 7,
+    'streak_14':      state.streak >= 14,
     'streak_30':      state.streak >= 30,
+    'streak_60':      state.streak >= 60,
+    'streak_100':     state.streak >= 100,
     'scenario_first': state.scenariosCompleted.length >= 1,
+    'scenarios_5':    state.scenariosCompleted.length >= 5,
+    'scenarios_10':   state.scenariosCompleted.length >= 10,
     'scenarios_all':  state.scenariosCompleted.length >= SCENARIOS.length,
-    'citizenship':    state.scenariosCompleted.includes('citizenship'),
+    'citizenship':    state.scenariosCompleted.includes('kep'),
+    'vocab_100':      vocabWords >= 100,
+    'vocab_500':      vocabWords >= 500,
+    'vocab_1000':     vocabWords >= 1000,
+    'vocab_2000':     vocabWords >= 2000,
+    'vocab_cat_1':    vocabCats >= 1,
+    'vocab_cat_10':   vocabCats >= 10,
+    'vocab_cat_all':  vocabCats >= VOCAB_CATEGORIES.length,
+    'srs_50':         srsCount >= 50,
+    'srs_150':        srsCount >= 150,
+    'srs_300':        srsCount >= 300,
     'weak_conquered': ctx.weakMode === true,
     'xp_500':         state.totalXp >= 500,
     'xp_2000':        state.totalXp >= 2000,
+    'xp_5000':        state.totalXp >= 5000,
+    'xp_10000':       state.totalXp >= 10000,
     'level_5':        state.level >= 5,
+    'level_10':       state.level >= 10,
+    'level_20':       state.level >= 20,
   };
   const newlyUnlocked = [];
   for (const [id, met] of Object.entries(conditions)) {
@@ -2696,6 +2733,7 @@ function completeVocabQuiz() {
     state.lastPlayed = today;
   }
   saveState();
+  checkAchievements({});
   const pct = score / totalWords;
   document.getElementById('vocab-complete-stars').textContent = pct === 1 ? '⭐⭐⭐' : pct >= 0.7 ? '⭐⭐' : '⭐';
   document.getElementById('vocab-complete-score').textContent = `${score}/${totalWords}`;

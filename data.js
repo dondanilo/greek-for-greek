@@ -7969,21 +7969,53 @@ const QUIZ_CATEGORIES = [
 // ACHIEVEMENTS
 // ============================================================
 const ACHIEVEMENTS = [
+  // --- уроки ---
   { id: 'first_lesson',    icon: '🎓', title: 'Первый шаг',        desc: 'Пройти первый урок',                    category: 'уроки' },
   { id: 'perfect_lesson',  icon: '💎', title: 'Перфекционист',     desc: 'Урок без единой ошибки',                category: 'уроки' },
   { id: 'lessons_5',       icon: '📚', title: 'Студент',           desc: '5 уроков пройдено',                     category: 'уроки' },
   { id: 'lessons_10',      icon: '🏆', title: 'Упорный',           desc: '10 уроков пройдено',                    category: 'уроки' },
   { id: 'lessons_30',      icon: '🦾', title: 'Марафонец',         desc: '30 уроков пройдено',                    category: 'уроки' },
+  { id: 'lessons_50',      icon: '🎯', title: 'Полсотни',          desc: '50 уроков пройдено',                    category: 'уроки' },
+  { id: 'lessons_100',     icon: '🏛️', title: 'Столетник',        desc: '100 уроков пройдено',                   category: 'уроки' },
+
+  // --- стрик ---
   { id: 'streak_3',        icon: '🔥', title: 'На разогреве',      desc: '3 дня подряд',                          category: 'стрик' },
   { id: 'streak_7',        icon: '🌟', title: 'Неделя силы',       desc: '7 дней подряд',                         category: 'стрик' },
+  { id: 'streak_14',       icon: '⚡', title: 'Две недели',        desc: '14 дней подряд',                        category: 'стрик' },
   { id: 'streak_30',       icon: '👑', title: 'Легенда',           desc: '30 дней подряд',                        category: 'стрик' },
+  { id: 'streak_60',       icon: '🗿', title: 'Несокрушимый',      desc: '60 дней подряд',                        category: 'стрик' },
+  { id: 'streak_100',      icon: '🔱', title: 'Сто дней подряд',   desc: '100 дней подряд',                       category: 'стрик' },
+
+  // --- сценарии ---
   { id: 'scenario_first',  icon: '🎭', title: 'Актёр',             desc: 'Первый сценарий пройден',               category: 'сценарии' },
-  { id: 'scenarios_all',   icon: '🇬🇷', title: 'Готов к Греции',  desc: 'Все 8 сценариев пройдены',              category: 'сценарии' },
-  { id: 'citizenship',     icon: '📜', title: 'Будущий гражданин', desc: 'Сценарий "Собеседование" пройден',      category: 'сценарии' },
-  { id: 'weak_conquered',  icon: '⚔️', title: 'Победил ошибки',   desc: 'Пройден урок повторения слабых мест',   category: 'прогресс' },
+  { id: 'scenarios_5',     icon: '🎬', title: 'Уверенный',         desc: '5 сценариев пройдено',                  category: 'сценарии' },
+  { id: 'scenarios_10',    icon: '🗣️', title: 'Свой человек',     desc: '10 сценариев пройдено',                 category: 'сценарии' },
+  { id: 'scenarios_all',   icon: '🇬🇷', title: 'Готов к Греции',  desc: 'Все сценарии пройдены',                 category: 'сценарии' },
+  { id: 'citizenship',     icon: '📜', title: 'Будущий гражданин', desc: 'Сценарий "В ΚΕΠ" пройден',              category: 'сценарии' },
+
+  // --- словарь ---
+  { id: 'vocab_100',       icon: '🔤', title: 'Сто слов',          desc: '100 слов выучено',                      category: 'словарь' },
+  { id: 'vocab_500',       icon: '📖', title: 'Пятьсот слов',      desc: '500 слов выучено',                      category: 'словарь' },
+  { id: 'vocab_1000',      icon: '📗', title: 'Тысячник',          desc: '1000 слов выучено',                     category: 'словарь' },
+  { id: 'vocab_2000',      icon: '📕', title: 'Две тысячи',        desc: '2000 слов выучено',                     category: 'словарь' },
+  { id: 'vocab_cat_1',     icon: '✅', title: 'Категория закрыта', desc: 'Пройдена первая категория целиком',     category: 'словарь' },
+  { id: 'vocab_cat_10',    icon: '🗂️', title: 'Десять тем',       desc: '10 категорий пройдено целиком',         category: 'словарь' },
+  { id: 'vocab_cat_all',   icon: '🧠', title: 'Словарь покорён',   desc: 'Все категории пройдены целиком',        category: 'словарь' },
+
+  // --- мастерство ---
+  { id: 'srs_50',          icon: '🌱', title: 'Ростки памяти',     desc: '50 слов в интервальном повторении',     category: 'мастерство' },
+  { id: 'srs_150',         icon: '🌳', title: 'Крепкая память',    desc: '150 слов в интервальном повторении',    category: 'мастерство' },
+  { id: 'srs_300',         icon: '🧩', title: 'Полный комплект',   desc: '300 слов в интервальном повторении',    category: 'мастерство' },
+  { id: 'weak_conquered',  icon: '⚔️', title: 'Победил ошибки',   desc: 'Пройден урок повторения слабых мест',   category: 'мастерство' },
+
+  // --- прогресс ---
   { id: 'xp_500',          icon: '⚡', title: 'Энергичный',        desc: '500 XP набрано',                        category: 'прогресс' },
   { id: 'xp_2000',         icon: '💫', title: 'Опытный',           desc: '2000 XP набрано',                       category: 'прогресс' },
+  { id: 'xp_5000',         icon: '☄️', title: 'Мастер',           desc: '5000 XP набрано',                       category: 'прогресс' },
+  { id: 'xp_10000',        icon: '🌌', title: 'Легенда XP',        desc: '10 000 XP набрано',                     category: 'прогресс' },
   { id: 'level_5',         icon: '🚀', title: 'Взлёт',             desc: 'Достигнут 5-й уровень',                 category: 'прогресс' },
+  { id: 'level_10',        icon: '🛸', title: 'Десятый уровень',   desc: 'Достигнут 10-й уровень',                category: 'прогресс' },
+  { id: 'level_20',        icon: '⭐', title: 'Двадцатый уровень', desc: 'Достигнут 20-й уровень',                category: 'прогресс' },
 ];
 const PHRASES = [
   {
