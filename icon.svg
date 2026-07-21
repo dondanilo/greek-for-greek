@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" rx="22.5" fill="#181B21"/>
-  
   <g fill="#fff">
-    <rect x="30" y="20" width="6.5" height="15" rx="1"/>
-    <circle cx="33.25" cy="14.6" r="3.4"/>
-    <rect x="40" y="20" width="20" height="5" rx="0.8"/>
-    <polygon points="52,20 60,20 48,35 40,35"/>
-    <rect x="40" y="30" width="20" height="5" rx="0.8"/>
-    <rect x="63.5" y="20" width="6.5" height="15" rx="1"/>
-    <circle cx="66.75" cy="14.6" r="3.4"/>
+    <rect x="30" y="18" width="6.5" height="15" rx="1"/>
+    <circle cx="33.25" cy="12.6" r="3.4"/>
+    <rect x="40" y="18" width="20" height="5" rx="0.8"/>
+    <polygon points="52,18 60,18 48,33 40,33"/>
+    <rect x="40" y="28" width="20" height="5" rx="0.8"/>
+    <rect x="63.5" y="18" width="6.5" height="15" rx="1"/>
+    <circle cx="66.75" cy="12.6" r="3.4"/>
   </g>
-  <circle cx="50" cy="64" r="27" fill="#fff"/>
-  <clipPath id="fc"><circle cx="50" cy="64" r="25"/></clipPath>
-  <g clip-path="url(#fc)">
-    <svg x="25" y="39" width="50" height="50" viewBox="0 0 100 100"
-         preserveAspectRatio="none">
+  <circle cx="50" cy="65" r="27.5" fill="#fff"/>
+  <circle cx="50" cy="65" r="25.58" fill="#181B21"/>
+  <clipPath id="fcgr27"><circle cx="50" cy="65" r="24.75"/></clipPath>
+  <g clip-path="url(#fcgr27)">
+    <svg x="25.25" y="40.25" width="49.50" height="49.50"
+         viewBox="0 0 100 100" preserveAspectRatio="none">
       <rect width="100" height="100" fill="#0D5EAF"/>
       <g fill="#fff">
         <rect y="11.11" width="100" height="11.11"/><rect y="33.33" width="100" height="11.11"/>
