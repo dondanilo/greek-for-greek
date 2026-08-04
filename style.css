@@ -535,6 +535,35 @@ body {
   margin-bottom: 16px;
   text-align: center;
 }
+.push-modal-icon {
+  font-size: 44px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.push-modal-text {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  opacity: .8;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.push-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.push-modal-actions .btn-primary { width: 100%; }
+.push-btn-later {
+  background: none;
+  border: none;
+  color: var(--text);
+  opacity: .55;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px;
+  cursor: pointer;
+}
 .goal-options { display: flex; flex-direction: column; gap: 10px; }
 .goal-option-btn {
   display: flex;

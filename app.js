@@ -122,7 +122,8 @@ const DEFAULT_STATE = {
   srs: {},  // { verbId: { interval, ef, due } }
   onboardingDone: false,
   vocabProgress: {},  // { categoryId: [greek, greek, ...] }
-  currentLesson: 1
+  currentLesson: 1,
+  pushPromptSeenAt: null  // когда последний раз показывали мягкий пуш-промпт
 };
 
 let state = { ...DEFAULT_STATE };
@@ -258,8 +259,35 @@ function finishOnboarding() {
   state.onboardingDone = true;
   saveState();
   showScreen('screen-home');
-  // Ask for push permission after onboarding — user is already engaged
-  setTimeout(setupPushNotifications, 2000);
+  // Soft pre-prompt after onboarding — user is already engaged
+  setTimeout(maybeShowPushPrompt, 2000);
+}
+
+// Мягкий промпт ПЕРЕД системным запросом: объясняем ценность, спрашиваем разрешение
+// только по клику (жест пользователя надёжнее setTimeout и не сжигает людей в
+// вечный "denied" холодным вопросом).
+function maybeShowPushPrompt() {
+  if (!('Notification' in window) || !('PushManager' in window)) return; // напр. iOS Safari без установки
+  if (Notification.permission === 'granted' || Notification.permission === 'denied') return;
+  const last = state.pushPromptSeenAt || 0;
+  if (Date.now() - last < 3 * 86400000) return; // не чаще раза в 3 дня
+  const m = document.getElementById('push-modal');
+  if (m) m.style.display = 'flex';
+}
+
+function acceptPushPrompt() {
+  const m = document.getElementById('push-modal');
+  if (m) m.style.display = 'none';
+  state.pushPromptSeenAt = Date.now();
+  saveState();
+  setupPushNotifications(); // системный запрос — теперь из жеста пользователя
+}
+
+function dismissPushPrompt() {
+  const m = document.getElementById('push-modal');
+  if (m) m.style.display = 'none';
+  state.pushPromptSeenAt = Date.now();
+  saveState();
 }
 
 const VAPID_PUBLIC_KEY = 'BNxge42260O1eI9J5DPz4Wa2O-gKn5d8ScwU2-U1PvmGwtrNMrjxmRn6mIY2Ty4VGhXGsaxg8I7UPMfb5VsrKp4';
@@ -969,6 +997,9 @@ function completeLesson() {
   document.getElementById('complete-streak').textContent = state.streak;
   document.getElementById('complete-goal-msg').style.display = state.dailyXp >= state.dailyGoal ? 'block' : 'none';
   showScreen('screen-complete');
+  // Ценный момент — юзер только что прошёл урок. Дозадать про пуши тем, кто
+  // ещё не решил (внутренний троттлинг раз в 3 дня не даст надоедать).
+  setTimeout(maybeShowPushPrompt, 1500);
 }
 
 function randomCorrectPhrase() {

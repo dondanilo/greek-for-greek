@@ -912,6 +912,19 @@
     </div>
   </div>
 
+  <!-- Push pre-prompt (soft ask before the system permission dialog) -->
+  <div id="push-modal" class="modal-overlay" onclick="dismissPushPrompt()" style="display:none">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="push-modal-icon">🔔</div>
+      <div class="modal-title">Не дай стрику сгореть</div>
+      <div class="push-modal-text">Включи напоминания — будем звать позаниматься, пока стрик жив. Один короткий пуш в день, не чаще. Выключить можно в любой момент.</div>
+      <div class="push-modal-actions">
+        <button class="btn-primary" onclick="acceptPushPrompt()">Включить напоминания</button>
+        <button class="push-btn-later" onclick="dismissPushPrompt()">Позже</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scroll to top button -->
   <!-- ==================== BLOG ==================== -->
   <div id="screen-blog" class="screen">
