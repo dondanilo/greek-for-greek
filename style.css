@@ -1067,6 +1067,14 @@ body {
 }
 .btn-user-info img { width: 100%; height: 100%; object-fit: cover; }
 
+.btn-guest-login {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 40px; padding: 0 18px; border-radius: 20px; border: none;
+  background: var(--green); color: #fff; cursor: pointer;
+  font-size: 15px; font-weight: 800; flex-shrink: 0;
+}
+.btn-guest-login:active { transform: scale(0.97); }
+
 /* ============================================================ USER MENU */
 .user-menu {
   flex-direction: column; gap: 6px;
@@ -1229,6 +1237,74 @@ body {
 /* ============================================================
    ONBOARDING
    ============================================================ */
+/* ==================== ПОШАГОВЫЙ ОНБОРДИНГ (Duolingo-стиль) ==================== */
+#screen-onboarding { padding: 0; gap: 0; }
+
+.onb-topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px 6px;
+  width: 100%; max-width: 480px; margin: 0 auto;
+}
+.onb-back {
+  background: none; border: none; cursor: pointer;
+  font-size: 30px; line-height: 1; color: var(--gray);
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; transition: opacity .15s;
+}
+.onb-back[hidden] { visibility: hidden; }
+.onb-progress {
+  flex: 1; height: 12px; background: var(--gray-light);
+  border-radius: 6px; overflow: hidden;
+}
+.onb-progress-fill {
+  height: 100%; width: 0%; background: var(--green);
+  border-radius: 6px; transition: width .35s cubic-bezier(.4,0,.2,1);
+}
+
+.onb-body {
+  flex: 1; width: 100%; max-width: 480px; margin: 0 auto;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 8px 24px 16px;
+}
+.onb-slide { display: none; flex-direction: column; align-items: center; animation: onbIn .3s ease; }
+.onb-slide.active { display: flex; }
+@keyframes onbIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+
+.onb-mascot { font-size: 72px; margin-bottom: 18px; animation: pulse 2s ease-in-out infinite; }
+.onb-mascot-sm { font-size: 48px; margin-bottom: 12px; }
+.onb-title {
+  font-size: 24px; font-weight: 800; color: var(--text);
+  text-align: center; margin: 0 0 10px; line-height: 1.25;
+}
+.onb-sub { font-size: 15px; color: var(--text-light); text-align: center; margin: 0; line-height: 1.5; }
+.onb-q {
+  font-size: 21px; font-weight: 800; color: var(--text);
+  text-align: center; margin: 0 0 22px; line-height: 1.25;
+}
+
+.onb-options { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.onb-option {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; padding: 15px 16px;
+  background: var(--white); border: 2px solid var(--gray-light);
+  border-bottom-width: 4px; border-radius: var(--radius);
+  font-family: 'Nunito', sans-serif; cursor: pointer;
+  text-align: left; transition: border-color .12s, background .12s;
+}
+.onb-option:active { transform: translateY(2px); border-bottom-width: 2px; }
+.onb-option.selected { border-color: var(--blue); background: #E5F6FE; }
+.onb-opt-ic { font-size: 26px; flex-shrink: 0; }
+.onb-opt-tx { font-size: 16px; font-weight: 700; color: var(--text); }
+
+.onb-footer {
+  width: 100%; max-width: 480px; margin: 0 auto;
+  padding: 12px 24px calc(20px + env(safe-area-inset-bottom));
+}
+.onb-cta { width: 100%; }
+.onb-cta:disabled { background: var(--gray-light); box-shadow: 0 4px 0 #cfcfcf; color: var(--gray); cursor: default; }
+.onb-cta:disabled:active { transform: none; box-shadow: 0 4px 0 #cfcfcf; }
+
 .onboarding-container {
   display: flex;
   flex-direction: column;

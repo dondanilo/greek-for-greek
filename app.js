@@ -121,6 +121,9 @@ const DEFAULT_STATE = {
   achievements: [],
   srs: {},  // { verbId: { interval, ef, due } }
   onboardingDone: false,
+  onbGoal: null,        // зачем учит: citizenship|work|life|travel
+  onbLevel: null,       // уровень: zero|basic|mid
+  dailyGoalMinutes: 10, // выбранная дневная цель, мин
   vocabProgress: {},  // { categoryId: [greek, greek, ...] }
   currentLesson: 1,
   pushPromptSeenAt: null  // когда последний раз показывали мягкий пуш-промпт
@@ -253,6 +256,130 @@ async function checkSubscription() {
   } catch (e) { console.error('checkSubscription error:', e); }
 
   return false;
+}
+
+// ============================================================
+// ГОСТЕВОЙ РЕЖИМ + ПРОБНЫЕ УРОКИ
+// ============================================================
+const TRIAL_LESSONS = 2; // сколько уроков доступно гостю без входа/подписки
+let hasSubscription = false;
+let pendingUpgrade = false; // гость нажал «оформить» → после входа сразу пэйволл
+
+// Пропускать ли в контент. Гостю дан пробник, дальше — окно с объяснением.
+// Прогресс гостя живёт в localStorage и переносится в новый аккаунт при входе
+// (loadState грузит localStorage, Firestore накрывает его только если документ есть).
+function trialGate() {
+  if (hasSubscription) return true;
+  if ((state.lessonsCompleted || 0) < TRIAL_LESSONS) return true;
+  showTrialModal();
+  return false;
+}
+
+function showTrialModal() {
+  const cta = document.getElementById('trial-cta');
+  if (cta) cta.textContent = currentUser ? 'Выбрать план' : 'Войти и открыть доступ';
+  const m = document.getElementById('trial-modal');
+  if (m) m.style.display = 'flex';
+}
+
+function dismissTrialModal() {
+  const m = document.getElementById('trial-modal');
+  if (m) m.style.display = 'none';
+}
+
+function trialUpgrade() {
+  dismissTrialModal();
+  if (currentUser) {
+    showPaywall();          // вошёл — сразу планы
+  } else {
+    pendingUpgrade = true;  // гость — сперва вход, после него откроем пэйволл
+    showLoginPromo();
+  }
+}
+
+function showLoginPromo() {
+  const sub = document.querySelector('#screen-login .login-subtitle');
+  if (sub) sub.textContent = 'Бесплатные уроки пройдены. Войди, чтобы продолжить и сохранить прогресс.';
+  showScreen('screen-login');
+}
+
+// Кнопка «Войти» для гостя вместо аватара
+function updateGuestUi() {
+  const isGuest = !currentUser;
+  const loginBtn = document.getElementById('guest-login-btn');
+  const avatarBtn = document.getElementById('user-avatar-btn');
+  if (loginBtn) loginBtn.style.display = isGuest ? 'inline-flex' : 'none';
+  if (avatarBtn) avatarBtn.style.display = isGuest ? 'none' : 'inline-flex';
+}
+
+// ==================== ПОШАГОВЫЙ ОНБОРДИНГ ====================
+// Слайды карусели. Слайды-вопросы (choice) требуют выбора, прежде чем пустить дальше.
+const ONB_SLIDES = [
+  { key: 'welcome', type: 'intro',  cta: 'Начать' },
+  { key: 'goal',    type: 'choice', field: 'onbGoal',  cta: 'Продолжить' },
+  { key: 'level',   type: 'choice', field: 'onbLevel', cta: 'Продолжить' },
+  { key: 'minutes', type: 'choice', field: 'dailyGoalMinutes', cta: 'Продолжить' },
+  { key: 'value',   type: 'intro',  cta: 'Отлично, дальше' },
+  { key: 'ready',   type: 'intro',  cta: 'Начать первый урок 🚀' }
+];
+let onbIndex = 0;
+
+function startOnboarding() {
+  onbIndex = 0;
+  showScreen('screen-onboarding');
+  onbRender();
+}
+
+function onbRender() {
+  const slide = ONB_SLIDES[onbIndex];
+  // показать нужный слайд
+  document.querySelectorAll('#screen-onboarding .onb-slide').forEach(el => {
+    el.classList.toggle('active', el.dataset.slide === slide.key);
+  });
+  // прогресс-бар: доля пройденного (последний слайд = 100%)
+  const fill = document.getElementById('onb-progress-fill');
+  if (fill) fill.style.width = Math.round((onbIndex / (ONB_SLIDES.length - 1)) * 100) + '%';
+  // кнопка «назад»
+  const back = document.getElementById('onb-back');
+  if (back) back.hidden = onbIndex === 0;
+  // финальный слайд: подстроить текст под гостя/юзера
+  if (slide.key === 'ready') {
+    const sub = document.getElementById('onb-ready-sub');
+    if (sub) sub.textContent = currentUser
+      ? 'Твой первый урок ждёт. Погнали!'
+      : 'Твой первый урок ждёт. Первые уроки — бесплатно, вход не нужен.';
+  }
+  // CTA: для choice-слайда неактивна, пока нет выбора
+  const cta = document.getElementById('onb-cta');
+  if (cta) {
+    cta.textContent = slide.cta;
+    cta.disabled = slide.type === 'choice' && !state[slide.field];
+  }
+}
+
+// Выбор варианта в choice-слайде: подсветить, сохранить, автопереход
+function onbSelect(el, key) {
+  const wrap = el.closest('.onb-options');
+  if (wrap) wrap.querySelectorAll('.onb-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const field = ONB_SLIDES[onbIndex].field;
+  let val = el.dataset.value;
+  if (field === 'dailyGoalMinutes') val = parseInt(val, 10);
+  state[field] = val;
+  const cta = document.getElementById('onb-cta');
+  if (cta) cta.disabled = false;
+  // мягкий автопереход, как у Duolingo
+  setTimeout(() => { if (ONB_SLIDES[onbIndex].field === field) onbNext(); }, 260);
+}
+
+function onbNext() {
+  if (onbIndex >= ONB_SLIDES.length - 1) { finishOnboarding(); return; }
+  onbIndex++;
+  onbRender();
+}
+
+function onbBack() {
+  if (onbIndex > 0) { onbIndex--; onbRender(); }
 }
 
 function finishOnboarding() {
@@ -581,31 +708,31 @@ async function init() {
 
   // Подписываемся на состояние авторизации
   auth.onAuthStateChanged(async user => {
-    if (user) {
-      currentUser = user;
-      await loadState();
-      await saveUserEmail();
-      checkStreak();
-      renderUserInfo();
+    currentUser = user || null;
+    await loadState();
+    checkStreak();
+    renderUserInfo();
+    updateGuestUi();
 
-      const hasAccess = await checkSubscription();
-      if (hasAccess) {
-        renderHome();
-        if (!state.onboardingDone) {
-          showScreen('screen-onboarding');
-        } else {
-          showScreen('screen-home');
-          // Silently refresh push subscription for returning users
-          if (Notification.permission === 'granted') {
-            setTimeout(setupPushNotifications, 3000);
-          }
-        }
-      } else {
-        showPaywall();
-      }
+    if (user) {
+      await saveUserEmail();
+      hasSubscription = await checkSubscription();
     } else {
-      currentUser = null;
-      showScreen('screen-login');
+      hasSubscription = false; // гость: локальный state, доступ по пробнику
+    }
+
+    renderHome();
+    if (!state.onboardingDone) {
+      startOnboarding();
+    } else if (user && !hasSubscription && pendingUpgrade) {
+      pendingUpgrade = false;
+      showPaywall();          // гость вошёл ради оформления — показываем планы
+    } else {
+      showScreen('screen-home');
+      // Тихо обновляем подписку на пуши у вошедших с доступом
+      if (user && hasSubscription && Notification.permission === 'granted') {
+        setTimeout(setupPushNotifications, 3000);
+      }
     }
   });
 }
@@ -746,12 +873,14 @@ function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 // LESSON — FLOW
 // ============================================================
 function startLesson() {
+  if (!trialGate()) return;
   const mods = getLessonModules();
   const num = Math.min(state.currentLesson || 1, mods.length);
   startTeachPhase(mods[num - 1]);
 }
 
 function startWeakLesson() {
+  if (!trialGate()) return;
   const weakIds = Object.keys(state.errorLog)
     .sort((a, b) => state.errorLog[b] - state.errorLog[a])
     .map(id => parseInt(id));
@@ -1110,6 +1239,7 @@ function buildSrsPool() {
 }
 
 function startSrsLesson() {
+  if (!trialGate()) return;
   const dueVerbs = getSrsDueVerbs();
   if (dueVerbs.length === 0) return;
   const pool = dueVerbs.length >= 2 ? dueVerbs : null;
@@ -1310,6 +1440,7 @@ function showScenarios() {
 }
 
 function startScenario(id) {
+  if (!trialGate()) return;
   const scenario = SCENARIOS.find(s => s.id === id);
   if (!scenario) return;
   scenarioState = { scenarioId: id, currentStep: 0, score: 0, answered: false };
@@ -2617,6 +2748,7 @@ function searchVocab(query) {
 }
 
 function startVocabQuiz(categoryId) {
+  if (!trialGate()) return;
   const category = VOCAB_CATEGORIES.find(c => c.id === categoryId);
   if (!category) return;
   const words = shuffle([...category.words]).slice(0, 10);

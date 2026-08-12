@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#58CC02">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Греческий">
@@ -41,54 +41,84 @@
     </div>
   </div>
 
-  <!-- ==================== PAYWALL ==================== -->
-  <!-- ==================== ONBOARDING ==================== -->
+  <!-- ==================== ONBOARDING (пошаговый, Duolingo-стиль) ==================== -->
   <div id="screen-onboarding" class="screen">
-    <div class="onboarding-container">
-      <div class="onboarding-logo">🇬🇷</div>
-      <h1 class="onboarding-title">Добро пожаловать в IziGreek</h1>
-      <p class="onboarding-subtitle">Греческий для жизни на Кипре и в Греции</p>
+    <!-- Верхняя панель: назад + прогресс -->
+    <div class="onb-topbar">
+      <button class="onb-back" id="onb-back" onclick="onbBack()" aria-label="Назад">‹</button>
+      <div class="onb-progress"><div class="onb-progress-fill" id="onb-progress-fill"></div></div>
+    </div>
 
-      <div class="onboarding-features">
-        <div class="onboarding-feature">
-          <div class="onboarding-feature-icon">🎯</div>
-          <div class="onboarding-feature-text">
-            <strong>Глаголы A2</strong>
-            <span>300+ глаголов с транскрипцией и примерами</span>
-          </div>
-        </div>
-        <div class="onboarding-feature">
-          <div class="onboarding-feature-icon">🎭</div>
-          <div class="onboarding-feature-text">
-            <strong>Сценарии</strong>
-            <span>Реальные диалоги: врач, банк, магазин, KEП</span>
-          </div>
-        </div>
-        <div class="onboarding-feature">
-          <div class="onboarding-feature-icon">💬</div>
-          <div class="onboarding-feature-text">
-            <strong>Фразы</strong>
-            <span>Живой разговорный греческий — как говорят на улице</span>
-          </div>
-        </div>
-        <div class="onboarding-feature">
-          <div class="onboarding-feature-icon">📚</div>
-          <div class="onboarding-feature-text">
-            <strong>Словарь</strong>
-            <span>800+ слов по темам с карточками и квизами</span>
-          </div>
+    <div class="onb-body">
+      <!-- 0. Приветствие -->
+      <div class="onb-slide" data-slide="welcome">
+        <div class="onb-mascot">🐬</div>
+        <h1 class="onb-title">Γεια σου! Я помогу выучить греческий</h1>
+        <p class="onb-sub">10 минут в день — и через месяц ты заговоришь. Ответь на пару вопросов, чтобы я подстроился под тебя.</p>
+      </div>
+
+      <!-- 1. Цель -->
+      <div class="onb-slide" data-slide="goal">
+        <div class="onb-mascot onb-mascot-sm">🎯</div>
+        <h2 class="onb-q">Зачем ты учишь греческий?</h2>
+        <div class="onb-options">
+          <button class="onb-option" data-value="citizenship" onclick="onbSelect(this,'goal')"><span class="onb-opt-ic">🏛️</span><span class="onb-opt-tx">Гражданство или ВНЖ</span></button>
+          <button class="onb-option" data-value="work" onclick="onbSelect(this,'goal')"><span class="onb-opt-ic">💼</span><span class="onb-opt-tx">Работа и карьера</span></button>
+          <button class="onb-option" data-value="life" onclick="onbSelect(this,'goal')"><span class="onb-opt-ic">🏝️</span><span class="onb-opt-tx">Жизнь на Кипре / в Греции</span></button>
+          <button class="onb-option" data-value="travel" onclick="onbSelect(this,'goal')"><span class="onb-opt-ic">✈️</span><span class="onb-opt-tx">Путешествия и общение</span></button>
         </div>
       </div>
 
-      <div class="onboarding-tip">
-        💡 10 минут в день — и через месяц ты заговоришь по-гречески
+      <!-- 2. Уровень -->
+      <div class="onb-slide" data-slide="level">
+        <div class="onb-mascot onb-mascot-sm">📊</div>
+        <h2 class="onb-q">Какой у тебя уровень?</h2>
+        <div class="onb-options">
+          <button class="onb-option" data-value="zero" onclick="onbSelect(this,'level')"><span class="onb-opt-ic">🌱</span><span class="onb-opt-tx">С нуля — не знаю ни слова</span></button>
+          <button class="onb-option" data-value="basic" onclick="onbSelect(this,'level')"><span class="onb-opt-ic">🔤</span><span class="onb-opt-tx">Знаю алфавит и базовые слова</span></button>
+          <button class="onb-option" data-value="mid" onclick="onbSelect(this,'level')"><span class="onb-opt-ic">💬</span><span class="onb-opt-tx">Могу говорить простыми фразами</span></button>
+        </div>
       </div>
 
-      <button class="btn-primary onboarding-btn" onclick="finishOnboarding()">
-        Начать учить греческий 🚀
-      </button>
+      <!-- 3. Дневная цель -->
+      <div class="onb-slide" data-slide="minutes">
+        <div class="onb-mascot onb-mascot-sm">🔥</div>
+        <h2 class="onb-q">Сколько минут в день готов уделять?</h2>
+        <div class="onb-options">
+          <button class="onb-option" data-value="5" onclick="onbSelect(this,'minutes')"><span class="onb-opt-ic">🙂</span><span class="onb-opt-tx">5 минут — спокойно</span></button>
+          <button class="onb-option" data-value="10" onclick="onbSelect(this,'minutes')"><span class="onb-opt-ic">😃</span><span class="onb-opt-tx">10 минут — в самый раз</span></button>
+          <button class="onb-option" data-value="15" onclick="onbSelect(this,'minutes')"><span class="onb-opt-ic">💪</span><span class="onb-opt-tx">15 минут — серьёзно</span></button>
+          <button class="onb-option" data-value="20" onclick="onbSelect(this,'minutes')"><span class="onb-opt-ic">🚀</span><span class="onb-opt-tx">20 минут — на максимум</span></button>
+        </div>
+      </div>
+
+      <!-- 4. Ценность -->
+      <div class="onb-slide" data-slide="value">
+        <div class="onb-mascot onb-mascot-sm">✨</div>
+        <h2 class="onb-q">Вот что тебя ждёт</h2>
+        <div class="onboarding-features">
+          <div class="onboarding-feature"><div class="onboarding-feature-icon">🎯</div><div class="onboarding-feature-text"><strong>Глаголы A2</strong><span>300+ глаголов с транскрипцией и примерами</span></div></div>
+          <div class="onboarding-feature"><div class="onboarding-feature-icon">🎭</div><div class="onboarding-feature-text"><strong>Сценарии</strong><span>Реальные диалоги: врач, банк, магазин, КЕП</span></div></div>
+          <div class="onboarding-feature"><div class="onboarding-feature-icon">💬</div><div class="onboarding-feature-text"><strong>Фразы</strong><span>Живой разговорный греческий — как говорят на улице</span></div></div>
+          <div class="onboarding-feature"><div class="onboarding-feature-icon">📚</div><div class="onboarding-feature-text"><strong>Словарь</strong><span>800+ слов по темам с карточками и квизами</span></div></div>
+        </div>
+      </div>
+
+      <!-- 5. Готово -->
+      <div class="onb-slide" data-slide="ready">
+        <div class="onb-mascot">🎉</div>
+        <h1 class="onb-title" id="onb-ready-title">Всё готово!</h1>
+        <p class="onb-sub" id="onb-ready-sub">Твой первый урок ждёт. Первые уроки — бесплатно, вход не нужен.</p>
+      </div>
+    </div>
+
+    <!-- Нижняя кнопка -->
+    <div class="onb-footer">
+      <button class="btn-primary onb-cta" id="onb-cta" onclick="onbNext()">Продолжить</button>
     </div>
   </div>
+
+  <!-- ==================== PAYWALL ==================== -->
 
   <div id="screen-paywall" class="screen">
     <div class="paywall-container">
@@ -121,6 +151,7 @@
     <div class="home-header">
       <div class="home-top-row">
         <div class="home-flag">🇬🇷</div>
+        <button class="btn-guest-login" id="guest-login-btn" onclick="signInWithGoogle()" style="display:none">Войти</button>
         <button class="btn-user-info" onclick="showUserMenu()" id="user-avatar-btn">
           <img id="user-avatar" src="" alt="" style="display:none">
           <span id="user-initials"></span>
@@ -921,6 +952,18 @@
       <div class="push-modal-actions">
         <button class="btn-primary" onclick="acceptPushPrompt()">Включить напоминания</button>
         <button class="push-btn-later" onclick="dismissPushPrompt()">Позже</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="trial-modal" class="modal-overlay" onclick="dismissTrialModal()" style="display:none">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="push-modal-icon">🎉</div>
+      <div class="modal-title">Бесплатные уроки пройдены</div>
+      <div class="push-modal-text">Ты прошёл пробные уроки! Чтобы продолжить и открыть <b>все уроки, сценарии, глаголы и фразы</b> — оформи полный доступ. 7 дней бесплатно, отмена в любой момент.</div>
+      <div class="push-modal-actions">
+        <button class="btn-primary" id="trial-cta" onclick="trialUpgrade()">Открыть полный доступ</button>
+        <button class="push-btn-later" onclick="dismissTrialModal()">Позже</button>
       </div>
     </div>
   </div>
