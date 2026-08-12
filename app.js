@@ -655,6 +655,15 @@ function pluralDays(n) {
   return 'дней';
 }
 
+// Общее склонение: forms = [1, 2-4, 5+], напр. ['шаг','шага','шагов']
+function pluralRu(n, forms) {
+  if (n % 100 >= 11 && n % 100 <= 19) return forms[2];
+  const r = n % 10;
+  if (r === 1) return forms[0];
+  if (r >= 2 && r <= 4) return forms[1];
+  return forms[2];
+}
+
 function showSettings() {
   // User info
   if (currentUser) {
@@ -1484,7 +1493,7 @@ function showScenarios() {
       <div class="scenario-info">
         <div class="scenario-title">${s.title}</div>
         <div class="scenario-desc">${s.description}</div>
-        <div class="scenario-meta">${s.steps.length} шага · ${s.steps.length * XP_PER_SCENARIO_STEP} XP</div>
+        <div class="scenario-meta">${s.steps.length} ${pluralRu(s.steps.length, ['шаг','шага','шагов'])} · ${s.steps.length * XP_PER_SCENARIO_STEP} XP</div>
       </div>
       <div class="scenario-arrow">${done ? '✅' : '→'}</div>
     </div>`;

@@ -3859,7 +3859,7 @@ const PLAN_30 = [
 // ============================================================
 const VOCAB_CATEGORIES = [
   {
-    id: 'food', title: 'Еда', icon: '🍽️',
+    id: 'food', title: 'Еда', emoji: '🍽️',
     words: [
       { greek: 'το ψωμί', transcription: 'то псоми', translation: 'хлеб', emoji: '🍞' },
       { greek: 'το κρέας', transcription: 'то крэас', translation: 'мясо', emoji: '🥩' },
