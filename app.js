@@ -584,7 +584,7 @@ function renderProgressLessons() {
   // Motivation
   const motivations = [
     { emoji: '🔥', text: `Ещё ${nextMilestone.n - lessons} уроков до «${nextMilestone.title}»`, sub: 'Ты почти там!' },
-    { emoji: '🧠', text: `${vocabLearned} слов уже в голове`, sub: 'Каждое слово — шаг к гражданству' },
+    { emoji: '🧠', text: `${vocabLearned} слов уже в голове`, sub: 'Каждое слово — ближе к свободному общению' },
     { emoji: '⚡', text: `${state.totalXp} XP заработано`, sub: 'Продолжай — каждый урок считается' },
   ];
   const m = motivations[lessons % motivations.length];
@@ -1879,7 +1879,7 @@ function showAudit() {
 }
 
 function getTutorTip() {
-  if (state.lessonsCompleted === 0) return 'Данил, начни с первого урока прямо сейчас! Каждый день — это вклад в гражданство. 🇬🇷';
+  if (state.lessonsCompleted === 0) return 'Начни с первого урока прямо сейчас! Каждый день — маленький шаг к свободному греческому. 🇬🇷';
   if (state.streak === 0) return 'Стрик сброшен. Помни: регулярность важнее интенсивности. 10 минут в день > 2 часа раз в неделю.';
   if (state.scenariosCompleted.length === 0) return 'Попробуй сценарий "Apple Store" или "Собеседование на гражданство" — это практика для реальной жизни!';
   if (!state.scenariosCompleted.includes('citizenship')) return `Пройдено ${state.scenariosCompleted.length}/${SCENARIOS.length} сценариев. Сценарий "Собеседование на гражданство" — самый важный. Пройди его!`;
