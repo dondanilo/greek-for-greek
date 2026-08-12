@@ -2300,6 +2300,9 @@ function toggleLike(docId) {
 
 async function createPost(type, data) {
   if (!currentUser) return;
+  // В iOS-приложении лента скрыта до модерации (App Store Guideline 1.2) —
+  // не публикуем в общую ленту. На вебе работает как обычно.
+  if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) return;
   try {
     await db.collection('posts').add({
       uid: currentUser.uid,
