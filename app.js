@@ -73,6 +73,59 @@ function signOut() {
   auth.signOut();
 }
 
+// ==================== УДАЛЕНИЕ АККАУНТА (App Store Guideline 5.1.1(v)) ====================
+// Полное удаление: данные в Firestore + сам аккаунт Firebase Auth + локальный прогресс.
+function deleteAccount() {
+  hideUserMenu();
+  if (!currentUser) return;
+  const m = document.getElementById('delete-account-modal');
+  if (m) m.style.display = 'flex';
+}
+
+function dismissDeleteAccount() {
+  const m = document.getElementById('delete-account-modal');
+  if (m) m.style.display = 'none';
+}
+
+async function confirmDeleteAccount() {
+  if (!currentUser) return;
+  const btn = document.getElementById('delete-account-confirm');
+  if (btn) { btn.disabled = true; btn.textContent = 'Удаляем…'; }
+  const uid = currentUser.uid;
+  try {
+    // 1. Свои посты в ленте (пока есть валидный токен — иначе правила не пустят)
+    const myPosts = await db.collection('posts').where('uid', '==', uid).get();
+    if (!myPosts.empty) {
+      const batch = db.batch();
+      myPosts.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
+    // 2. Подписка на пуши и документ пользователя
+    await db.collection('push_subscriptions').doc(uid).delete().catch(() => {});
+    await db.collection('users').doc(uid).delete().catch(() => {});
+    // (subscriptions/{email} не трогаем — платёжная запись, правила write:false)
+
+    // 3. Локальный прогресс
+    try { localStorage.removeItem('greek-app-state-v2'); localStorage.removeItem('apnsToken'); } catch (e) {}
+    state = { ...DEFAULT_STATE };
+
+    // 4. Сам аккаунт Firebase Auth (в конце — после удаления токен пропадёт)
+    await currentUser.delete();
+
+    dismissDeleteAccount();
+    // onAuthStateChanged(null) сам уведёт на онбординг/логин
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Удалить навсегда'; }
+    if (e.code === 'auth/requires-recent-login') {
+      dismissDeleteAccount();
+      alert('Для безопасности войди заново, а затем повтори удаление аккаунта.');
+      auth.signOut(); // свежий вход даст «recent login», и удаление пройдёт
+    } else {
+      alert('Не удалось удалить аккаунт: ' + (e.message || e.code || e));
+    }
+  }
+}
+
 function showUserMenu() {
   const menu = document.getElementById('user-menu');
   menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';

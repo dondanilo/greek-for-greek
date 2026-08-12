@@ -1167,6 +1167,17 @@ body {
   font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
   cursor: pointer;
 }
+
+/* Опасное действие — удаление аккаунта. Приглушённое, чтобы не тыкали случайно;
+   подтверждение всё равно во всплывающем окне. */
+.btn-delete-account {
+  width: 100%; padding: 14px; margin-top: 10px;
+  background: var(--red); color: #fff;
+  border: none; border-radius: 14px;
+  font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800;
+  cursor: pointer;
+}
+.btn-delete-account:disabled { opacity: .6; cursor: default; }
 .settings-version { text-align: center; font-size: 12px; color: #ccc; padding: 16px 0 8px; }
 
 /* ============================================================ AUTH LOADING */

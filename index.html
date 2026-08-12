@@ -737,6 +737,7 @@
     <!-- Sign out -->
     <div class="settings-section">
       <button class="btn-signout-full" onclick="signOut()">Выйти из аккаунта</button>
+      <button class="btn-delete-account" onclick="deleteAccount()">Удалить аккаунт</button>
     </div>
 
     <div class="settings-version">IziGreek v1.0 · cabinet.izigreek.com</div>
@@ -964,6 +965,19 @@
       <div class="push-modal-actions">
         <button class="btn-primary" id="trial-cta" onclick="trialUpgrade()">Открыть полный доступ</button>
         <button class="push-btn-later" onclick="dismissTrialModal()">Позже</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== УДАЛЕНИЕ АККАУНТА ==================== -->
+  <div id="delete-account-modal" class="modal-overlay" onclick="dismissDeleteAccount()" style="display:none">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="push-modal-icon">⚠️</div>
+      <div class="modal-title">Удалить аккаунт?</div>
+      <div class="push-modal-text">Это <b>навсегда</b> удалит твой прогресс, достижения, посты и данные аккаунта. Действие <b>необратимо</b> — восстановить не получится.</div>
+      <div class="push-modal-actions">
+        <button class="btn-delete-account" id="delete-account-confirm" onclick="confirmDeleteAccount()">Удалить навсегда</button>
+        <button class="push-btn-later" onclick="dismissDeleteAccount()">Отмена</button>
       </div>
     </div>
   </div>
