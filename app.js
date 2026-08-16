@@ -283,6 +283,10 @@ async function checkSubscription() {
   // Developer account — always has access
   if (currentUser.email?.toLowerCase() === 'dondanilo1994@gmail.com') return true;
 
+  // Нативная подписка iOS (Apple IAP) — флаг выставляет native-iap.js по entitlement
+  // RevenueCat. На вебе window.__iziNativeSubscription всегда undefined → пропускаем.
+  if (window.__iziNativeSubscription === true) return true;
+
   // 1. Check users/{uid}.subscription (set by webhook)
   const ACTIVE_STATUSES = ['active', 'trialing', 'on_trial', 'paid'];
 
@@ -731,6 +735,11 @@ async function togglePushSetting() {
 }
 
 function showPaywall() {
+  // В iOS-приложении оплата обязана идти через Apple IAP (гайдлайн 3.1.1), а не
+  // через внешний LemonSqueezy. native-iap.js регистрирует __iziIapPaywall и
+  // сам навешивает нативную покупку на кнопки. На вебе хук undefined → обычный флоу.
+  if (typeof window.__iziIapPaywall === 'function') { window.__iziIapPaywall(); return; }
+
   const monthlyUrl = `https://izigreek.lemonsqueezy.com/checkout/buy/ba321ab1-7852-4b45-8d8b-a39393003582?checkout[custom][user_id]=${currentUser?.uid || ''}`;
   const annualUrl = `https://izigreek.lemonsqueezy.com/checkout/buy/81d18e92-cb61-46fb-b84c-63b5c903b15d?checkout[custom][user_id]=${currentUser?.uid || ''}`;
 
