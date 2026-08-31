@@ -1070,6 +1070,15 @@ body {
 .btn-apple-login:disabled { opacity: .6; cursor: default; }
 .apple-svg { flex-shrink: 0; margin-top: -2px; }
 
+/* Ненавязчивый выход с экрана входа обратно на главную (гость может передумать). */
+.btn-login-back {
+  margin-top: 18px; padding: 10px 20px;
+  background: none; border: none; color: var(--gray-dark, #777);
+  font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; text-decoration: underline;
+}
+.btn-login-back:active { opacity: .6; }
+
 /* ============================================================ USER AVATAR */
 .home-top-row {
   display: flex; justify-content: space-between; align-items: center; width: 100%;
@@ -1470,7 +1479,18 @@ body {
   background: white; color: var(--text); font-size: 15px; font-weight: 700;
   text-decoration: none; text-align: center; border: 2px solid var(--gray-light);
 }
-.paywall-note { font-size: 13px; color: var(--gray); margin-bottom: 24px; }
+.paywall-note { font-size: 13px; color: var(--gray); margin-bottom: 14px; }
+
+/* Обязательные по гайдлайну 3.1.2(c) ссылки в потоке покупки. Держим их
+   подчинёнными по размеру, но с явным подчёркиванием — Apple проверяет,
+   что ссылка видна и по ней реально открывается страница. */
+.paywall-legal {
+  font-size: 13px; line-height: 1.6; margin-bottom: 24px;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+}
+.paywall-legal a { color: var(--gray); text-decoration: underline; }
+.paywall-legal a:active { opacity: .6; }
+.paywall-legal-sep { color: var(--gray); }
 .paywall-signout {
   background: none; border: none; color: var(--gray); font-size: 14px;
   cursor: pointer; text-decoration: underline; padding: 8px;

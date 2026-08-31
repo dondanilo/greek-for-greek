@@ -354,9 +354,27 @@ function trialUpgrade() {
   }
 }
 
+// Показать кнопку возврата на главную — только гостю (у вошедшего этот экран не всплывает,
+// а на самом первом запуске уходить с экрана входа некуда).
+function updateLoginBackBtn() {
+  const back = document.getElementById('login-back-btn');
+  if (back) back.style.display = state.onboardingDone ? 'block' : 'none';
+}
+
 function showLoginPromo() {
   const sub = document.querySelector('#screen-login .login-subtitle');
   if (sub) sub.textContent = 'Бесплатные уроки пройдены. Войди, чтобы продолжить и сохранить прогресс.';
+  updateLoginBackBtn();
+  showScreen('screen-login');
+}
+
+// Обычный вход по кнопке «Войти» на главной. Раньше она звала signInWithGoogle()
+// напрямую — гость вообще не видел вариант «Войти через Apple» (гайдлайн 4.8).
+// Ведём на экран входа, где показаны оба провайдера.
+function showLogin() {
+  const sub = document.querySelector('#screen-login .login-subtitle');
+  if (sub) sub.textContent = 'Войди, чтобы прогресс сохранился на всех устройствах';
+  updateLoginBackBtn();
   showScreen('screen-login');
 }
 
@@ -445,6 +463,18 @@ function finishOnboarding() {
   showScreen('screen-home');
   // Soft pre-prompt after onboarding — user is already engaged
   setTimeout(maybeShowPushPrompt, 2000);
+}
+
+// В iOS-WKWebView (Capacitor) объекта Notification нет вообще — обращение к
+// Notification.permission бросает ReferenceError. Раньше это роняло showSettings()
+// на строке с пуш-тумблером, ДО вызова showScreen(), поэтому экран настроек в
+// приложении просто не открывался. Следствие: ревьюер Apple не мог добраться ни до
+// удаления аккаунта (гайдлайн 5.1.1(v)), ни до кнопки подписки (2.1(b)) — оба
+// живут только внутри настроек. Единая безопасная точка чтения разрешения.
+function pushPermission() {
+  try {
+    return (typeof Notification !== 'undefined' && Notification.permission) || 'unsupported';
+  } catch (e) { return 'unsupported'; }
 }
 
 // Мягкий промпт ПЕРЕД системным запросом: объясняем ценность, спрашиваем разрешение
@@ -688,13 +718,27 @@ function showSettings() {
     }
   }
 
+  // Подписка: статус + кнопка перехода на пейволл (постоянная точка входа в IAP)
+  const subStatusEl = document.getElementById('settings-sub-status');
+  const subBtnEl = document.getElementById('settings-sub-btn');
+  const subActive = hasSubscription || window.__iziNativeSubscription;
+  if (subStatusEl) subStatusEl.textContent = subActive ? 'Подписка активна' : 'Бесплатный доступ';
+  // Кнопку НЕ прячем даже при активной подписке — только меняем текст. Раньше она
+  // исчезала, и после покупки одного тарифа пейволл становился недостижим: второй
+  // тариф выбрать было уже неоткуда. Ревьюер Apple купил годовую, не нашёл, где
+  // выбрать месячную, и завернул билд 21 по гайдлайну 2.1(a).
+  if (subBtnEl) {
+    subBtnEl.style.display = 'block';
+    subBtnEl.textContent = subActive ? 'Изменить план' : 'Оформить подписку';
+  }
+
   // Daily goal buttons
   document.querySelectorAll('.settings-goal-btn').forEach(btn => {
     btn.classList.toggle('active', parseInt(btn.dataset.xp) === state.dailyGoal);
   });
 
   // Push toggle
-  const pushOn = Notification.permission === 'granted';
+  const pushOn = pushPermission() === 'granted';
   document.getElementById('push-toggle').classList.toggle('on', pushOn);
 
   // Stats
@@ -717,11 +761,15 @@ function setDailyGoal(xp) {
 }
 
 async function togglePushSetting() {
-  if (Notification.permission === 'denied') {
+  if (pushPermission() === 'unsupported') {
+    alert('Уведомления в приложении подключаются отдельно — скоро включим.');
+    return;
+  }
+  if (pushPermission() === 'denied') {
     alert('Уведомления заблокированы в настройках браузера. Разрешите их вручную.');
     return;
   }
-  if (Notification.permission === 'granted') {
+  if (pushPermission() === 'granted') {
     // Unsubscribe
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
@@ -730,7 +778,7 @@ async function togglePushSetting() {
     document.getElementById('push-toggle').classList.remove('on');
   } else {
     await setupPushNotifications();
-    document.getElementById('push-toggle').classList.toggle('on', Notification.permission === 'granted');
+    document.getElementById('push-toggle').classList.toggle('on', pushPermission() === 'granted');
   }
 }
 
@@ -801,7 +849,7 @@ async function init() {
     } else {
       showScreen('screen-home');
       // Тихо обновляем подписку на пуши у вошедших с доступом
-      if (user && hasSubscription && Notification.permission === 'granted') {
+      if (user && hasSubscription && pushPermission() === 'granted') {
         setTimeout(setupPushNotifications, 3000);
       }
     }
