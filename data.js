@@ -1,3 +1,7 @@
+// --- сборка контента: генерируется tools/build-content.js, руками не править ---
+const CONTENT_VERSION = 1;
+const CONTENT_SECTIONS = {"VERBS":"2425d24d7653","SCENARIOS":"32dc5f6fb93b","PLAN_30":"018e5a709193","VOCAB_CATEGORIES":"70af9fdf7965","QUIZ_CATEGORIES":"ddda20356401","ACHIEVEMENTS":"d781e1ca77d8","PHRASES":"c845b99eb9e6"};
+// --- /сборка контента ---
 const VERBS = [
   {
     id: 1, infinitive: "είμαι", translation: "быть",

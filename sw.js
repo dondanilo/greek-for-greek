@@ -1,10 +1,11 @@
-const CACHE_NAME = 'greek-app-v13';
+const CACHE_NAME = 'greek-app-v14';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './data.js',
+  './content-loader.js',
   './manifest.json'
 ];
 
