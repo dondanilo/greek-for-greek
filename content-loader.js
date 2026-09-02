@@ -114,8 +114,12 @@
     });
   }
 
-  var activeVersion = applied.length ? meta.version : BUNDLED_VERSION;
-  console.log('[content] версия ' + activeVersion + (applied.length ? ' (обновлено: ' + applied.join(', ') + ')' : ' (вшитая)'));
+  // Версия устройства — это версия пака, даже если подменять ничего не пришлось
+  // (например, после отката контент на сервере снова совпал с вшитым).
+  var activeVersion = meta ? meta.version : BUNDLED_VERSION;
+  console.log('[content] версия ' + activeVersion + (
+    applied.length ? ' (обновлено: ' + applied.join(', ') + ')'
+      : meta ? ' (разделы совпадают с вшитыми)' : ' (вшитая)'));
 
   // ------------------------------------------------------------------
   // Фаза 2 — асинхронно, после старта приложения
@@ -136,7 +140,7 @@
         var stale = KEYS.filter(function (k) {
           return manifest.sections[k] && manifest.sections[k] !== currentHash(k);
         });
-        if (!stale.length) return;
+        if (!stale.length) { console.log('[content] разделы уже актуальны'); return; }
 
         console.log('[content] качаем разделы: ' + stale.join(', '));
         return Promise.all(stale.map(function (key) {
