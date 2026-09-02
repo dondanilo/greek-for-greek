@@ -65,12 +65,10 @@ if (fs.existsSync(MANIFEST)) {
 const changed = KEYS.filter((k) => !previous || previous.sections?.[k] !== hashes[k]);
 if (previous) version = changed.length ? previous.version + 1 : previous.version;
 
-fs.writeFileSync(MANIFEST, JSON.stringify({
-  version,
-  generatedAt: new Date().toISOString(),
-  sections: hashes,
-  counts
-}, null, 2) + '\n');
+// Метку времени обновляем только вместе с контентом: иначе холостой прогон
+// делает манифест «грязным» для git и порождает пустые коммиты.
+const generatedAt = changed.length || !previous ? new Date().toISOString() : previous.generatedAt;
+fs.writeFileSync(MANIFEST, JSON.stringify({ version, generatedAt, sections: hashes, counts }, null, 2) + '\n');
 
 // Штамп в data.js: вшитая версия и хэши. Удалённый раздел применяется только
 // если версия строго новее вшитой, поэтому свежая сборка из App Store никогда
