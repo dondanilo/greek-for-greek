@@ -1,8 +1,8 @@
 {
-  "version": 1,
-  "generatedAt": "2026-09-02T10:50:57.162Z",
+  "version": 2,
+  "generatedAt": "2026-09-02T10:53:47.366Z",
   "sections": {
-    "VERBS": "2425d24d7653",
+    "VERBS": "420f58b407b4",
     "SCENARIOS": "32dc5f6fb93b",
     "PLAN_30": "018e5a709193",
     "VOCAB_CATEGORIES": "70af9fdf7965",
@@ -11,7 +11,7 @@
     "PHRASES": "c845b99eb9e6"
   },
   "counts": {
-    "VERBS": 305,
+    "VERBS": 306,
     "SCENARIOS": 20,
     "PLAN_30": 4,
     "VOCAB_CATEGORIES": 33,
