@@ -1832,7 +1832,7 @@ function renderScenarioStep(scenario, stepIdx) {
 
   document.getElementById('scenario-progress-fill').style.width = (stepIdx / total * 100) + '%';
   document.getElementById('scenario-step-counter').textContent = `${stepIdx + 1}/${total}`;
-  document.getElementById('scenario-title-bar').textContent = scenario.title;
+  document.getElementById('scenario-title-bar').textContent = `${scenario.icon} ${scenario.title}`;
 
   const container = document.getElementById('scenario-step-container');
   container.innerHTML = `
@@ -2258,10 +2258,9 @@ function showAudit() {
 function getTutorTip() {
   if (state.lessonsCompleted === 0) return 'Начни с первого урока прямо сейчас! Каждый день — маленький шаг к свободному греческому. 🇬🇷';
   if (state.streak === 0) return 'Стрик сброшен. Помни: регулярность важнее интенсивности. 10 минут в день > 2 часа раз в неделю.';
-  if (state.scenariosCompleted.length === 0) return 'Попробуй сценарий "Apple Store" или "Собеседование на гражданство" — это практика для реальной жизни!';
-  if (!state.scenariosCompleted.includes('citizenship')) return `Пройдено ${state.scenariosCompleted.length}/${SCENARIOS.length} сценариев. Сценарий "Собеседование на гражданство" — самый важный. Пройди его!`;
+  if (state.scenariosCompleted.length === 0) return 'Попробуй сценарий "В банке" или "В аптеке" — это практика для реальной жизни!';
   if (state.scenariosCompleted.length < SCENARIOS.length) return `Пройдено ${state.scenariosCompleted.length}/${SCENARIOS.length} сценариев. Попробуй аптеку, банк и ΚΕΠ — реальные ситуации в Греции!`;
-  return 'Отлично! Все 8 сценариев пройдены. Следующий шаг — говорить с носителями. Найди грека и практикуй!';
+  return `Отлично! Все ${SCENARIOS.length} сценариев пройдены. Следующий шаг — говорить с носителями. Найди грека и практикуй!`;
 }
 
 // ============================================================
