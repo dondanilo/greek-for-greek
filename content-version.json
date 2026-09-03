@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "generatedAt": "2026-09-02T10:55:50.199Z",
+  "version": 4,
+  "generatedAt": "2026-09-03T05:45:42.159Z",
   "sections": {
-    "VERBS": "2425d24d7653",
-    "SCENARIOS": "32dc5f6fb93b",
-    "PLAN_30": "018e5a709193",
-    "VOCAB_CATEGORIES": "70af9fdf7965",
+    "VERBS": "8d5778cc7f3c",
+    "SCENARIOS": "db4c676c304b",
+    "PLAN_30": "f723206b0c27",
+    "VOCAB_CATEGORIES": "3ce83222aad9",
     "QUIZ_CATEGORIES": "ddda20356401",
     "ACHIEVEMENTS": "d781e1ca77d8",
     "PHRASES": "c845b99eb9e6"
