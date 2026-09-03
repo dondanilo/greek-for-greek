@@ -178,6 +178,7 @@ const DEFAULT_STATE = {
   onbLevel: null,       // уровень: zero|basic|mid
   dailyGoalMinutes: 10, // выбранная дневная цель, мин
   vocabProgress: {},  // { categoryId: [greek, greek, ...] }
+  flashProgress: {},  // карточки: { categoryId: [greek, ...] } — отмеченные «знаю»
   currentLesson: 1,
   pushPromptSeenAt: null  // когда последний раз показывали мягкий пуш-промпт
 };
@@ -1538,6 +1539,263 @@ function playSound(type) {
 }
 
 // ============================================================
+// КАРТОЧКИ (FLASHCARDS) — темы, голосование Знаю/Не знаю, авто-просмотр
+// Портировано из IziSerb на нашем контенте VOCAB_CATEGORIES.
+// Отличия от серба: поля данных (emoji/greek вместо icon/serbian), озвучка
+// через общий speakGreek(), и trialGate() на обоих режимах — у нас списки
+// открыты всем, а само занятие требует подписки (как в сценариях и словаре).
+// ============================================================
+const FC_BATCH = 10; // пауза «продолжим/хватит» каждые 10 слов
+let fcState = {
+  catId: null, cat: null, dir: 'el2ru', mode: 'vote',
+  queue: [], words: [], index: 0, know: 0, dont: 0, revealed: false, currentWord: null,
+  viewTimer: null, viewPlaying: false, viewSpeed: 1, resume: false,
+};
+
+function showFlashBreak() {
+  stopFlashView();
+  document.getElementById('fc-break-count').textContent = fcState.index;
+  document.getElementById('fc-break-modal').style.display = 'flex';
+  try { playSound('complete'); } catch (e) {}
+}
+function continueFlashBatch() {
+  document.getElementById('fc-break-modal').style.display = 'none';
+  fcState.resume = true;
+  if (fcState.mode === 'view') {
+    fcState.viewPlaying = true;
+    document.getElementById('fc-view-play').textContent = '⏸';
+    renderFlashViewCard();
+  } else {
+    renderFlashVote();
+  }
+}
+function endFlashSession() {
+  document.getElementById('fc-break-modal').style.display = 'none';
+  stopFlashView();
+  showFlashDeck(fcState.catId);
+}
+
+function fcCat(id) { return VOCAB_CATEGORIES.find(c => c.id === id); }
+function fcKnownSet(catId) {
+  if (!state.flashProgress) state.flashProgress = {};
+  if (!state.flashProgress[catId]) state.flashProgress[catId] = [];
+  return state.flashProgress[catId];
+}
+
+function showFlashcards() {
+  document.getElementById('fc-categories').innerHTML = VOCAB_CATEGORIES.map(cat => {
+    const known = fcKnownSet(cat.id).length;
+    const total = cat.words.length;
+    const pct = total ? Math.round(known / total * 100) : 0;
+    return `
+      <button class="fc-cat-card" onclick="showFlashDeck('${cat.id}')">
+        <div class="fc-cat-pct">${pct}%</div>
+        <div class="fc-cat-body">
+          <div class="fc-cat-title">${cat.emoji || '🃏'} ${cat.title}</div>
+          <div class="fc-cat-sub">${total} ${pluralRu(total, ['слово', 'слова', 'слов'])}</div>
+        </div>
+        <div class="fc-cat-arrow">›</div>
+      </button>`;
+  }).join('');
+  showScreen('screen-flashcards');
+}
+
+function showFlashDeck(catId) {
+  const cat = fcCat(catId);
+  if (!cat) return;
+  fcState.catId = catId;
+  fcState.cat = cat;
+  document.getElementById('fc-deck-title').textContent = `${cat.emoji || '🃏'} ${cat.title}`;
+  document.getElementById('fc-wordlist').innerHTML = cat.words.map(w => `
+    <div class="fc-word-row">
+      <div class="fc-word-el">${w.greek}${w.transcription ? ` <span class="fc-word-tr">[${w.transcription}]</span>` : ''}</div>
+      <div class="fc-word-ru">${w.translation}</div>
+    </div>`).join('');
+  showScreen('screen-fc-deck');
+}
+
+function openFlashDirection() { document.getElementById('fc-direction-modal').style.display = 'flex'; }
+function closeFlashDirection() { document.getElementById('fc-direction-modal').style.display = 'none'; }
+
+// --- Флеш-карты: голосование Знаю / Не знаю ---
+function startFlashVote(dir) {
+  closeFlashDirection();
+  if (!trialGate()) return;
+  const cat = fcState.cat; if (!cat) return;
+  fcState.mode = 'vote';
+  fcState.dir = dir;
+  fcState.resume = false;
+  fcState.queue = shuffle(cat.words);
+  fcState.index = 0;
+  fcState.know = 0;
+  fcState.dont = 0;
+  // вернуть кнопки, если их скрыл экран «Готово»
+  document.querySelector('#screen-fc-vote .fc-vote-actions').style.display = '';
+  document.querySelector('#screen-fc-vote .fc-vote-stats').style.display = '';
+  document.querySelector('#screen-fc-vote .fc-skip').style.display = '';
+  document.getElementById('fc-vote-title').textContent = `${cat.emoji || '🃏'} ${cat.title}`;
+  renderFlashVote();
+  showScreen('screen-fc-vote');
+}
+
+function renderFlashVote() {
+  const total = fcState.queue.length;
+  if (fcState.index >= total) { finishFlashVote(); return; }
+  const w = fcState.queue[fcState.index];
+  fcState.currentWord = w;
+  fcState.revealed = false;
+  const front = fcState.dir === 'el2ru' ? w.greek : w.translation;
+  const back = fcState.dir === 'el2ru' ? w.translation : w.greek;
+  document.getElementById('fc-vote-tag').textContent = fcState.dir === 'el2ru' ? 'СЛОВО' : 'ПЕРЕВОД';
+  document.getElementById('fc-vote-front').textContent = front;
+  document.getElementById('fc-vote-front-tr').textContent = (fcState.dir === 'el2ru' && w.transcription) ? `[${w.transcription}]` : '';
+  const backEl = document.getElementById('fc-vote-back');
+  backEl.textContent = back;
+  backEl.style.display = 'none';
+  const hint = document.getElementById('fc-vote-hint');
+  hint.textContent = 'Нажми, чтобы увидеть перевод';
+  hint.style.display = '';
+  updateFlashVoteStats();
+}
+
+function revealFlashVote() {
+  if (fcState.revealed) return;
+  fcState.revealed = true;
+  document.getElementById('fc-vote-back').style.display = '';
+  document.getElementById('fc-vote-hint').style.display = 'none';
+}
+
+function updateFlashVoteStats() {
+  document.getElementById('fc-stat-total').textContent = fcState.queue.length;
+  document.getElementById('fc-stat-know').textContent = fcState.know;
+  document.getElementById('fc-stat-dont').textContent = fcState.dont;
+}
+
+function answerFlashVote(known) {
+  const w = fcState.queue[fcState.index];
+  if (!w) return;
+  const set = fcKnownSet(fcState.catId);
+  if (known) {
+    fcState.know++;
+    if (!set.includes(w.greek)) set.push(w.greek);
+  } else {
+    fcState.dont++;
+    const i = set.indexOf(w.greek); if (i >= 0) set.splice(i, 1);
+    fcState.queue.push(w); // незнакомые копятся — повторим в конце
+  }
+  saveState();
+  fcState.index++;
+  afterVoteAdvance();
+}
+
+function afterVoteAdvance() {
+  // Пауза каждые FC_BATCH слов: «продолжим или на сегодня хватит?»
+  if (fcState.index > 0 && fcState.index % FC_BATCH === 0 && fcState.index < fcState.queue.length) {
+    showFlashBreak();
+    return;
+  }
+  renderFlashVote();
+}
+
+function skipFlashVote() {
+  const w = fcState.queue[fcState.index];
+  if (w) fcState.queue.push(w);
+  fcState.index++;
+  afterVoteAdvance();
+}
+
+function finishFlashVote() {
+  const total = fcState.know + fcState.dont;
+  document.getElementById('fc-vote-tag').textContent = '';
+  document.getElementById('fc-vote-front').textContent = '🎉';
+  document.getElementById('fc-vote-front-tr').textContent = '';
+  document.getElementById('fc-vote-back').style.display = 'none';
+  const hint = document.getElementById('fc-vote-hint');
+  hint.style.display = '';
+  hint.textContent = `Готово! Знаешь ${fcState.know} из ${total}`;
+  document.querySelector('#screen-fc-vote .fc-vote-actions').style.display = 'none';
+  document.querySelector('#screen-fc-vote .fc-vote-stats').style.display = 'none';
+  document.querySelector('#screen-fc-vote .fc-skip').style.display = 'none';
+  try { playSound('complete'); } catch (e) {}
+}
+
+// --- Просмотр: слово → перевод сам, с озвучкой ---
+function startFlashView() {
+  if (!trialGate()) return;
+  const cat = fcState.cat; if (!cat) return;
+  fcState.resume = false;
+  fcState.mode = 'view';
+  fcState.words = shuffle(cat.words);
+  fcState.index = 0;
+  fcState.viewSpeed = 1;
+  fcState.viewPlaying = true;
+  document.getElementById('fc-view-speed').textContent = '1.0x';
+  document.getElementById('fc-view-play').textContent = '⏸';
+  showScreen('screen-fc-view');
+  renderFlashViewCard();
+}
+
+function renderFlashViewCard() {
+  const w = fcState.words[fcState.index];
+  if (!w) { stopFlashView(); showFlashDeck(fcState.catId); return; }
+  // Пауза каждые FC_BATCH слов (кроме момента продолжения)
+  if (!fcState.resume && fcState.index > 0 && fcState.index % FC_BATCH === 0) {
+    showFlashBreak();
+    return;
+  }
+  fcState.resume = false;
+  fcState.currentWord = w;
+  document.getElementById('fc-view-word').textContent = w.greek;
+  document.getElementById('fc-view-tr').textContent = w.transcription || '';
+  const tr = document.getElementById('fc-view-translation');
+  tr.textContent = '';
+  tr.style.opacity = '0';
+  document.getElementById('fc-view-counter').textContent = `${fcState.index + 1}/${fcState.words.length}`;
+  document.getElementById('fc-view-progress-fill').style.width = (fcState.index / fcState.words.length * 100) + '%';
+  playFlashWord();
+  scheduleFlashView();
+}
+
+function scheduleFlashView() {
+  clearFlashViewTimers();
+  if (!fcState.viewPlaying) return;
+  const revealMs = 2200 / fcState.viewSpeed;
+  const nextMs = 1600 / fcState.viewSpeed;
+  fcState.viewTimer = setTimeout(() => {
+    const tr = document.getElementById('fc-view-translation');
+    const w = fcState.words[fcState.index];
+    if (w) { tr.textContent = w.translation; tr.style.opacity = '1'; }
+    fcState.viewTimer = setTimeout(() => {
+      fcState.index++;
+      renderFlashViewCard();
+    }, nextMs);
+  }, revealMs);
+}
+
+function clearFlashViewTimers() { if (fcState.viewTimer) { clearTimeout(fcState.viewTimer); fcState.viewTimer = null; } }
+
+function toggleFlashView() {
+  fcState.viewPlaying = !fcState.viewPlaying;
+  document.getElementById('fc-view-play').textContent = fcState.viewPlaying ? '⏸' : '▶️';
+  if (fcState.viewPlaying) scheduleFlashView(); else clearFlashViewTimers();
+}
+
+function cycleFlashSpeed() {
+  const speeds = [1, 1.5, 2];
+  const i = speeds.indexOf(fcState.viewSpeed);
+  fcState.viewSpeed = speeds[(i + 1) % speeds.length];
+  document.getElementById('fc-view-speed').textContent = fcState.viewSpeed.toFixed(1) + 'x';
+  if (fcState.viewPlaying) scheduleFlashView();
+}
+
+function stopFlashView() { fcState.viewPlaying = false; clearFlashViewTimers(); }
+
+function playFlashWord() {
+  const w = fcState.currentWord;
+  if (w) speakGreek(w.greek);
+}
+
+// ============================================================
 // SCENARIOS
 // ============================================================
 function showScenarios() {
@@ -2787,7 +3045,7 @@ let vocabQuizState = {
 
 function showVocab(mode) {
   currentVocabMode = mode;
-  document.getElementById('vocab-screen-title').textContent = mode === 'image' ? 'Карточки' : 'Перевод';
+  document.getElementById('vocab-screen-title').textContent = mode === 'image' ? 'Картинки' : 'Перевод';
   const descEl = document.getElementById('vocab-screen-desc');
   if (descEl) descEl.textContent = mode === 'image'
     ? 'Выбери картинку, которая соответствует греческому слову.'

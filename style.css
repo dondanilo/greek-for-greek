@@ -2808,3 +2808,109 @@ body {
   background: #fff9e6; border-radius: 12px;
   padding: 12px 14px; font-size: 13px; color: #555; line-height: 1.6;
 }
+
+/* ==================== КАРТОЧКИ (FLASHCARDS) ====================
+   Портировано из IziSerb; сербская палитра заменена на нашу. */
+
+/* Список тем */
+#fc-categories { padding: 0 16px 24px; }
+.fc-cat-card {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  background: var(--white); border: 1px solid var(--gray-light); border-radius: 16px;
+  padding: 14px 16px; margin-bottom: 10px; cursor: pointer; text-align: left;
+  box-shadow: 0 2px 8px rgba(20,45,90,.04);
+}
+.fc-cat-card:active { transform: scale(.99); }
+.fc-cat-pct { font-size: 15px; font-weight: 800; color: var(--green); width: 44px; flex-shrink: 0; text-align: center; }
+.fc-cat-body { flex: 1; }
+.fc-cat-title { font-size: 16px; font-weight: 800; color: var(--text); }
+.fc-cat-sub { font-size: 13px; color: var(--gray); margin-top: 2px; }
+.fc-cat-arrow { font-size: 22px; color: var(--gray); }
+
+/* Колода: режимы */
+.fc-deck-actions { padding: 4px 16px 8px; }
+.fc-mode-btn {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  background: var(--white); border: 1px solid var(--gray-light); border-radius: 16px;
+  padding: 16px; margin-bottom: 12px; cursor: pointer; text-align: left;
+  box-shadow: 0 2px 8px rgba(20,45,90,.04);
+}
+.fc-mode-btn:active { transform: scale(.99); }
+.fc-mode-icon { font-size: 30px; flex-shrink: 0; }
+.fc-mode-info { flex: 1; }
+.fc-mode-name { font-size: 17px; font-weight: 800; color: var(--text); }
+.fc-mode-sub { font-size: 13px; color: var(--gray); margin-top: 2px; }
+.fc-mode-arrow { font-size: 24px; color: var(--gray); }
+
+.fc-wordlist-title { padding: 10px 16px 6px; font-size: 13px; font-weight: 800; color: var(--gray); text-transform: uppercase; letter-spacing: .3px; }
+.fc-wordlist { padding: 0 16px 24px; }
+.fc-word-row { padding: 10px 4px; border-bottom: 1px solid var(--gray-light); }
+.fc-word-el { font-size: 15px; font-weight: 700; color: var(--blue); }
+.fc-word-tr { font-size: 12px; color: var(--gray); font-weight: 500; }
+.fc-word-ru { font-size: 14px; color: var(--text); margin-top: 1px; }
+
+/* Модалка направления */
+.fc-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: flex-end; z-index: 1000; }
+.fc-modal-card { width: 100%; background: var(--white); border-radius: 24px 24px 0 0; padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); }
+.fc-modal-title { font-size: 24px; font-weight: 900; color: var(--text); }
+.fc-modal-sub { font-size: 14px; color: var(--gray); margin: 4px 0 16px; }
+.fc-dir-btn {
+  width: 100%; display: flex; align-items: center; gap: 14px; text-align: left;
+  background: #f6f8fb; border: 1px solid var(--gray-light); border-radius: 16px;
+  padding: 16px; margin-bottom: 12px; cursor: pointer;
+}
+.fc-dir-btn:active { background: var(--gray-bg); }
+.fc-dir-flag { font-size: 20px; font-weight: 800; }
+.fc-dir-note { font-size: 13px; color: var(--gray); }
+.fc-modal-cancel { width: 100%; background: none; border: none; color: var(--gray); font-size: 16px; font-weight: 700; padding: 12px; cursor: pointer; font-family: inherit; }
+
+/* Карточка голосования */
+.fc-card {
+  position: relative; margin: 16px; min-height: 260px;
+  background: var(--white); border: 1px solid var(--gray-light); border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(20,45,90,.06);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 28px 20px; cursor: pointer; user-select: none;
+}
+.fc-audio { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 22px; cursor: pointer; opacity: .7; }
+.fc-card-tag { background: var(--gray-bg); color: var(--gray); font-size: 12px; font-weight: 800; letter-spacing: .5px; padding: 5px 14px; border-radius: 99px; margin-bottom: 18px; }
+.fc-card-main { font-size: 34px; font-weight: 900; color: var(--blue); text-align: center; }
+.fc-card-tr { font-size: 15px; color: var(--gray); margin-top: 6px; }
+.fc-card-hint { font-size: 14px; color: var(--gray); margin-top: 20px; }
+.fc-card-back { font-size: 24px; font-weight: 800; color: var(--text); margin-top: 20px; text-align: center; }
+
+.fc-vote-actions { display: flex; gap: 12px; padding: 0 16px; }
+.fc-vote-no, .fc-vote-yes {
+  flex: 1; padding: 18px; border-radius: 16px; font-size: 17px; font-weight: 800;
+  font-family: inherit; cursor: pointer; border: 2px solid;
+}
+.fc-vote-no { background: #fff; color: var(--red); border-color: var(--red); }
+.fc-vote-yes { background: var(--green); color: #fff; border-color: var(--green); }
+.fc-vote-no:active, .fc-vote-yes:active { transform: translateY(2px); }
+
+.fc-vote-stats { display: flex; justify-content: space-around; padding: 20px 16px 8px; }
+.fc-vote-stats > div { text-align: center; }
+.fc-stat-lbl { font-size: 12px; font-weight: 700; color: var(--gray); letter-spacing: .5px; }
+.fc-stat-val { font-size: 26px; font-weight: 900; color: var(--text); }
+.fc-green { color: var(--green) !important; }
+.fc-red { color: var(--red) !important; }
+.fc-skip { display: block; margin: 0 auto; background: none; border: none; color: var(--blue); font-size: 15px; font-weight: 700; padding: 10px; cursor: pointer; font-family: inherit; }
+
+/* Авто-просмотр */
+.fc-view-counter { margin-left: auto; font-size: 15px; font-weight: 700; color: var(--gray); }
+.fc-view-progress { height: 4px; background: var(--gray-bg); margin: 0 0 40px; }
+.fc-view-progress-fill { height: 100%; background: var(--blue); width: 0; transition: width .3s; }
+.fc-view-body { position: relative; text-align: center; padding: 40px 20px; min-height: 300px; }
+.fc-audio-view { position: static; display: block; margin: 0 auto 40px; font-size: 26px; }
+.fc-view-word { font-size: 44px; font-weight: 900; color: var(--blue); }
+.fc-view-tr { font-size: 18px; color: var(--gray); font-style: italic; margin-top: 10px; }
+.fc-view-translation { font-size: 30px; font-weight: 800; color: var(--text); margin-top: 40px; opacity: 0; transition: opacity .4s; min-height: 40px; }
+.fc-view-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 24px; position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); left: 0; right: 0; }
+.fc-view-btn { width: 64px; height: 64px; border-radius: 99px; background: var(--white); border: 1px solid var(--gray-light); box-shadow: 0 3px 10px rgba(20,45,90,.1); font-size: 20px; font-weight: 800; color: var(--blue); cursor: pointer; }
+.fc-view-speed { font-size: 16px; }
+
+/* Пауза-«всплывашка» каждые 10 слов */
+.fc-break-emoji { font-size: 44px; text-align: center; margin-bottom: 6px; }
+.fc-break-continue { justify-content: center; background: var(--green) !important; border-color: var(--green) !important; }
+.fc-break-continue .fc-dir-flag, .fc-break-continue .fc-dir-note { color: #fff; }
+.fc-break-continue { flex-direction: column; align-items: center; gap: 2px; }

@@ -232,9 +232,9 @@
     <div class="lesson-btn-hint">Сначала карточки, потом упражнения</div>
 
     <div class="nav-grid">
-      <button class="nav-btn" onclick="showScenarios()">
-        <span class="nav-icon">🎭</span>
-        <span class="nav-label">Сценарии</span>
+      <button class="nav-btn" onclick="showFlashcards()">
+        <span class="nav-icon">🃏</span>
+        <span class="nav-label">Карточки</span>
       </button>
       <button class="nav-btn" onclick="showVerbTable()">
         <span class="nav-icon">📚</span>
@@ -254,7 +254,7 @@
       </button>
       <button class="nav-btn" onclick="showVocab('image')">
         <span class="nav-icon">🖼️</span>
-        <span class="nav-label">Карточки</span>
+        <span class="nav-label">Картинки</span>
       </button>
       <button class="nav-btn" onclick="showVocab('translation')">
         <span class="nav-icon">📝</span>
@@ -289,6 +289,10 @@
       <button class="nav-btn nav-btn-speech nav-btn-wide" onclick="showSpeechTraining()">
         <span class="nav-icon">🎤</span>
         <span class="nav-label">Тренировка речи</span>
+      </button>
+      <button class="nav-btn" onclick="showScenarios()">
+        <span class="nav-icon">🎭</span>
+        <span class="nav-label">Сценарии</span>
       </button>
     </div>
 
@@ -609,6 +613,116 @@
   </div>
 
   <!-- ==================== QUIZ CATEGORY LIST ==================== -->
+  <!-- ==================== КАРТОЧКИ (FLASHCARDS) ==================== -->
+  <div id="screen-flashcards" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showHome()">← Назад</button>
+      <h2>Карточки</h2>
+    </div>
+    <p class="sub-desc">Выбери тему — учи слова карточками 🃏</p>
+    <div id="fc-categories"></div>
+  </div>
+
+  <div id="screen-fc-deck" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showFlashcards()">← Назад</button>
+      <h2 id="fc-deck-title">Тема</h2>
+    </div>
+    <div class="fc-deck-actions">
+      <button class="fc-mode-btn" onclick="openFlashDirection()">
+        <div class="fc-mode-icon">🃏</div>
+        <div class="fc-mode-info">
+          <div class="fc-mode-name">Флеш-карты</div>
+          <div class="fc-mode-sub">Знаю / Не знаю — незнакомые копятся</div>
+        </div>
+        <div class="fc-mode-arrow">›</div>
+      </button>
+      <button class="fc-mode-btn" onclick="startFlashView()">
+        <div class="fc-mode-icon">▶️</div>
+        <div class="fc-mode-info">
+          <div class="fc-mode-name">Просмотр</div>
+          <div class="fc-mode-sub">Слово → перевод появляется сам</div>
+        </div>
+        <div class="fc-mode-arrow">›</div>
+      </button>
+    </div>
+    <div class="fc-wordlist-title">Слова в теме</div>
+    <div id="fc-wordlist" class="fc-wordlist"></div>
+  </div>
+
+  <div id="fc-direction-modal" class="fc-modal-overlay" style="display:none">
+    <div class="fc-modal-card">
+      <div class="fc-modal-title">Флеш-карты</div>
+      <div class="fc-modal-sub">Выбери направление заучивания</div>
+      <button class="fc-dir-btn" onclick="startFlashVote('el2ru')">
+        <span class="fc-dir-flag">🇬🇷→🇷🇺</span>
+        <span class="fc-dir-note">Видишь слово, вспоминаешь перевод</span>
+      </button>
+      <button class="fc-dir-btn" onclick="startFlashVote('ru2el')">
+        <span class="fc-dir-flag">🇷🇺→🇬🇷</span>
+        <span class="fc-dir-note">Видишь перевод, вспоминаешь слово</span>
+      </button>
+      <button class="fc-modal-cancel" onclick="closeFlashDirection()">Отмена</button>
+    </div>
+  </div>
+
+  <div id="fc-break-modal" class="fc-modal-overlay" style="display:none">
+    <div class="fc-modal-card">
+      <div class="fc-break-emoji">🎉</div>
+      <div class="fc-modal-title">Молодец!</div>
+      <div class="fc-modal-sub">Прошёл <span id="fc-break-count">10</span> слов подряд. Продолжим или на сегодня хватит?</div>
+      <button class="fc-dir-btn fc-break-continue" onclick="continueFlashBatch()">
+        <span class="fc-dir-flag">▶️ Продолжить</span>
+        <span class="fc-dir-note">Ещё 10 слов</span>
+      </button>
+      <button class="fc-modal-cancel" onclick="endFlashSession()">На сегодня хватит</button>
+    </div>
+  </div>
+
+  <div id="screen-fc-vote" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="showFlashDeck(fcState.catId)">← Назад</button>
+      <h2 id="fc-vote-title">Карточки</h2>
+    </div>
+    <div class="fc-card" id="fc-vote-card" onclick="revealFlashVote()">
+      <button class="fc-audio" onclick="event.stopPropagation(); playFlashWord()">🔊</button>
+      <div class="fc-card-tag" id="fc-vote-tag">СЛОВО</div>
+      <div class="fc-card-main" id="fc-vote-front"></div>
+      <div class="fc-card-tr" id="fc-vote-front-tr"></div>
+      <div class="fc-card-hint" id="fc-vote-hint">Нажми, чтобы увидеть перевод</div>
+      <div class="fc-card-back" id="fc-vote-back" style="display:none"></div>
+    </div>
+    <div class="fc-vote-actions">
+      <button class="fc-vote-no" onclick="answerFlashVote(false)">✕ Не знаю</button>
+      <button class="fc-vote-yes" onclick="answerFlashVote(true)">✓ Знаю</button>
+    </div>
+    <div class="fc-vote-stats">
+      <div><div class="fc-stat-lbl">ВСЕГО</div><div class="fc-stat-val" id="fc-stat-total">0</div></div>
+      <div><div class="fc-stat-lbl fc-green">ЗНАЮ</div><div class="fc-stat-val fc-green" id="fc-stat-know">0</div></div>
+      <div><div class="fc-stat-lbl fc-red">НЕ ЗНАЮ</div><div class="fc-stat-val fc-red" id="fc-stat-dont">0</div></div>
+    </div>
+    <button class="fc-skip" onclick="skipFlashVote()">Пропустить →</button>
+  </div>
+
+  <div id="screen-fc-view" class="screen">
+    <div class="sub-header">
+      <button class="btn-back" onclick="stopFlashView(); showFlashDeck(fcState.catId)">← Назад</button>
+      <h2>Просмотр</h2>
+      <span class="fc-view-counter" id="fc-view-counter">0/0</span>
+    </div>
+    <div class="fc-view-progress"><div class="fc-view-progress-fill" id="fc-view-progress-fill"></div></div>
+    <div class="fc-view-body">
+      <button class="fc-audio fc-audio-view" onclick="playFlashWord()">🔊</button>
+      <div class="fc-view-word" id="fc-view-word"></div>
+      <div class="fc-view-tr" id="fc-view-tr"></div>
+      <div class="fc-view-translation" id="fc-view-translation"></div>
+    </div>
+    <div class="fc-view-controls">
+      <button class="fc-view-btn" id="fc-view-play" onclick="toggleFlashView()">⏸</button>
+      <button class="fc-view-btn fc-view-speed" id="fc-view-speed" onclick="cycleFlashSpeed()">1.0x</button>
+    </div>
+  </div>
+
   <div id="screen-quiz" class="screen">
     <div class="sub-header">
       <button class="btn-back" onclick="showHome()">← Назад</button>
